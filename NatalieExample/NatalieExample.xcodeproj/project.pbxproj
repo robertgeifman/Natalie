@@ -470,7 +470,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "swift build -c release --package-path \"$SRCROOT/..\"";
+			shellScript = "swift build -c release --package-path \"$SRCROOT/..\"\n";
 		};
 		C4D441C41D9D0554005198F4 /* Natalie generator */ = {
 			isa = PBXShellScriptBuildPhase;
