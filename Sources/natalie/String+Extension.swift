@@ -10,7 +10,8 @@ import Foundation
 
 extension String {
     func trimAllWhitespacesAndSpecialCharacters() -> String {
-        let invalidCharacters = NSCharacterSet.alphanumerics.inverted
+        var invalidCharacters = NSMutableCharacterSet.alphanumerics.inverted
+        invalidCharacters.remove(charactersIn: "_")
         let x = self.components(separatedBy: invalidCharacters)
         return x.joined(separator: "")
     }

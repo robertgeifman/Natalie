@@ -222,8 +222,8 @@ enum OS: String, CustomStringConvertible {
             case "exit", "viewControllerPlaceholder":
                 return nil
             default:
-                assertionFailure("Unknown controller element: \(name)")
-                return nil
+                // assertionFailure("Unknown controller element: \(name)")
+                return name
             }
         case .OSX:
             switch name {

@@ -60,6 +60,7 @@
 		75E28AAB1D577D0500A80623 /* SWXMLHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SWXMLHash.swift; sourceTree = "<group>"; };
 		75E28AB21D577EEA00A80623 /* XMLObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLObject.swift; sourceTree = "<group>"; };
 		C4F8BEDE1F9C79BD0031195F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		E1C7AC6121AB81F600318671 /* Natalie-Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Natalie-Shared.swift"; path = "natalie/Natalie-Shared.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +111,7 @@
 		75E28AA21D577D0500A80623 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				E1C7AC6121AB81F600318671 /* Natalie-Shared.swift */,
 				75E28AA31D577D0500A80623 /* natalie */,
 			);
 			path = Sources;
@@ -135,9 +137,9 @@
 		75E28AA81D577D0500A80623 /* SWXMLHash */ = {
 			isa = PBXGroup;
 			children = (
-				75E28AA91D577D0500A80623 /* Notes.txt */,
-				75E28AAA1D577D0500A80623 /* SWXMLHash+TypeConversion.swift */,
 				75E28AAB1D577D0500A80623 /* SWXMLHash.swift */,
+				75E28AAA1D577D0500A80623 /* SWXMLHash+TypeConversion.swift */,
+				75E28AA91D577D0500A80623 /* Notes.txt */,
 			);
 			path = SWXMLHash;
 			sourceTree = "<group>";

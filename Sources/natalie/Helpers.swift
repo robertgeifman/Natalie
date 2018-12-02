@@ -38,7 +38,7 @@ enum FirstLetterFormat {
     }
 }
 
-func swiftRepresentation(for string: String, firstLetter: FirstLetterFormat = .none, doNotShadow: String? = nil) -> String {
+func swiftRepresentation(for string: String, firstLetter: FirstLetterFormat = .none, doNotShadow: String? = nil, prefix: String? = nil) -> String {
     var str = string.trimAllWhitespacesAndSpecialCharacters()
     str = firstLetter.format(str)
     if str == doNotShadow {
@@ -51,6 +51,7 @@ func initIdentifier(for identifierString: String, value: String) -> String {
     if identifierString == "String" {
         return "\"\(value)\""
     } else {
-        return "\(identifierString)(\"\(value)\")"
+        return "\"\(value)\""
+//        return "\(identifierString)(\"\(value)\")"
     }
 }

@@ -16,7 +16,8 @@ class Scene: XMLObject {
     }()
 
     lazy var segues: [Segue]? = {
-        return self.searchNamed(name: "segue")?.map { Segue(xml: $0) }
+        let segues = self.searchNamed(name: "segue")
+        return segues?.map { Segue(xml: $0) }
     }()
 
     lazy var sceneID: String? = self.xml.element?.attribute(by: "sceneID")?.text

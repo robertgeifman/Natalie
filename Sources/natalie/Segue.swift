@@ -6,6 +6,8 @@
 //  Copyright © 2016 Marcin Krzyzanowski. All rights reserved.
 //
 
+import Cocoa
+
 class Segue: XMLObject {
 
     let kind: String
@@ -14,11 +16,13 @@ class Segue: XMLObject {
 
     override init(xml: XMLIndexer) {
         self.kind = xml.element!.attribute(by: "kind")!.text
-        if let id = xml.element?.attribute(by: "identifier")?.text, !id.isEmpty {
-            self.identifier = id
-        } else {
-            self.identifier = nil
+        var id = xml.element?.attribute(by: "identifier")?.text
+        if nil == id || id!.isEmpty {
+			if let value = xml.element?.attribute(by: "id")?.text {
+				id = "segue_" + value
+			}
         }
+		self.identifier = id
         super.init(xml: xml)
     }
 

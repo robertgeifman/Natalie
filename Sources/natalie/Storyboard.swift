@@ -41,6 +41,7 @@ class Storyboard: XMLObject {
 
         return scenes.map { Scene(xml: $0) }
     }()
+
     lazy var colors: [Color] = {
         guard let colors = self.searchNamed(root: self.xml, name: "color") else {
             return []
