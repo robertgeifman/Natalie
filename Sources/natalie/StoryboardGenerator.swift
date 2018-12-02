@@ -8,6 +8,18 @@
 
 import Foundation
 
+@discardableResult
+func += (_ array: inout [String], _ value: String) -> [String] {
+	array.append(value)
+	return array
+}
+
+@discardableResult
+func += (_ array: inout [String], _ value: [String]) -> [String] {
+	array.append(contentsOf: value)
+	return array
+}
+
 struct Natalie {
 	struct Header: CustomStringConvertible {
 		var description: String {
@@ -32,72 +44,64 @@ struct Natalie {
 		assert(Set(storyboards.map { $0.storyboard.os }).count < 2)
 	}
 
-	static func process(storyboards: [StoryboardFile]) -> String {
-		var output = String()
+	static func process(storyboards: [StoryboardFile]) -> [String] {
+		var output = [String]()
 		for os in OS.allValues {
 			let storyboardsForOS = storyboards.filter { $0.storyboard.os == os }
 			if !storyboardsForOS.isEmpty {
 
 				if storyboardsForOS.count != storyboards.count {
-					output += "#if os(\(os.rawValue))\n"
+					output += "#if os(\(os.rawValue))"
 				}
 
 				output += Natalie(storyboards: storyboardsForOS).process(os: os)
 
 				if storyboardsForOS.count != storyboards.count {
-					output += "#endif\n"
+					output += "#endif"
 				}
 			}
 		}
 		return output
 	}
 
-	func process(os: OS) -> String {
-		var output = ""
+	func process(os: OS) -> [String] {
+		var output = [String]()
 
 		output += header.description
-		output += "import \(os.framework)\n"
+		output += "import \(os.framework)"
 		for module in storyboardCustomModules {
-			output += "import \(module)\n"
+			output += "import \(module)"
 		}
-		output += "\n"
+		output += ""
 
 		let storyboardModules = storyboardCustomModules
 		for file in storyboards {
 			output += file.storyboard.processViewControllers(storyboardCustomModules: storyboardModules)
 		}
 
-		output += "\n////////////////////////////////////////////////////////////\n"
-		output += "enum Storyboards {\n"
+		output += ""
+		output += "////////////////////////////////////////////////////////////"
+		output += "enum Storyboards {"
 		for file in storyboards {
 			output += file.storyboard.processStoryboard(storyboardName: file.storyboardName, os: os)
 		}
-		output += "}\n"
-		output += "\n"
+		output += "}"
+		output += ""
 
 		let colors = storyboards
 			.flatMap { $0.storyboard.colors }
 			.filter { $0.catalog != .system }
 			.compactMap { $0.assetName }
-		if !colors.isEmpty {
-			output += "// MARK: - Colors\n"
-			output += "@available(\(os.colorOS), *)\n"
-			output += "extension \(os.colorType) {\n"
-			for colorName in Set(colors) {
-				output += "\tstatic let \(swiftRepresentation(for: colorName, firstLetter: .none)) = \(os.colorType)(named: \(initIdentifier(for: os.colorNameType, value: colorName)))\n"
-			}
-			output += "}\n"
-			output += "\n"
-		}
 
-		if let reusableViews = os.resuableViews {
-			for reusableView in reusableViews {
-				output += "extension \(reusableView): ReusableViewProtocol {\n"
-				output += "\tpublic var viewType: UIView.Type? { return type(of: self) }\n"
-				output += "\tpublic var storyboardIdentifier: String? { return self.reuseIdentifier }\n"
-				output += "}\n"
-				output += "\n"
+		if !colors.isEmpty {
+			output += "// MARK: - Colors"
+			output += "@available(\(os.colorOS), *)"
+			output += "extension \(os.colorType) {"
+			for colorName in Set(colors) {
+				output += "\tstatic let \(swiftRepresentation(for: colorName, firstLetter: .none)) = \(os.colorType)(named: \(initIdentifier(for: os.colorNameType, value: colorName)))"
 			}
+			output += "}"
+			output += ""
 		}
 
 		return output

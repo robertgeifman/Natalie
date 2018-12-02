@@ -22,12 +22,9 @@ enum OS: String, CustomStringConvertible {
 
         init(os: OS) {
             switch os {
-            case iOS:
-                self = .iOSCocoaTouch
-            case OSX:
-                self = .MacOSXCocoa
-            case tvOS:
-                self = .AppleTV
+            case iOS: self = .iOSCocoaTouch
+            case OSX: self = .MacOSXCocoa
+            case tvOS: self = .AppleTV
             }
         }
     }
@@ -38,26 +35,20 @@ enum OS: String, CustomStringConvertible {
 
         init(os: OS) {
             switch os {
-            case iOS, .tvOS:
-                self = .UIKit
-            case OSX:
-                self = .Cocoa
+            case iOS, .tvOS: self = .UIKit
+            case OSX: self = .Cocoa
             }
         }
     }
 
     init(targetRuntime: String) {
         switch targetRuntime {
-        case Runtime.iOSCocoaTouch.rawValue:
-            self = .iOS
-        case Runtime.MacOSXCocoa.rawValue:
-            self = .OSX
-        case Runtime.AppleTV.rawValue:
-            self = .tvOS
-        case "iOS.CocoaTouch.iPad":
-            self = .iOS
+        case Runtime.iOSCocoaTouch.rawValue: self = .iOS
+        case Runtime.MacOSXCocoa.rawValue: self = .OSX
+        case Runtime.AppleTV.rawValue: self = .tvOS
+        case "iOS.CocoaTouch.iPad": self = .iOS
         default:
-            fatalError("Unsupported \(targetRuntime)")
+        	fatalError("Unsupported \(targetRuntime)")
         }
     }
 
@@ -75,120 +66,100 @@ enum OS: String, CustomStringConvertible {
 
     var storyboardType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "UIStoryboard"
-        case .OSX:
-            return "NSStoryboard"
+        case .iOS, .tvOS: return "UIStoryboard"
+        case .OSX: return "NSStoryboard"
         }
     }
 
     var storyboardIdentifierType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "String"
-        case .OSX:
-            return "NSStoryboard.Name"
+        case .iOS, .tvOS: return "String"
+        case .OSX: return "NSStoryboard.Name"
         }
     }
 
     var storyboardSceneIdentifierType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "String"
-        case .OSX:
-            return "NSStoryboard.SceneIdentifier"
+        case .iOS, .tvOS: return "String"
+        case .OSX: return "NSStoryboard.SceneIdentifier"
         }
     }
 
     var storyboardSegueType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "UIStoryboardSegue"
-        case .OSX:
-            return "NSStoryboardSegue"
+        case .iOS, .tvOS: return "UIStoryboardSegue"
+        case .OSX: return "NSStoryboardSegue"
         }
     }
 
     var storyboardSegueIdentifierType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "String"
-        case .OSX:
-            return "NSStoryboardSegue.Identifier"
+        case .iOS, .tvOS: return "String"
+        case .OSX: return "NSStoryboardSegue.Identifier"
         }
     }
 
     var storyboardControllerTypes: [String] {
         switch self {
-        case .iOS, .tvOS:
-            return ["UIViewController"]
-        case .OSX:
-            return ["NSViewController", "NSWindowController"]
+        case .iOS, .tvOS: return ["UIViewController"]
+        case .OSX: return ["NSViewController", "NSWindowController"]
+        }
+    }
+
+    var defaultSegueDestinationType: String {
+        switch self {
+        case .iOS, .tvOS: return "UIViewController"
+        case .OSX: return "NSViewController"
         }
     }
 
     var storyboardControllerReturnType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "UIViewController"
-        case .OSX:
-            return "Any" // NSViewController or NSWindowController
+        case .iOS, .tvOS: return "UIViewController"
+        case .OSX: return "Any" // NSViewController or NSWindowController
         }
     }
 
     var storyboardControllerSignatureType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "ViewController"
-        case .OSX:
-            return "Controller" // NSViewController or NSWindowController
+        case .iOS, .tvOS: return "ViewController"
+        case .OSX: return "Controller" // NSViewController or NSWindowController
         }
     }
 
     var storyboardInstantiationInfo: [(String /* Signature type */, String /* Return type */)] {
         switch self {
-        case .iOS, .tvOS:
-            return [("ViewController", "UIViewController")]
-        case .OSX:
-            return [("Controller", "NSWindowController"), ("Controller", "NSViewController")]
+        case .iOS, .tvOS: return [("ViewController", "UIViewController")]
+        case .OSX: return [("Controller", "NSWindowController"), ("Controller", "NSViewController")]
         }
     }
 
     var viewType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "UIView"
-        case .OSX:
-            return "NSView"
+        case .iOS, .tvOS: return "UIView"
+        case .OSX: return "NSView"
         }
     }
 
     var colorType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "UIColor"
-        case .OSX:
-            return "NSColor"
+        case .iOS, .tvOS: return "UIColor"
+        case .OSX: return "NSColor"
         }
     }
 
     var colorNameType: String {
         switch self {
-        case .iOS, .tvOS:
-            return "String"
-        case .OSX:
-            return "NSColor.Name"
+        case .iOS, .tvOS: return "String"
+        case .OSX: return "NSColor.Name"
         }
     }
 
     var colorOS: String {
         switch self {
-        case .iOS:
-            return "iOS 11.0"
-        case .tvOS:
-            return "tvOS 11.0"
-        case .OSX:
-            return "OSX 10.13"
+        case .iOS: return "iOS 11.0"
+        case .tvOS: return "tvOS 11.0"
+        case .OSX: return "OSX 10.13"
         }
     }
 
@@ -222,25 +193,16 @@ enum OS: String, CustomStringConvertible {
     func controllerType(for name: String) -> String? {
         switch self {
         case .iOS, .tvOS:
-            switch name {
-            case "viewController":
-                return "UIViewController"
-            case "navigationController":
-                return "UINavigationController"
-            case "tableViewController":
-                return "UITableViewController"
-            case "tabBarController":
-                return "UITabBarController"
-            case "splitViewController":
-                return "UISplitViewController"
-            case "pageViewController":
-                return "UIPageViewController"
-            case "collectionViewController":
-                return "UICollectionViewController"
-            case "exit", "viewControllerPlaceholder":
-                return nil
-            default:
-                // assertionFailure("Unknown controller element: \(name)")
+			switch name {
+			case "viewController": return "UIViewController"
+			case "navigationController": return "UINavigationController"
+			case "tableViewController": return "UITableViewController"
+			case "tabBarController":return "UITabBarController"
+			case "splitViewController": return "UISplitViewController"
+			case "pageViewController": return "UIPageViewController"
+			case "collectionViewController": return "UICollectionViewController"
+			case "exit", "viewControllerPlaceholder": return nil
+			default: // assertionFailure("Unknown controller element: \(name)")
                 return nil
             }
         case .OSX:
@@ -250,14 +212,9 @@ enum OS: String, CustomStringConvertible {
 			case "pagecontroller": return "NSPageController"
 			case "tabViewController": return "NSTabViewController"
 			case "splitViewController": return "NSSplitViewController"
-			case "tableCellView": return "NSTableCellView"
-			case "tableHeaderView": return "NSTableHeaderView"
-			case "tableRowView": return "NSTableRowView"
 			case "collectionViewItem": return "NSCollectionViewItem"
-			case "collectionViewSectionHeaderView": return "NSCollectionViewSectionHeaderView"
 			case "exit", "viewControllerPlaceholder": return nil
-			default:
-			// assertionFailure("Unknown controller element: \(name)")
+			default: // assertionFailure("Unknown controller element: \(name)")
 				return nil
             }
         }

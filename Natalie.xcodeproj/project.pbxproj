@@ -24,6 +24,7 @@
 		75E28AB11D577D0500A80623 /* SWXMLHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75E28AAB1D577D0500A80623 /* SWXMLHash.swift */; };
 		75E28AB31D577EEA00A80623 /* XMLObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75E28AB21D577EEA00A80623 /* XMLObject.swift */; };
 		C4F8BEDF1F9C79BD0031195F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F8BEDE1F9C79BD0031195F /* Color.swift */; };
+		E106750F21B47EC900CDEF9B /* natalie in CopyFiles */ = {isa = PBXBuildFile; fileRef = 755B834F1D576CBF0020148B /* natalie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,12 +54,13 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		755B834D1D576CBF0020148B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
+			buildActionMask = 12;
+			dstPath = "$(HOME)/bin";
+			dstSubfolderSpec = 0;
 			files = (
+				E106750F21B47EC900CDEF9B /* natalie in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -84,7 +86,7 @@
 		75E28AAB1D577D0500A80623 /* SWXMLHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SWXMLHash.swift; sourceTree = "<group>"; };
 		75E28AB21D577EEA00A80623 /* XMLObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLObject.swift; sourceTree = "<group>"; };
 		C4F8BEDE1F9C79BD0031195F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
-		E1352BC221B40018009DDABF /* Natalie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Natalie.swift; path = "../../../No Panic!/FileBrowser/FileBrowser/Natalie.swift"; sourceTree = "<group>"; };
+		E106750E21B4700000CDEF9B /* Natalie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Natalie.swift; path = "../../No Panic!/FileBrowser/Natalie.swift"; sourceTree = "<group>"; };
 		E1352BC421B421EE009DDABF /* Aspects.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Aspects.xcodeproj; path = ../Aspects/Aspects.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -118,6 +120,7 @@
 		755B83461D576CBF0020148B = {
 			isa = PBXGroup;
 			children = (
+				E106750E21B4700000CDEF9B /* Natalie.swift */,
 				75E28AA21D577D0500A80623 /* Sources */,
 				750EA4C81D57C65E00782671 /* natalie-tests */,
 				E1352BC421B421EE009DDABF /* Aspects.xcodeproj */,
@@ -138,7 +141,6 @@
 		75E28AA21D577D0500A80623 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				E1352BC221B40018009DDABF /* Natalie.swift */,
 				75E28AA31D577D0500A80623 /* natalie */,
 			);
 			path = Sources;
