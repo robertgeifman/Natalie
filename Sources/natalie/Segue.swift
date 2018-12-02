@@ -9,7 +9,6 @@
 import Cocoa
 
 class Segue: XMLObject {
-
     let kind: String
     let identifier: String?
     let id: String

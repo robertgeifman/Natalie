@@ -67,6 +67,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "/Users/robert/Projects/No\ Panic!/FileBrowser/FileBrowser/Base.lproj/FilesCollection.storyboard"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "/Users/robert/Projects/No\ Panic!/CloudTV/CloudTV/Base.lproj/Main.storyboard"
             isEnabled = "YES">
          </CommandLineArgument>

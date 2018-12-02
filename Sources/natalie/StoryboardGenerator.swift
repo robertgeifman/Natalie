@@ -9,7 +9,6 @@
 import Foundation
 
 struct Natalie {
-
 	struct Header: CustomStringConvertible {
 		var description: String {
 			var output = String()
@@ -68,8 +67,8 @@ struct Natalie {
 			output += file.storyboard.processViewControllers(storyboardCustomModules: storyboardModules)
 		}
 
-		output += "\n"
-		output += "struct Storyboards {\n"
+		output += "\n////////////////////////////////////////////////////////////\n"
+		output += "enum Storyboards {\n"
 		for file in storyboards {
 			output += file.storyboard.processStoryboard(storyboardName: file.storyboardName, os: os)
 		}

@@ -15,12 +15,20 @@ class ViewController: XMLObject {
     lazy var id: String? = self.xml.element?.attribute(by: "id")?.text
     lazy var userLabel: String? = self.xml.element?.attribute(by: "userLabel")?.text
 
-    lazy var reusables: [Reusable]? = {
+    func reusables(_ os: OS) -> [Reusable]? {
+		var objects = [XMLIndexer]()
         if let reusables = self.searchAll(root: self.xml, attributeKey: "reuseIdentifier") {
-            return reusables.map { Reusable(xml: $0) }
+        	objects.append(contentsOf: reusables)
         }
-        return nil
-    }()
+
+		if let resuableItems = os.resuableItems {
+			for name in resuableItems where self.name == name {
+				objects.append(self.xml)
+			}
+		}
+		let result = objects.map { Reusable(xml: $0) }
+		return result
+    }
 
     lazy var customClassWithModule: String? = {
         if let className = self.customClass {

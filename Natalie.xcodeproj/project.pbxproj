@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		48E3E55B1EE6D5DF000D4B3F /* Natalie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E3E55A1EE6D5DF000D4B3F /* Natalie.swift */; };
+		48E3E55B1EE6D5DF000D4B3F /* StoryboardGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E3E55A1EE6D5DF000D4B3F /* StoryboardGenerator.swift */; };
 		48E3E55D1EE6D85E000D4B3F /* Storyboard+Natalie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E3E55C1EE6D85E000D4B3F /* Storyboard+Natalie.swift */; };
 		7501493B1D57825F00B22C87 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7501493A1D57825F00B22C87 /* ViewController.swift */; };
 		7501493D1D57827800B22C87 /* Segue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7501493C1D57827800B22C87 /* Segue.swift */; };
@@ -26,6 +26,30 @@
 		C4F8BEDF1F9C79BD0031195F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F8BEDE1F9C79BD0031195F /* Color.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E1352BCA21B421EE009DDABF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1352BC421B421EE009DDABF /* Aspects.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 34B986671B1DE0CE00DE719D;
+			remoteInfo = "Aspects-iOS";
+		};
+		E1352BCC21B421EE009DDABF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1352BC421B421EE009DDABF /* Aspects.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 34B9868C1B1E48CD00DE719D;
+			remoteInfo = "Aspects-Mac";
+		};
+		E1352BCE21B421EE009DDABF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1352BC421B421EE009DDABF /* Aspects.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 7376F8C31B8EA670009CAB74;
+			remoteInfo = "Aspects-watchOS";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		755B834D1D576CBF0020148B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -39,7 +63,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		48E3E55A1EE6D5DF000D4B3F /* Natalie.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Natalie.swift; sourceTree = "<group>"; };
+		48E3E55A1EE6D5DF000D4B3F /* StoryboardGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoryboardGenerator.swift; sourceTree = "<group>"; };
 		48E3E55C1EE6D85E000D4B3F /* Storyboard+Natalie.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Storyboard+Natalie.swift"; sourceTree = "<group>"; };
 		7501493A1D57825F00B22C87 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7501493C1D57827800B22C87 /* Segue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Segue.swift; sourceTree = "<group>"; };
@@ -60,7 +84,8 @@
 		75E28AAB1D577D0500A80623 /* SWXMLHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SWXMLHash.swift; sourceTree = "<group>"; };
 		75E28AB21D577EEA00A80623 /* XMLObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLObject.swift; sourceTree = "<group>"; };
 		C4F8BEDE1F9C79BD0031195F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
-		E1C7AC6121AB81F600318671 /* Natalie-Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Natalie-Shared.swift"; path = "natalie/Natalie-Shared.swift"; sourceTree = "<group>"; };
+		E1352BC221B40018009DDABF /* Natalie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Natalie.swift; path = "../../../No Panic!/FileBrowser/FileBrowser/Natalie.swift"; sourceTree = "<group>"; };
+		E1352BC421B421EE009DDABF /* Aspects.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Aspects.xcodeproj; path = ../Aspects/Aspects.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,7 +120,9 @@
 			children = (
 				75E28AA21D577D0500A80623 /* Sources */,
 				750EA4C81D57C65E00782671 /* natalie-tests */,
+				E1352BC421B421EE009DDABF /* Aspects.xcodeproj */,
 				755B83501D576CBF0020148B /* Products */,
+				E1352BD021B421FB009DDABF /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -111,7 +138,7 @@
 		75E28AA21D577D0500A80623 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				E1C7AC6121AB81F600318671 /* Natalie-Shared.swift */,
+				E1352BC221B40018009DDABF /* Natalie.swift */,
 				75E28AA31D577D0500A80623 /* natalie */,
 			);
 			path = Sources;
@@ -121,7 +148,7 @@
 			isa = PBXGroup;
 			children = (
 				75E28AA51D577D0500A80623 /* main.swift */,
-				48E3E55A1EE6D5DF000D4B3F /* Natalie.swift */,
+				48E3E55A1EE6D5DF000D4B3F /* StoryboardGenerator.swift */,
 				48E3E55C1EE6D85E000D4B3F /* Storyboard+Natalie.swift */,
 				750149441D5782F100B22C87 /* OS.swift */,
 				750149461D57830A00B22C87 /* StoryboardFile.swift */,
@@ -155,6 +182,23 @@
 				C4F8BEDE1F9C79BD0031195F /* Color.swift */,
 			);
 			name = XMLObject;
+			sourceTree = "<group>";
+		};
+		E1352BC521B421EE009DDABF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E1352BCB21B421EE009DDABF /* Aspects.framework */,
+				E1352BCD21B421EE009DDABF /* Aspects.framework */,
+				E1352BCF21B421EE009DDABF /* Aspects.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E1352BD021B421FB009DDABF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -212,7 +256,7 @@
 					};
 					755B834E1D576CBF0020148B = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = 67RAULRX93;
+						DevelopmentTeam = HPSN4NS7JC;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -227,6 +271,12 @@
 			mainGroup = 755B83461D576CBF0020148B;
 			productRefGroup = 755B83501D576CBF0020148B /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E1352BC521B421EE009DDABF /* Products */;
+					ProjectRef = E1352BC421B421EE009DDABF /* Aspects.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				755B834E1D576CBF0020148B /* natalie */,
@@ -234,6 +284,30 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		E1352BCB21B421EE009DDABF /* Aspects.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Aspects.framework;
+			remoteRef = E1352BCA21B421EE009DDABF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E1352BCD21B421EE009DDABF /* Aspects.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Aspects.framework;
+			remoteRef = E1352BCC21B421EE009DDABF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E1352BCF21B421EE009DDABF /* Aspects.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Aspects.framework;
+			remoteRef = E1352BCE21B421EE009DDABF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		750EA4C51D57C65E00782671 /* Resources */ = {
@@ -287,7 +361,7 @@
 				75E28AB31D577EEA00A80623 /* XMLObject.swift in Sources */,
 				750149451D5782F100B22C87 /* OS.swift in Sources */,
 				750149431D5782CA00B22C87 /* Scene.swift in Sources */,
-				48E3E55B1EE6D5DF000D4B3F /* Natalie.swift in Sources */,
+				48E3E55B1EE6D5DF000D4B3F /* StoryboardGenerator.swift in Sources */,
 				7501493B1D57825F00B22C87 /* ViewController.swift in Sources */,
 				7501493D1D57827800B22C87 /* Segue.swift in Sources */,
 				75E28AB01D577D0500A80623 /* SWXMLHash+TypeConversion.swift in Sources */,
@@ -437,7 +511,7 @@
 		755B83571D576CBF0020148B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEVELOPMENT_TEAM = 67RAULRX93;
+				DEVELOPMENT_TEAM = HPSN4NS7JC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 			};
@@ -446,7 +520,7 @@
 		755B83581D576CBF0020148B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEVELOPMENT_TEAM = 67RAULRX93;
+				DEVELOPMENT_TEAM = HPSN4NS7JC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 			};

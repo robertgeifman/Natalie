@@ -132,7 +132,7 @@ enum OS: String, CustomStringConvertible {
         case .iOS, .tvOS:
             return "UIViewController"
         case .OSX:
-            return "AnyObject" // NSViewController or NSWindowController
+            return "Any" // NSViewController or NSWindowController
         }
     }
 
@@ -197,9 +197,27 @@ enum OS: String, CustomStringConvertible {
         case .iOS, .tvOS:
             return ["UICollectionReusableView", "UITableViewCell"]
         case .OSX:
-            return nil
+            return ["NSTableCellView", "NSTableHeaderView", "NSTableRowView", "NSCollectionViewItem", "NSCollectionViewSectionHeaderView"]
         }
     }
+
+    var resuableItems: [String]? {
+        switch self {
+        case .iOS, .tvOS:
+            return ["collectionReusableView", "tableViewCell"]
+        case .OSX:
+            return ["tableCellView", "tableHeaderView", "tableRowView", "collectionViewItem", "collectionViewSectionHeaderView"]
+        }
+    }
+
+    var reusableItemsMap: [String: String] {
+        switch self {
+        case .iOS, .tvOS:
+            return ["collectionReusableView": "UICollectionReusableView", "tableViewCell": "UITableViewCell"]
+        case .OSX:
+            return ["tableCellView": "NSTableCellView", "tableHeaderView": "NSTableHeaderView", "tableRowView": "NSTableRowView", "collectionViewItem": "NSCollectionViewItem", "collectionViewSectionHeaderView": "NSCollectionViewSectionHeaderView"]
+		}
+	}
 
     func controllerType(for name: String) -> String? {
         switch self {
@@ -226,22 +244,21 @@ enum OS: String, CustomStringConvertible {
                 return nil
             }
         case .OSX:
-            switch name {
-            case "viewController":
-                return "NSViewController"
-            case "windowController":
-                return "NSWindowController"
-            case "pagecontroller":
-                return "NSPageController"
-            case "tabViewController":
-                return "NSTabViewController"
-            case "splitViewController":
-                return "NSSplitViewController"
-            case "exit", "viewControllerPlaceholder":
-                return nil
-            default:
-                // assertionFailure("Unknown controller element: \(name)")
-                return nil
+			switch name {
+			case "viewController": return "NSViewController"
+			case "windowController": return "NSWindowController"
+			case "pagecontroller": return "NSPageController"
+			case "tabViewController": return "NSTabViewController"
+			case "splitViewController": return "NSSplitViewController"
+			case "tableCellView": return "NSTableCellView"
+			case "tableHeaderView": return "NSTableHeaderView"
+			case "tableRowView": return "NSTableRowView"
+			case "collectionViewItem": return "NSCollectionViewItem"
+			case "collectionViewSectionHeaderView": return "NSCollectionViewSectionHeaderView"
+			case "exit", "viewControllerPlaceholder": return nil
+			default:
+			// assertionFailure("Unknown controller element: \(name)")
+				return nil
             }
         }
     }

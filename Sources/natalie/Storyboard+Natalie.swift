@@ -75,12 +75,15 @@ extension Storyboard {
 						output += "\n\t}\n"
 					}
 
-					if let reusables = viewController.reusables?.filter({ return $0.reuseIdentifier != nil }) { //, !reusables.isEmpty {
-						output += "\n"
-						output += "\tenum Reusable {"
+					if let reusables = viewController.reusables(os) { // ?.filter({ return $0.reuseIdentifier != nil }) //, !reusables.isEmpty {
+						output += "\n\tenum Reusable {"
 						for reusable in reusables {
-							if let identifier = reusable.reuseIdentifier, let customClass = reusable.customClass {
-								output += "\n\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable<\(customClass)> { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+							if let identifier = reusable.reuseIdentifier {
+								if let customClass = reusable.customClass {
+									output += "\n\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable<\(customClass)> { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+								} else {
+									output += "\n\t\tstatic var \(swiftRepresentation(for: identifier)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+								}
 							}
 						}
 						output += "\n\t}"
@@ -90,8 +93,7 @@ extension Storyboard {
 			}
 		}
 
-		output += "\n"
-		output += "////////////////////////////////////////////////////////////\n"
+		output += "\n////////////////////////////////////////////////////////////\n"
 		output += "enum Segues {" // : \(os.storyboardSegueIdentifierType), CustomStringConvertible, SegueProtocol {\n"
 		for scene in self.scenes {
 			if let segues = scene.segues, !segues.isEmpty {
@@ -116,8 +118,27 @@ extension Storyboard {
 			}
 		}
 		output += "\n}\n"
-		output += "\n"
 
+		output += "\n////////////////////////////////////////////////////////////\n"
+		output += "\nenum Reusables {"
+		for scene in self.scenes {
+			if let viewController = scene.viewController, nil == viewController.customClass {
+				if let reusables = viewController.reusables(os) { // ?.filter({ return $0.reuseIdentifier != nil }) //, !reusables.isEmpty {
+					for reusable in reusables {
+						if let identifier = reusable.reuseIdentifier {
+							if let customClass = reusable.customClass {
+								output += "\n\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable<\(customClass)> { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+							} else {
+								let customClass = os.reusableItemsMap[reusable.kind]
+								output += "\n\t\tstatic var \(swiftRepresentation(for: identifier)): Reusable<\(customClass!)> { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+							}
+						}
+					}
+					output += "\n"
+				}
+			}
+		}
+		output += "\n}\n"
 		return output
 	}
 
