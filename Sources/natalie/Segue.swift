@@ -12,17 +12,13 @@ class Segue: XMLObject {
 
     let kind: String
     let identifier: String?
+    let id: String
     lazy var destination: String? = self.xml.element?.attribute(by: "destination")?.text
 
     override init(xml: XMLIndexer) {
         self.kind = xml.element!.attribute(by: "kind")!.text
-        var id = xml.element?.attribute(by: "identifier")?.text
-        if nil == id || id!.isEmpty {
-			if let value = xml.element?.attribute(by: "id")?.text {
-				id = "segue_" + value
-			}
-        }
-		self.identifier = id
+        self.identifier = xml.element?.attribute(by: "identifier")?.text
+        self.id = (xml.element?.attribute(by: "id"))!.text
         super.init(xml: xml)
     }
 

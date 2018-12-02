@@ -43,7 +43,7 @@ extension Storyboard {
 						output += "}\n"
 					}
 
-					if let segues = scene.segues?.filter({ return $0.identifier != nil }) { // , !segues.isEmpty {
+					if let segues = scene.segues, !segues.isEmpty {
 						output += "extension \(os.storyboardSegueType) {\n"
 						output += "\tfunc selection() -> \(customClass).Segue? {\n"
 						output += "\t\tif let identifier = self.identifier {\n"
@@ -54,21 +54,21 @@ extension Storyboard {
 						output += "}\n"
 						output += "\n"
 						output += "extension \(customClass) {\n"
-						output += "\tenum Segues {" // : \(os.storyboardSegueIdentifierType), CustomStringConvertible, SegueProtocol {\n"
+						output += "\tenum Segue {" // : \(os.storyboardSegueIdentifierType), CustomStringConvertible, SegueProtocol {\n"
 						for segue in segues {
-							if let identifier = segue.identifier {
+							if let identifier = segue.identifier,
+								let destination = segue.destination,
+								let destinationElement = searchById(id: destination)?.element,
+								let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name)) {
 								let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .lowercase)
-								if let destination = segue.destination,
-									let destinationElement = searchById(id: destination)?.element,
-									let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name)) {
-									output += "\t\t\tstatic var \(swiftIdentifier): Segue<\(destinationClass)> { return .init(\"\(identifier)\", \"\(segue.kind)\") }\n"
-								} else {
-									output += "\t\t\tstatic var \(swiftIdentifier): Segue { return .init(\"\(identifier)\", \"\(segue.kind)\") }\n"
-								}
+								output += "\n\t\t\tstatic var \(swiftIdentifier): Segue<\(destinationClass)> { return .init(\"\(identifier)\", .\(segue.kind)) }"
+							} else {
+								let swiftIdentifier = swiftRepresentation(for: segue.id, firstLetter: .capitalize)
+								output += "\n\t\t\tstatic var \(segue.kind)\(swiftIdentifier): Segue { return .init(\"\(segue.id)\", .\(segue.kind)) }"
 							}
 						}
 
-						output += "\t}\n"
+						output += "\n\t}\n"
 						output += "\n"
 					}
 
@@ -122,36 +122,37 @@ extension Storyboard {
 						output += "\t\tvar description: String { return self.rawValue }\n"
 						output += "\t}\n"
 						output += "\n"
-						output += "}\n"
-						output += "\n"
 					}
+					output += "}\n"
+					output += "\n"
 				}
 			}
 		}
 
 		output += "\n"
 		output += "////////////////////////////////////////////////////////////\n"
-		output += "enum Segues {\n" // : \(os.storyboardSegueIdentifierType), CustomStringConvertible, SegueProtocol {\n"
+		output += "enum Segues {" // : \(os.storyboardSegueIdentifierType), CustomStringConvertible, SegueProtocol {\n"
 		for scene in self.scenes {
-			if let segues = scene.segues?.filter({ return $0.identifier != nil }) { // , !segues.isEmpty {
+			if let segues = scene.segues, !segues.isEmpty {
 				for segue in segues {
-					if let identifier = segue.identifier {
+					if let identifier = segue.identifier,
+						let destination = segue.destination,
+						let destinationElement = searchById(id: destination)?.element,
+						let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name)) {
 						let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .lowercase)
-						if let destination = segue.destination,
-							let destinationElement = searchById(id: destination)?.element,
-							let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name)) {
-							output += "\t\tstatic var \(swiftIdentifier): Segue<\(destinationClass)> { return .init(\"\(identifier)\", \"\(segue.kind)\") }\n"
-						} else {
-							output += "\t\tstatic var \(swiftIdentifier): Segue { return .init(\"\(identifier)\", \"\(segue.kind)\") }\n"
-						}
+						output += "\n\t\tstatic var \(swiftIdentifier): Segue<\(destinationClass)> { return .init(\"\(identifier)\", .\(segue.kind)) }"
+					} else {
+						let swiftIdentifier = swiftRepresentation(for: segue.id, firstLetter: .capitalize)
+						output += "\n\t\tstatic var \(segue.kind)\(swiftIdentifier): Segue { return .init(\"\(segue.id)\", .\(segue.kind)) }"
 					}
 				}
 
 				output += "\n"
 			}
 		}
-		output += "}\n"
+		output += "\n}\n"
 		output += "\n"
+
 		return output
 	}
 

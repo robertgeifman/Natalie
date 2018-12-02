@@ -223,7 +223,7 @@ enum OS: String, CustomStringConvertible {
                 return nil
             default:
                 // assertionFailure("Unknown controller element: \(name)")
-                return name
+                return nil
             }
         case .OSX:
             switch name {
@@ -240,7 +240,7 @@ enum OS: String, CustomStringConvertible {
             case "exit", "viewControllerPlaceholder":
                 return nil
             default:
-                assertionFailure("Unknown controller element: \(name)")
+                // assertionFailure("Unknown controller element: \(name)")
                 return nil
             }
         }
