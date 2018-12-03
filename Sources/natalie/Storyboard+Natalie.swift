@@ -57,19 +57,20 @@ extension Storyboard {
 					let sceneReusables = viewController.reusables(os)
 					let sceneSegues = scene.segues
 
-					let segues = processSegues(sceneSegues)
+					var seguesController = [String]()
+					var prepareForSegue = [String]()
+					let segues = processSegues(sceneSegues, customClass, &seguesController, &prepareForSegue)
 					let reusables = processReusables(sceneReusables)
 
 					if !segues.isEmpty || !reusables.isEmpty {
+						output += seguesController
+						output += ""
 						output += "extension \(customClass) {"
 
 						if !segues.isEmpty {
-							output += "\tenum Segues {" // : \(os.storyboardSegueIdentifierType), CustomStringConvertible, SegueProtocol {"
+							output += "\tenum Segues: String {" // \(os.storyboardSegueIdentifierType), CustomStringConvertible {" //, SegueProtocol {"
 							output += segues
 							output += "\t}"
-						}
-
-						if !segues.isEmpty && !reusables.isEmpty {
 							output += ""
 						}
 
@@ -79,6 +80,11 @@ extension Storyboard {
 							output += "\t}"
 						}
 
+						if !segues.isEmpty && !reusables.isEmpty {
+							output += ""
+						}
+
+						output += prepareForSegue
 						output += "}"
 					}
 				}
@@ -97,7 +103,7 @@ extension Storyboard {
 		let segues = processSegues()
 		let reusables = processReusables()
 		if !segues.isEmpty {
-			output += "\t\tenum Segues {"
+			output += "\t\tenum Segues: String {"
 			output += segues
 			output += "\t\t}"
 			output += ""
@@ -127,6 +133,10 @@ extension Storyboard {
 
 	func processSegues() -> [String] {
 		var output = [String]()
+		var output2 = [String]()
+		output2 += "\t\t\tvar segue: Segue {"
+		output2 += "\t\t\t\tswitch self {"
+
 		for scene in self.scenes {
 		if let segues = scene.segues, !segues.isEmpty {
 			for segue in segues {
@@ -135,23 +145,51 @@ extension Storyboard {
 					let destinationElement = searchById(id: destination)?.element {
 						if let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name)) {
 							let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .lowercase)
-							output += "\t\t\tstatic var \(swiftIdentifier): Natalie.Segue<\(destinationClass)> { return .init(\"\(identifier)\", \"\(segue.kind)\") } // \(destinationElement.name)"
+//							output += "\t\t\tstatic var \(swiftIdentifier): Segue<\(destinationClass)> { return .init(\"\(identifier)\", \"\(segue.kind)\") }"
+							output += "\t\t\tcase \(swiftIdentifier) = \"\(identifier)\""
+							output2 += "\t\t\t\tcase .\(swiftIdentifier): return Segue(\"\(identifier)\", \"\(segue.kind)\", \(destinationClass).self)"
 						} else {
-							let swiftIdentifier = swiftRepresentation(for: segue.id, firstLetter: .capitalize)
-							output += "\t\t\tstatic var \(segue.kind)\(swiftIdentifier): Natalie.Segue<\(os.defaultSegueDestinationType)> { return .init(\"\(segue.id)\", \"\(segue.kind)\") } // \(destinationElement.name)"
+							let swiftIdentifier = segue.kind + swiftRepresentation(for: segue.id, firstLetter: .capitalize)
+							// \(destinationElement.name)
+//							output += "\t\t\tstatic var \(segue.kind)\(swiftIdentifier): Segue<\(os.defaultSegueDestinationType)> { return .init(\"\(segue.id)\", \"\(segue.kind)\") }"
+							output += "\t\t\tcase \(swiftIdentifier) = \"\(segue.id)\""
+							output2 += "\t\t\t\tcase .\(swiftIdentifier): return Segue(\"\(segue.id)\", \"\(segue.kind)\", \(os.defaultSegueDestinationType).self)"
 						}
 					} else {
-						let swiftIdentifier = swiftRepresentation(for: segue.id, firstLetter: .capitalize)
-						output += "\t\t\tstatic var \(segue.kind)\(swiftIdentifier): Natalie.Segue<\(os.defaultSegueDestinationType)> { return .init(\"\(segue.id)\", \"\(segue.kind)\") }"
+						let swiftIdentifier = segue.kind + swiftRepresentation(for: segue.id, firstLetter: .capitalize)
+//						output += "\t\t\tstatic var \(segue.kind)\(swiftIdentifier): Segue<\(os.defaultSegueDestinationType)> { return .init(\"\(segue.id)\", \"\(segue.kind)\") }"
+						output += "\t\t\tcase \(swiftIdentifier) = \"\(segue.id)\""
+						output2 += "\t\t\t\tcase .\(swiftIdentifier): return Segue(\"\(segue.id)\", \"\(segue.kind)\", \(os.defaultSegueDestinationType).self)"
 					}
 			}
 		}
 		}
+
+		output2 += "\t\t\t\t}"
+		output2 += "\t\t\t}"
+		if output.isEmpty {
+			return [String]()
+		}
+
+		output += output2
 		return output
 	}
 
-	func processSegues(_ sceneSegues: [Segue]?) -> [String] {
+	func processSegues(_ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String], _ prepareForSegue: inout [String]) -> [String] {
 		var output = [String]()
+		var output1 = [String]()
+		var output2 = [String]()
+		var output3 = [String]()
+		output1 += "@objc protocol \(customClass)SegueController: NSObjectProtocol {"
+
+		output2 += "\t\tvar segue: Segue {"
+		output2 += "\t\t\tswitch self {"
+
+		output3 += "\tinternal var segueController: Any? { return self }"
+		output3 += "\toverride func prepare(for segue: NSStoryboardSegue, sender: Any?) {"
+		output3 += "\t\tguard let identifier = segue.identifier, "
+		output3 += "\t\t\tlet controller = segueController as? \(customClass)SegueController else { super.prepare(for: segue, sender: sender); return }"
+		output3 += "\t\tswitch identifier {"
 		if let segues = sceneSegues, !segues.isEmpty {
 			for segue in segues {
 				if let identifier = segue.identifier,
@@ -159,17 +197,52 @@ extension Storyboard {
 					let destinationElement = searchById(id: destination)?.element {
 						if let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name)) {
 							let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .lowercase)
-							output += "\t\tstatic var \(swiftIdentifier): Natalie.Segue<\(destinationClass)> { return .init(\"\(identifier)\", \"\(segue.kind)\") } // \(destinationElement.name)"
+//							output += "\t\tstatic var \(swiftIdentifier): Segue<\(destinationClass)> { return .init(\"\(identifier)\", \"\(segue.kind)\") }"
+							output += "\t\tcase \(swiftIdentifier) = \"\(identifier)\""
+							output2 += "\t\t\tcase .\(swiftIdentifier): return Segue(\"\(identifier)\", \"\(segue.kind)\", \(destinationClass).self)"
+							let functionName = "prepareFor" + swiftRepresentation(for: identifier, firstLetter: .capitalize)
+							output1 += "\t@objc optional func \(functionName)(sender: Any?)"
+							output3 += "\t\tcase Segues.\(swiftIdentifier).rawValue: controller.\(functionName)?(sender: sender)"
 						} else {
-							let swiftIdentifier = swiftRepresentation(for: segue.id, firstLetter: .capitalize)
-							output += "\t\tstatic var \(segue.kind)\(swiftIdentifier): Natalie.Segue<\(os.defaultSegueDestinationType)> { return .init(\"\(segue.id)\", \"\(segue.kind)\") } // \(destinationElement.name)"
+							let swiftIdentifier = segue.kind + swiftRepresentation(for: segue.id, firstLetter: .capitalize)
+							// \(destinationElement.name)
+//							output += "\t\tstatic var \(segue.kind)\(swiftIdentifier): Segue<\(os.defaultSegueDestinationType)> { return .init(\"\(segue.id)\", \"\(segue.kind)\") }"
+							output += "\t\tcase \(swiftIdentifier) = \"\(segue.id)\""
+							output2 += "\t\t\tcase .\(swiftIdentifier): return Segue(\"\(segue.id)\", \"\(segue.kind)\", \(os.defaultSegueDestinationType).self)"
+							let functionName = "prepareFor" + swiftRepresentation(for: segue.kind, firstLetter: .capitalize) + swiftRepresentation(for: segue.id, firstLetter: .capitalize)
+							output1 += "\t@objc optional func \(functionName)(sender: Any?)"
+							output3 += "\t\tcase Segues.\(swiftIdentifier).rawValue: controller.\(functionName)?(sender: sender)"
 						}
 					} else {
-						let swiftIdentifier = swiftRepresentation(for: segue.id, firstLetter: .capitalize)
-						output += "\t\tstatic var \(segue.kind)\(swiftIdentifier): Natalie.Segue<\(os.defaultSegueDestinationType)> { return .init(\"\(segue.id)\", \"\(segue.kind)\") }"
+						let swiftIdentifier = segue.kind + swiftRepresentation(for: segue.id, firstLetter: .capitalize)
+//						output += "\t\tstatic var \(segue.kind)\(swiftIdentifier): Segue<\(os.defaultSegueDestinationType)> { return .init(\"\(segue.id)\", \"\(segue.kind)\") }"
+						output += "\t\tcase \(swiftIdentifier) = \"\(segue.id)\""
+						output2 += "\t\t\tcase .\(swiftIdentifier): return Segue(\"\(segue.id)\", \"\(segue.kind)\", \(os.defaultSegueDestinationType).self)"
+						let functionName = "prepareFor" + swiftRepresentation(for: segue.kind, firstLetter: .capitalize) + swiftRepresentation(for: segue.id, firstLetter: .capitalize)
+						output1 += "\t@objc optional func \(functionName)(sender: Any?)"
+						output3 += "\t\tcase Segues.\(swiftIdentifier).rawValue: controller.\(functionName)?(sender: sender)"
 					}
 			}
 		}
+
+		output1 += "}"
+
+		output2 += "\t\t\t}"
+		output2 += "\t\t}"
+
+		output3 += "\t\tdefault: super.prepare(for: segue, sender: sender)"
+		output3 += "\t\t}"
+		output3 += "\t}"
+
+		if output.isEmpty {
+			return [String]()
+		}
+
+		output += ""
+		output += output2
+
+		seguesController = output1
+		prepareForSegue = output3
 		return output
 	}
 
@@ -181,10 +254,10 @@ extension Storyboard {
 					for reusable in reusables {
 						if let identifier = reusable.reuseIdentifier {
 							if let customClass = reusable.customClass {
-								output += "\t\\ttstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Natalie.Reusable<\(customClass)> { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+								output += "\t\\ttstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass).self) }"
 							} else {
 								let customClass = os.reusableItemsMap[reusable.kind]
-								output += "\t\t\tstatic var \(swiftRepresentation(for: identifier)): Natalie.Reusable<\(customClass!)> { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+								output += "\t\t\tstatic var \(swiftRepresentation(for: identifier)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass!).self) }"
 							}
 						}
 					}
@@ -200,10 +273,10 @@ extension Storyboard {
 			for reusable in reusables {
 				if let identifier = reusable.reuseIdentifier {
 					if let customClass = reusable.customClass {
-						output += "\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Natalie.Reusable<\(customClass)> { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+						output += "\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass).self) }"
 					} else {
 						let customClass = os.reusableItemsMap[reusable.kind]
-						output += "\t\tstatic var \(swiftRepresentation(for: identifier)): Natalie.Reusable<\(customClass!)> { return .init(\"\(identifier)\", \"\(reusable.kind)\") }"
+						output += "\t\tstatic var \(swiftRepresentation(for: identifier)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass!).self) }"
 					}
 				}
 			}
