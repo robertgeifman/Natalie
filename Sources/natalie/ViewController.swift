@@ -7,14 +7,17 @@
 //
 
 class ViewController: XMLObject {
-
     lazy var customClass: String? = self.xml.element?.attribute(by: "customClass")?.text
     lazy var customModuleProvider: String? = self.xml.element?.attribute(by: "customModuleProvider")?.text
     lazy var storyboardIdentifier: String? = self.xml.element?.attribute(by: "storyboardIdentifier")?.text
     lazy var customModule: String? = self.xml.element?.attribute(by: "customModule")?.text
     lazy var id: String? = self.xml.element?.attribute(by: "id")?.text
     lazy var userLabel: String? = self.xml.element?.attribute(by: "userLabel")?.text
-
+	let owner: XMLObject?
+	init(xml: XMLIndexer, owner: XMLObject?) {
+		self.owner = owner
+		super.init(xml: xml)
+	}
     func reusables(_ os: OS) -> [Reusable]? {
 		var objects = [XMLIndexer]()
         if let reusables = self.searchAll(root: self.xml, attributeKey: "reuseIdentifier") {

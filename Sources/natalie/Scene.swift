@@ -7,17 +7,16 @@
 //
 
 class Scene: XMLObject {
-
     lazy var viewController: ViewController? = {
         if let vcs = self.searchAll(attributeKey: "sceneMemberID", attributeValue: "viewController"), let vc = vcs.first {
-            return ViewController(xml: vc)
+            return ViewController(xml: vc, owner: self)
         }
         return nil
     }()
 
     lazy var segues: [Segue]? = {
         let segues = self.searchNamed(name: "segue")
-        return segues?.map { Segue(xml: $0) }
+        return segues?.map { Segue(xml: $0, source: self) }
     }()
 
     lazy var sceneID: String? = self.xml.element?.attribute(by: "sceneID")?.text

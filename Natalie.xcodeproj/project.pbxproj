@@ -25,6 +25,7 @@
 		75E28AB31D577EEA00A80623 /* XMLObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75E28AB21D577EEA00A80623 /* XMLObject.swift */; };
 		C4F8BEDF1F9C79BD0031195F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F8BEDE1F9C79BD0031195F /* Color.swift */; };
 		E106750F21B47EC900CDEF9B /* natalie in CopyFiles */ = {isa = PBXBuildFile; fileRef = 755B834F1D576CBF0020148B /* natalie */; };
+		E106751621B5AF7400CDEF9B /* Storyboard+ViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +88,7 @@
 		75E28AB21D577EEA00A80623 /* XMLObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLObject.swift; sourceTree = "<group>"; };
 		C4F8BEDE1F9C79BD0031195F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		E106750E21B4700000CDEF9B /* Natalie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Natalie.swift; path = "../../No Panic!/FileBrowser/Natalie.swift"; sourceTree = "<group>"; };
+		E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Storyboard+ViewControllers.swift"; sourceTree = "<group>"; };
 		E1352BC421B421EE009DDABF /* Aspects.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Aspects.xcodeproj; path = ../Aspects/Aspects.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -151,6 +153,7 @@
 			children = (
 				75E28AA51D577D0500A80623 /* main.swift */,
 				48E3E55A1EE6D5DF000D4B3F /* StoryboardGenerator.swift */,
+				E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */,
 				48E3E55C1EE6D85E000D4B3F /* Storyboard+Natalie.swift */,
 				750149441D5782F100B22C87 /* OS.swift */,
 				750149461D57830A00B22C87 /* StoryboardFile.swift */,
@@ -366,6 +369,7 @@
 				48E3E55B1EE6D5DF000D4B3F /* StoryboardGenerator.swift in Sources */,
 				7501493B1D57825F00B22C87 /* ViewController.swift in Sources */,
 				7501493D1D57827800B22C87 /* Segue.swift in Sources */,
+				E106751621B5AF7400CDEF9B /* Storyboard+ViewControllers.swift in Sources */,
 				75E28AB01D577D0500A80623 /* SWXMLHash+TypeConversion.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

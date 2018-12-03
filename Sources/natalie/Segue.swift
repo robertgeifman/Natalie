@@ -13,8 +13,9 @@ class Segue: XMLObject {
     let identifier: String?
     let id: String
     lazy var destination: String? = self.xml.element?.attribute(by: "destination")?.text
-
-    override init(xml: XMLIndexer) {
+	let source: Scene
+    init(xml: XMLIndexer, source: Scene) {
+		self.source = source
         self.kind = xml.element!.attribute(by: "kind")!.text
         self.identifier = xml.element?.attribute(by: "identifier")?.text
         self.id = (xml.element?.attribute(by: "id"))!.text

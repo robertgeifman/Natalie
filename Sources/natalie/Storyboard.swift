@@ -7,7 +7,6 @@
 //
 
 class Storyboard: XMLObject {
-
     let version: String
     lazy var os: OS = {
         guard let targetRuntime = self.xml["document"].element?.attribute(by: "targetRuntime")?.text else {
@@ -20,7 +19,7 @@ class Storyboard: XMLObject {
     lazy var initialViewControllerClass: String? = {
         if let initialViewControllerId = self.xml["document"].element?.attribute(by: "initialViewController")?.text,
             let xmlVC = self.searchById(id: initialViewControllerId) {
-            let vc = ViewController(xml: xmlVC)
+            let vc = ViewController(xml: xmlVC, owner: self)
             // The initialViewController class could have the same name as the enclosing Storyboard struct,
             // so we must qualify controllerClass with the module name.
             if let customClassName = vc.customClassWithModule {
