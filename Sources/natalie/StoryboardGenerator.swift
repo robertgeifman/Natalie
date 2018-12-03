@@ -79,6 +79,7 @@ struct Natalie {
 			output += file.storyboard.processViewControllers(storyboardCustomModules: storyboardModules)
 		}
 
+#if false
 		output += ""
 		output += "////////////////////////////////////////////////////////////"
 		output += "enum Storyboards {"
@@ -103,6 +104,7 @@ struct Natalie {
 			output += "}"
 			output += ""
 		}
+#endif
 
 		return output
 	}
