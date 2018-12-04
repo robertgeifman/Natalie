@@ -288,14 +288,14 @@ extension Storyboard {
 					output3 += "\t\tcase Segues.\(swiftIdentifier).rawValue: controller.\(functionName)?(sender: sender)"
 				} else if segue.kind == "relationship" {
 					let destinationName = swiftRepresentation(for: destinationElement.attribute(by: "storyboardIdentifier")?.text ?? destination, firstLetter: .capitalize)
-					let relationshipKind = destinationElement.attribute(by: "relationship")?.text
-					let swiftIdentifier = segue.kind + swiftRepresentation(for: destinationElement.name, firstLetter: .capitalize) +
+					let relationshipKind = destinationElement.attribute(by: "relationship")?.text ?? segue.kind
+					let swiftIdentifier = relationshipKind + swiftRepresentation(for: destinationElement.name, firstLetter: .capitalize) +
 						swiftRepresentation(for: destinationElement.attribute(by: "storyboardIdentifier")?.text ?? destination, firstLetter: .capitalize)
-					let functionName = "prepareFor" + swiftRepresentation(for: segue.kind, firstLetter: .capitalize) +
+					let functionName = "prepareFor" + swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) +
 						swiftRepresentation(for: destinationElement.name, firstLetter: .capitalize) + destinationName
 
 					output += "\t\tcase \(swiftIdentifier) = \"\(destination)\" // \(segue.id) - \(destinationElement.name) - \(destination) "
-					output2 += "\t\t\tcase .\(swiftIdentifier): return Segue(\"\(destination)\", \"\(segue.kind)\", \(destinationClass).self)"
+					output2 += "\t\t\tcase .\(swiftIdentifier): return Segue(\"\(destination)\", \"\(relationshipKind)\", \(destinationClass).self)"
 
 					output1 += "\t@objc optional func \(functionName)(sender: Any?)"
 					output3 += "\t\tcase Segues.\(swiftIdentifier).rawValue: controller.\(functionName)?(sender: sender)"
