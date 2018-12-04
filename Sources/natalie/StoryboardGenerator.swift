@@ -79,8 +79,6 @@ struct Natalie {
 			output += file.storyboard.processViewControllers(storyboardCustomModules: storyboardModules)
 		}
 
-#if false
-		output += ""
 		output += "////////////////////////////////////////////////////////////"
 		output += "enum Storyboards {"
 		for file in storyboards {
@@ -95,6 +93,7 @@ struct Natalie {
 			.compactMap { $0.assetName }
 
 		if !colors.isEmpty {
+			output += "////////////////////////////////////////////////////////////"
 			output += "// MARK: - Colors"
 			output += "@available(\(os.colorOS), *)"
 			output += "extension \(os.colorType) {"
@@ -104,7 +103,6 @@ struct Natalie {
 			output += "}"
 			output += ""
 		}
-#endif
 
 		return output
 	}

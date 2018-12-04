@@ -9,6 +9,76 @@
 import Foundation
 
 extension Storyboard {
+	func processViewControllers(storyboardCustomModules: Set<String>) -> [String] {
+		var output = [String]()
+		for scene in self.scenes {
+			guard let viewController = scene.viewController,
+				let customClass = viewController.customClass
+			else { continue }
+
+			output += "////////////////////////////////////////////////////////////"
+			output += "// MARK: - \(customClass)"
+
+			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)
+			output += sceneClass
+			let sceneSegues = scene.segues
+			let sceneReusables = viewController.reusables(os)
+
+			var seguesController = [String]()
+			var prepareForSegue = [String]()
+			let segues = processSegues(sceneSegues, customClass, &seguesController, &prepareForSegue)
+			let reusables = processReusables(sceneReusables)
+
+			if !segues.isEmpty || !reusables.isEmpty {
+				output += seguesController
+				output += ""
+
+				if !segues.isEmpty {
+					output += "extension \(customClass): \(customClass)SegueController {"
+					output += "\tenum Segues: RawRepresentable {"
+					output += segues
+					output += "\t}"
+					output += ""
+				} else {
+					output += "extension \(customClass) {"
+				}
+
+				if !reusables.isEmpty {
+					output += "\tenum Reusables {"
+					output += reusables
+					output += "\t}"
+				}
+
+				if !segues.isEmpty && !reusables.isEmpty {
+					output += ""
+				}
+
+				output += prepareForSegue
+				output += "}"
+			}
+
+			output += ""
+		}
+		return output
+	}
+
+	func processReusables(_ sceneReusables: [Reusable]?) -> [String] {
+		var output = [String]()
+		if let reusables = sceneReusables, !reusables.isEmpty { // ?.filter({ return $0.reuseIdentifier != nil })
+			for reusable in reusables {
+				if let identifier = reusable.reuseIdentifier {
+					if let customClass = reusable.customClass {
+						output += "\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass).self) }"
+					} else {
+						let customClass = os.reusableItemsMap[reusable.kind]
+						output += "\t\tstatic var \(swiftRepresentation(for: identifier)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass!).self) }"
+					}
+				}
+			}
+		}
+		return output
+	}
+
 	func processSegues(_ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String], _ prepareForSegue: inout [String]) -> [String] {
 		guard let segues = sceneSegues, !segues.isEmpty else { return [String]() }
 
@@ -140,7 +210,7 @@ extension Storyboard {
 				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
 				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue: Segue<\(destinationClass)> { return .init(\"\(segue.id)\", .\(segue.kind)) }"
 			} else if segue.kind == "relationship" {
-				let sourceName = swiftRepresentation(for: source, firstLetter: .capitalize)
+				// let sourceName = swiftRepresentation(for: source, firstLetter: .capitalize)
 				let destinationName = swiftRepresentation(for: destinationIdString ?? destination, firstLetter: .capitalize)
 				let relationshipKind = segue.relationshipKind ?? ""
 				let swiftIdentifier = segue.kind + swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) +
