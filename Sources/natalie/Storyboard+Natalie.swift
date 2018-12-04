@@ -19,7 +19,7 @@ extension Storyboard {
 		let segues = processSegues()
 		let reusables = processReusables()
 		if !segues.isEmpty {
-			output += "\t\tenum Segues: String {"
+			output += "\t\tenum Segues: RawRepresentable {"
 			output += segues
 			output += "\t\t}"
 			output += ""
