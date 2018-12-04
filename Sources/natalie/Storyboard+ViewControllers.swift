@@ -48,10 +48,12 @@ extension Storyboard {
 
 		var enumCases = [String]()
 		var delegateMethods = [String]()
+		var delegateImplementationMethods = [String]()
 		var matchPatternsHead = [String]()
 		var matchPatterns = [String]()
 		var matchCases = [String]()
 		var initWithRawValue = [String]()
+		var staticVarsValue = [String]()
 
 		delegateMethods += "@objc protocol \(customClass)SegueController: NSObjectProtocol {"
 
@@ -99,14 +101,19 @@ extension Storyboard {
 				if let value = patterns[pattern], value > 1 {
 					continue
 				}
-				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return (\"\(identifier)\", \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\")"
 
-				delegateMethods += "\t@objc optional func \(functionName)(to: \(destinationClass)?, sender: Any?)"
+				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+
+				let method = "func \(functionName)(to controller: \(destinationClass)?, sender: Any?)"
+				delegateImplementationMethods += "\t" + method
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + method
 
 				enumCases += "\t\tcase \(swiftIdentifier) // \(identifier): \(segue.kind)  - \(destination): \(destinationElement.name)"
 				matchCases += "\t\tcase (\"\(identifier)\", \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
 				matchCases += "\t\t\tcontroller.\(functionName)?(to: destination as? \(destinationClass), sender: sender)"
 				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
+				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue: Segue<\(destinationClass)> { return .init(\"\(identifier)\", .\(segue.kind)) }"
 			} else if segue.kind == "embed" {
 				let sourceName = swiftRepresentation(for: source, firstLetter: .capitalize)
 				let destinationName = swiftRepresentation(for: destinationIdString ?? destination, firstLetter: .capitalize)
@@ -120,34 +127,44 @@ extension Storyboard {
 				if let value = patterns[pattern], value > 1 {
 					continue
 				}
-				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return (\"nil\", \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\") //  sourceName=\"\(sourceName)\""
 
-				delegateMethods += "\t@objc optional func \(functionName)(to: \(destinationClass)?, sender: Any?)"
+				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern) //  sourceName=\"\(sourceName)\""
+
+				let method = "func \(functionName)(to controller: \(destinationClass)?, sender: Any?)"
+				delegateImplementationMethods += "\t" + method
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + method
 				enumCases += "\t\tcase \(swiftIdentifier) // \(segue.id): \(segue.kind) - \(destination): \(destinationElement.name) "
 				matchCases += "\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
 				matchCases += "\t\t\tcontroller.\(functionName)?(to: destination as? \(destinationClass), sender: sender)"
 				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
+				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue: Segue<\(destinationClass)> { return .init(\"\(segue.id)\", .\(segue.kind)) }"
 			} else if segue.kind == "relationship" {
 				let sourceName = swiftRepresentation(for: source, firstLetter: .capitalize)
 				let destinationName = swiftRepresentation(for: destinationIdString ?? destination, firstLetter: .capitalize)
-				let relationshipKind = destinationElement.attribute(by: "relationship")?.text
-				let swiftIdentifier = (relationshipKind ?? segue.kind) +
+				let relationshipKind = segue.relationshipKind ?? ""
+				let swiftIdentifier = segue.kind + swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) +
 					swiftRepresentation(for: destinationElement.name, firstLetter: .capitalize) +
 					swiftRepresentation(for: destinationIdString ?? destination, firstLetter: .capitalize)
 				let functionName = "prepareFor" + swiftRepresentation(for: segue.kind, firstLetter: .capitalize) +
-					swiftRepresentation(for: relationshipKind!, firstLetter: .capitalize) + destinationName
+					swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + destinationName
 
 				let pattern = "(nil, \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\")"
 				if let value = patterns[pattern], value > 1 {
 					continue
 				}
-				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return (\"nil\", \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\") //  relationship=\"\(relationshipKind!)\", sourceName=\"\(sourceName)\""
 
-				delegateMethods += "\t@objc optional func \(functionName)(to: \(destinationClass)?, sender: Any?)"
-				enumCases += "\t\tcase \(swiftIdentifier) // \(segue.id): \(segue.kind)(\(relationshipKind!)) - \(destination): \(destinationElement.name) "
+				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
+				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+
+				let method = "func \(functionName)(to controller: \(destinationClass)?, sender: Any?)"
+				delegateImplementationMethods += "\t" + method
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + method
+				enumCases += "\t\tcase \(swiftIdentifier) // \(segue.id): \(segue.kind)(\(relationshipKind)) - \(destination): \(destinationElement.name)"
 				matchCases += "\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
 				matchCases += "\t\t\tcontroller.\(functionName)?(to: destination as? \(destinationClass), sender: sender)"
-				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
+				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue: Segue<\(destinationClass)> { return .init(\"\(segue.id)\", .\(segue.kind)) }"
 			}
 		}
 
@@ -155,6 +172,14 @@ extension Storyboard {
 			return [String]()
 		}
 
+		staticVarsValue += ""
+		staticVarsValue += enumCases
+		enumCases = staticVarsValue
+/*
+		delegateMethods += "/*"
+		delegateMethods += delegateImplementationMethods
+		delegateMethods += "*/"
+*/
 		delegateMethods += "}"
 
 		matchPatterns += "\t\t\t}"
@@ -163,12 +188,13 @@ extension Storyboard {
 		matchPatternsHead += initWithRawValue
 		matchPatternsHead += matchPatterns
 
-		matchCases += "\t\tdefault: super.prepare(for: segue, sender: sender)"
-		matchCases += "\t\t}"
-		matchCases += "\t}"
-
 		enumCases += ""
 		enumCases += matchPatternsHead
+
+		matchCases += "\t\tdefault:"
+		matchCases += "\t\t\tsuper.prepare(for: segue, sender: sender)"
+		matchCases += "\t\t}"
+		matchCases += "\t}"
 
 		seguesController = delegateMethods
 		prepareForSegue = matchCases

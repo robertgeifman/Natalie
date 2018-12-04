@@ -13,6 +13,7 @@ class Segue: XMLObject {
     let identifier: String?
     let id: String
     lazy var destination: String? = self.xml.element?.attribute(by: "destination")?.text
+    lazy var relationshipKind: String? = self.xml.element?.attribute(by: "relationship")?.text
 	let source: Scene
     init(xml: XMLIndexer, source: Scene) {
 		self.source = source

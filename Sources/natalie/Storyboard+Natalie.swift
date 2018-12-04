@@ -200,16 +200,18 @@ extension Storyboard {
 					if !segues.isEmpty || !reusables.isEmpty {
 						output += seguesController
 						output += ""
-						output += "extension \(customClass) {"
 
 						if !segues.isEmpty {
-							output += "\tenum Segues: RawRepresentable {" // \(os.storyboardSegueIdentifierType), CustomStringConvertible {" //, SegueProtocol {"
+							output += "extension \(customClass): \(customClass)SegueController {"
+							output += "\tenum Segues: RawRepresentable {"
 							output += segues
 							output += "\t}"
 							output += ""
+						} else {
+							output += "extension \(customClass) {"
 						}
 
-						if !reusables.isEmpty { // ?.filter({ return $0.reuseIdentifier != nil })
+						if !reusables.isEmpty {
 							output += "\tenum Reusables {"
 							output += reusables
 							output += "\t}"
