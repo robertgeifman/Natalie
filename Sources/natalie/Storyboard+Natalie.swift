@@ -203,7 +203,7 @@ extension Storyboard {
 						output += "extension \(customClass) {"
 
 						if !segues.isEmpty {
-							output += "\tenum Segues: String {" // \(os.storyboardSegueIdentifierType), CustomStringConvertible {" //, SegueProtocol {"
+							output += "\tenum Segues: RawRepresentable {" // \(os.storyboardSegueIdentifierType), CustomStringConvertible {" //, SegueProtocol {"
 							output += segues
 							output += "\t}"
 							output += ""
