@@ -74,7 +74,7 @@ extension Storyboard {
 		for segue in segues {
 			guard let sourceElement = segue.source.viewController,
 				let sourceClass = sourceElement.customClass ?? os.controllerType(for: sourceElement.name),
-				let source = sourceElement.storyboardIdentifier ?? sourceElement.id,
+//				let source = sourceElement.storyboardIdentifier ?? sourceElement.id,
 				let destination = segue.destination,
 				let destinationElement = searchById(id: destination)?.element,
 				let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name))
@@ -103,7 +103,7 @@ extension Storyboard {
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
-				enumCases += "\t\tcase \(swiftIdentifier) // \(identifier): \(segue.kind)  - \(destination): \(destinationElement.name)"
+				enumCases += "\t\tcase \(swiftIdentifier)"
 				matchCases += "\t\tcase (\"\(identifier)\", \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
 				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(destinationClass), sender: sender)"
 				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
@@ -138,7 +138,7 @@ extension Storyboard {
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
-				enumCases += "\t\tcase \(swiftIdentifier) // \(segue.id): \(segue.kind) - \(destination): \(destinationElement.name) "
+				enumCases += "\t\tcase \(swiftIdentifier)"
 				matchCases += "\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
 				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(destinationClass), sender: sender)"
 				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
@@ -176,7 +176,7 @@ extension Storyboard {
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
-				enumCases += "\t\tcase \(swiftIdentifier) // \(segue.id): \(segue.kind)(\(relationshipKind)) - \(destination): \(destinationElement.name)"
+				enumCases += "\t\tcase \(swiftIdentifier)"
 				matchCases += "\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
 				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(destinationClass), sender: sender)"
 				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
