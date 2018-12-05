@@ -53,7 +53,7 @@ extension Storyboard {
 		matchPatterns += "\t\tvar matchPattern: (String?, String?, String?, String, String?, String?, String) {"
 		matchPatterns += "\t\t\tswitch self {"
 
-		seguePatterns += "\t\tfunc destinationType() -> Any.Type {"
+		seguePatterns += "\t\tvar segue: AnySegue {"
 		seguePatterns += "\t\t\tswitch self {"
 		matchCases += "\toverride func prepare(for segue: NSStoryboardSegue, sender: Any?) {"
 		matchCases += "\t\tguard let controller = segueController as? \(customClass)SegueController else { super.prepare(for: segue, sender: sender); return }"
@@ -101,8 +101,9 @@ extension Storyboard {
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
-				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
-				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
+//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
+				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
+//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
 			} else if segue.kind == "embed" {
 				var dstName: String
 
@@ -137,8 +138,9 @@ extension Storyboard {
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
-				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
-				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
+//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
+				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			} else if segue.kind == "relationship" {
 				let relationshipKind = segue.relationshipKind ?? ""
 
@@ -175,8 +177,9 @@ extension Storyboard {
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
-				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
-				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
+//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
+				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			}
 		}
 
