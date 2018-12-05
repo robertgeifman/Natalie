@@ -50,7 +50,7 @@ extension Storyboard {
 
 		delegateMethods += "@objc protocol \(customClass)SegueController: NSObjectProtocol {"
 
-		matchPatterns += "\t\tvar matchPattern: (String?, String?, String?, String, String?, String?, String) {"
+		matchPatterns += "\t\tvar matchPattern: (String?, String?, String?, Any.Type, String?, String?, NSViewController.Type) {"
 		matchPatterns += "\t\t\tswitch self {"
 
 		seguePatterns += "\t\tvar segue: AnySegue {"
@@ -67,7 +67,7 @@ extension Storyboard {
 				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
 			else { continue }
 
-			let srcID = srcElement.id
+//			let srcID = srcElement.id
 
 			let srcRestorationID = srcElement.xml.element?.attribute(by: "identifier")?.text
 			let dstRestorationID = dstElement.attribute(by: "identifier")?.text
@@ -75,8 +75,8 @@ extension Storyboard {
 			let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
 			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
 
-			let pattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedString), \(srcStoryboardID.unwrappedString), \"\(srcClass)\", \(dstRestorationID.unwrappedString), \(dstStoryboardID.unwrappedString), \"\(dstClass)\")"
-			let casePattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedPattern), \(srcStoryboardID.unwrappedPattern), \"\(srcClass)\", \(dstRestorationID.unwrappedPattern), \(dstStoryboardID.unwrappedPattern), \"\(dstClass)\")"
+			let pattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedString), \(srcStoryboardID.unwrappedString), \(srcClass).self, \(dstRestorationID.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
+			let casePattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedPattern), \(srcStoryboardID.unwrappedPattern), is \(srcClass), \(dstRestorationID.unwrappedPattern), \(dstStoryboardID.unwrappedPattern), is \(dstClass))"
 
 			if let value = patterns[pattern], value > 1 {
 				continue
