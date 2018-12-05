@@ -15,34 +15,27 @@ extension Storyboard {
 		var patterns = [String: Int]()
 
 		for segue in segues {
-			guard let sourceElement = segue.source.viewController,
-				let sourceClass = sourceElement.customClass ?? os.controllerType(for: sourceElement.name),
-				let destination = segue.destination,
-				let destinationElement = searchById(id: destination)?.element,
-				let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name))
+			guard let srcElement = segue.source.viewController,
+				let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name),
+				let dstID = segue.destination,
+				let dstElement = searchById(id: dstID)?.element,
+				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
 			else { continue }
 
-			let sourceRestorationID = sourceElement.xml.element?.attribute(by: "identifier")?.text
-			let destinationRestorationID = destinationElement.attribute(by: "identifier")?.text
+//			let srcID = srcElement.id
 
-			let sourceId = sourceRestorationID == nil ? "nil" : "\"\(sourceRestorationID!)\""
-			let destinationId = destinationRestorationID == nil ? "nil" : "\"\(destinationRestorationID!)\""
+			let srcRestorationID = srcElement.xml.element?.attribute(by: "identifier")?.text
+			let dstRestorationID = dstElement.attribute(by: "identifier")?.text
 
-			var pattern: String?
-			if let identifier = segue.identifier {
-				pattern = "(\"\(identifier)\", \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\")"
-			} else if segue.kind == "embed" {
-				pattern = "(nil, \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\")"
-			} else if segue.kind == "relationship" {
-				pattern = "(nil, \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\")"
-			}
+			let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
+			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
 
-			if let pattern = pattern {
-				if let value = patterns[pattern] {
-					patterns[pattern] = value + 1
-				} else {
-					patterns[pattern] = 1
-				}
+			let pattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedString), \(srcStoryboardID.unwrappedString), \"\(srcClass)\", \(dstRestorationID.unwrappedString), \(dstStoryboardID.unwrappedString), \"\(dstClass)\")"
+
+			if let value = patterns[pattern] {
+				patterns[pattern] = value + 1
+			} else {
+				patterns[pattern] = 1
 			}
 		}
 
@@ -53,10 +46,11 @@ extension Storyboard {
 		var matchCases = [String]()
 		var initWithRawValue = [String]()
 		var staticVarsValue = [String]()
+		var allCases = [String]()
 
 		delegateMethods += "@objc protocol \(customClass)SegueController: NSObjectProtocol {"
 
-		matchPatternsHead += "\t\ttypealias RawValue = (String?, String?, String, String?, String)"
+		matchPatternsHead += "\t\ttypealias RawValue = (String?, String?, String?, String, String?, String?, String)"
 		matchPatternsHead += "\t\tinit?(rawValue: RawValue) {"
 		matchPatternsHead += "\t\t\tswitch rawValue {"
 
@@ -72,115 +66,120 @@ extension Storyboard {
 		matchCases += "\t\tswitch segue.matchPattern {"
 
 		for segue in segues {
-			guard let sourceElement = segue.source.viewController,
-				let sourceClass = sourceElement.customClass ?? os.controllerType(for: sourceElement.name),
-//				let source = sourceElement.storyboardIdentifier ?? sourceElement.id,
-				let destination = segue.destination,
-				let destinationElement = searchById(id: destination)?.element,
-				let destinationClass = (destinationElement.attribute(by: "customClass")?.text ?? os.controllerType(for: destinationElement.name))
+			guard let srcElement = segue.source.viewController,
+				let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name),
+				let dstID = segue.destination,
+				let dstElement = searchById(id: dstID)?.element,
+				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
 			else { continue }
 
-			let sourceRestorationID = sourceElement.xml.element?.attribute(by: "identifier")?.text
-			let destinationRestorationID = destinationElement.attribute(by: "identifier")?.text
+			let srcID = srcElement.id
 
-			let sourceId = sourceRestorationID == nil ? "nil" : "\"\(sourceRestorationID!)\""
-			let destinationId = destinationRestorationID == nil ? "nil" : "\"\(destinationRestorationID!)\""
+			let srcRestorationID = srcElement.xml.element?.attribute(by: "identifier")?.text
+			let dstRestorationID = dstElement.attribute(by: "identifier")?.text
 
-			let sourceIdCase = sourceRestorationID == nil ? "_" : "\"\(sourceRestorationID!)\""
-			let destinationIdCase = destinationRestorationID == nil ? "_" : "\"\(destinationRestorationID!)\""
+			let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
+			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
 
-			if let identifier = segue.identifier {
-				let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .lowercase)
-				let pattern = "(\"\(identifier)\", \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\")"
-				if let value = patterns[pattern], value > 1 {
-					continue
-				}
+			let pattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedString), \(srcStoryboardID.unwrappedString), \"\(srcClass)\", \(dstRestorationID.unwrappedString), \(dstStoryboardID.unwrappedString), \"\(dstClass)\")"
+			let casePattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedPattern), \(srcStoryboardID.unwrappedPattern), \"\(srcClass)\", \(dstRestorationID.unwrappedPattern), \(dstStoryboardID.unwrappedPattern), \"\(dstClass)\")"
+
+			if let value = patterns[pattern], value > 1 {
+				continue
+			}
+
+			if let segueID = segue.identifier {
+				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
+				let functionName = "prepareForSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
+
+				allCases += "\t\t\t" + swiftIdentifier + ","
 
 				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
-				let functionName = "prepareForSegue" + swiftRepresentation(for: identifier, firstLetter: .capitalize)
-				let method = "func \(functionName)(_ destination: \(destinationClass)?, sender: Any?)"
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
 				enumCases += "\t\tcase \(swiftIdentifier)"
-				matchCases += "\t\tcase (\"\(identifier)\", \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
-				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(destinationClass), sender: sender)"
-				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
-				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(destinationClass)>(\"\(identifier)\", .\(segue.kind))"
+
+				matchCases += "\t\tcase \(casePattern):"
+				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(dstClass), sender: sender)"
+
+				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
+
+				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
 			} else if segue.kind == "embed" {
-//				let sourceName = swiftRepresentation(for: source, firstLetter: .capitalize)
-				var destinationName: String
-				if let identifier = destinationElement.attribute(by: "storyboardIdentifier")?.text {
-					destinationName = swiftRepresentation(for: identifier, firstLetter: .capitalize)
-				} else if let identifier = destinationRestorationID {
-					let customClass = destinationElement.attribute(by: "customClass")?.text ?? destinationElement.name
-					destinationName = swiftRepresentation(for: customClass, firstLetter: .capitalize) +
+				var dstName: String
+
+				if let identifier = dstStoryboardID {
+					dstName = swiftRepresentation(for: identifier, firstLetter: .capitalize)
+				} else if let identifier = dstRestorationID {
+					let customClass = dstElement.attribute(by: "customClass")?.text ?? dstElement.name
+					dstName = swiftRepresentation(for: customClass, firstLetter: .capitalize) +
 						swiftRepresentation(for: identifier, firstLetter: .capitalize)
-				} else if let customClass = destinationElement.attribute(by: "customClass")?.text {
-					destinationName = swiftRepresentation(for: customClass, firstLetter: .capitalize)
+				} else if let customClass = dstElement.attribute(by: "customClass")?.text {
+					dstName = swiftRepresentation(for: customClass, firstLetter: .capitalize)
 				} else {
-					destinationName = swiftRepresentation(for: destinationElement.name, firstLetter: .capitalize) +
-						swiftRepresentation(for: destination, firstLetter: .capitalize)
+					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
+						// swiftRepresentation(for: dstID, firstLetter: .capitalize)
 				}
 
-				let swiftIdentifier = segue.kind + destinationName
+				let swiftIdentifier = "embed" + dstName
+				let functionName = "prepareToEmbed" + dstName
+				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
-				let pattern = "(nil, \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\")"
-				if let value = patterns[pattern], value > 1 {
-					continue
-				}
+				allCases += "\t\t\t" + swiftIdentifier + ","
 
 				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
-				let functionName = "prepareTo" + swiftRepresentation(for: segue.kind, firstLetter: .capitalize) + destinationName
-				let method = "func \(functionName)(_ destination: \(destinationClass)?, sender: Any?)"
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
 				enumCases += "\t\tcase \(swiftIdentifier)"
-				matchCases += "\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
-				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(destinationClass), sender: sender)"
-				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
-//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(destinationClass)>(\"\(segue.id)\", .\(segue.kind))"
+
+				matchCases += "\t\tcase \(casePattern):"
+				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(dstClass), sender: sender)"
+
+				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
+
+				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			} else if segue.kind == "relationship" {
 				let relationshipKind = segue.relationshipKind ?? ""
 
-//				let sourceName = swiftRepresentation(for: source, firstLetter: .capitalize)
-				var destinationName = swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + "To"
+				var dstName = swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + "To"
 
-				if let identifier = destinationElement.attribute(by: "storyboardIdentifier")?.text {
-					destinationName += swiftRepresentation(for: identifier, firstLetter: .capitalize)
-				} else if let identifier = destinationRestorationID {
-					let customClass = destinationElement.attribute(by: "customClass")?.text ?? destinationElement.name
-					destinationName += swiftRepresentation(for: customClass, firstLetter: .capitalize) +
+				if let identifier = dstElement.attribute(by: "storyboardIdentifier")?.text {
+					dstName += swiftRepresentation(for: identifier, firstLetter: .capitalize)
+				} else if let identifier = dstRestorationID {
+					let customClass = dstElement.attribute(by: "customClass")?.text ?? dstElement.name
+					dstName += swiftRepresentation(for: customClass, firstLetter: .capitalize) +
 						swiftRepresentation(for: identifier, firstLetter: .capitalize)
-				} else if let customClass = destinationElement.attribute(by: "customClass")?.text {
-					destinationName += swiftRepresentation(for: customClass, firstLetter: .capitalize)
+				} else if let customClass = dstElement.attribute(by: "customClass")?.text {
+					dstName += swiftRepresentation(for: customClass, firstLetter: .capitalize)
 				} else {
-					destinationName += swiftRepresentation(for: destinationElement.name, firstLetter: .capitalize) +
-						swiftRepresentation(for: destination, firstLetter: .capitalize)
+					dstName += swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
+						//swiftRepresentation(for: dstID, firstLetter: .capitalize)
 				}
 
-				let swiftIdentifier = swiftRepresentation(for: segue.kind, firstLetter: .lowercase) + destinationName
+				let swiftIdentifier = "relationship" + dstName
+				let functionName = "prepareRelationship" + dstName
+				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
-				let pattern = "(nil, \(sourceId), \"\(sourceClass)\", \(destinationId), \"\(destinationClass)\")"
-				if let value = patterns[pattern], value > 1 {
-					continue
-				}
+				allCases += "\t\t\t" + swiftIdentifier + ","
 
 				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
-				let functionName = "prepare" + swiftRepresentation(for: segue.kind, firstLetter: .capitalize) + destinationName
-				let method = "func \(functionName)(_ destination: \(destinationClass)?, sender: Any?)"
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
 				enumCases += "\t\tcase \(swiftIdentifier)"
-				matchCases += "\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"):"
-				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(destinationClass), sender: sender)"
-				initWithRawValue += "\t\t\tcase (_, \(sourceIdCase), \"\(sourceClass)\", \(destinationIdCase), \"\(destinationClass)\"): self = .\(swiftIdentifier)"
-//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(destinationClass)>(\"\(segue.id)\", .\(segue.kind))"
+
+				matchCases += "\t\tcase \(casePattern):"
+				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(dstClass), sender: sender)"
+
+				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
+
+				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			}
 		}
 
@@ -199,6 +198,11 @@ extension Storyboard {
 
 		matchPatterns += "\t\t\t}"
 		matchPatterns += "\t\t}"
+		matchPatterns += ""
+//		matchPatterns += "\t\ttypealias AllCases = [Segues]"
+		matchPatterns += "\t\tstatic var allCases = [" // : AllCases
+		matchPatterns += allCases
+		matchPatterns += "\t\t]"
 
 		matchPatternsHead += initWithRawValue
 		matchPatternsHead += matchPatterns
@@ -215,9 +219,7 @@ extension Storyboard {
 		prepareForSegue = matchCases
 		return enumCases
 	}
-}
 
-extension Storyboard {
 	func processViewControllers(storyboardCustomModules: Set<String>) -> [String] {
 		var output = [String]()
 		for scene in self.scenes {
@@ -244,7 +246,7 @@ extension Storyboard {
 
 				if !segues.isEmpty {
 					output += "extension \(customClass): \(customClass)SegueController {"
-					output += "\tenum Segues: RawRepresentable {"
+					output += "\tenum Segues: RawRepresentable, CaseIterable {"
 					output += segues
 					output += "\t}"
 					output += ""
@@ -286,5 +288,34 @@ extension Storyboard {
 			}
 		}
 		return output
+	}
+
+	struct Format {
+		static let pattern = "(\"%s\", %s, \"%s\", %s, \"%s\")"
+		static let matchPattern = "\t\t\tcase .%s: return %s"
+
+		static let functionName = "prepareForSegue%s"
+		static let method = "func %s(_ destination: %s?, sender: Any?)"
+
+		static let enumCase = "\t\tcase %s"
+		static let matchCase = "\t\tcase (\"%s\", %s, \"%s\", %s, \"%s\"): controller.%s?(segue.destinationController as? %s, sender: sender)"
+		static let initWithRawValue = "\t\t\tcase (%s, %s, \"%s\", %s, \"%s\"): self = .%s"
+		static let staticVarsValue = "\t\tstatic var %sSegue = Segue<%s>(\"%s\", .%s)"
+	}
+}
+
+extension Optional where Wrapped == String {
+	var unwrappedString: String {
+		switch self {
+		case .none: return "nil"
+		case .some(let value): return "\"\(value)\""
+		}
+	}
+
+	var unwrappedPattern: String {
+		switch self {
+		case .none: return "_"
+		case .some(let value): return "\"\(value)\""
+		}
 	}
 }
