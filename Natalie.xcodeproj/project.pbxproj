@@ -27,31 +27,8 @@
 		E106750F21B47EC900CDEF9B /* natalie in CopyFiles */ = {isa = PBXBuildFile; fileRef = 755B834F1D576CBF0020148B /* natalie */; };
 		E106751621B5AF7400CDEF9B /* Storyboard+ViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */; };
 		E106751821B5CD6300CDEF9B /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = E106751721B5CD6300CDEF9B /* Optional.swift */; };
+		E18F9C2421C653A600461ABD /* Base64.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18F9C2321C653A600461ABD /* Base64.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		E1352BCA21B421EE009DDABF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E1352BC421B421EE009DDABF /* Aspects.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 34B986671B1DE0CE00DE719D;
-			remoteInfo = "Aspects-iOS";
-		};
-		E1352BCC21B421EE009DDABF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E1352BC421B421EE009DDABF /* Aspects.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 34B9868C1B1E48CD00DE719D;
-			remoteInfo = "Aspects-Mac";
-		};
-		E1352BCE21B421EE009DDABF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E1352BC421B421EE009DDABF /* Aspects.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 7376F8C31B8EA670009CAB74;
-			remoteInfo = "Aspects-watchOS";
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		755B834D1D576CBF0020148B /* CopyFiles */ = {
@@ -88,10 +65,9 @@
 		75E28AAB1D577D0500A80623 /* SWXMLHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SWXMLHash.swift; sourceTree = "<group>"; };
 		75E28AB21D577EEA00A80623 /* XMLObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLObject.swift; sourceTree = "<group>"; };
 		C4F8BEDE1F9C79BD0031195F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
-		E106750E21B4700000CDEF9B /* Natalie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Natalie.swift; path = "../../No Panic!/FileBrowser/Natalie.swift"; sourceTree = "<group>"; };
 		E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Storyboard+ViewControllers.swift"; sourceTree = "<group>"; };
 		E106751721B5CD6300CDEF9B /* Optional.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
-		E1352BC421B421EE009DDABF /* Aspects.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Aspects.xcodeproj; path = ../Aspects/Aspects.xcodeproj; sourceTree = "<group>"; };
+		E18F9C2321C653A600461ABD /* Base64.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Base64.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,10 +100,8 @@
 		755B83461D576CBF0020148B = {
 			isa = PBXGroup;
 			children = (
-				E106750E21B4700000CDEF9B /* Natalie.swift */,
 				75E28AA21D577D0500A80623 /* Sources */,
 				750EA4C81D57C65E00782671 /* natalie-tests */,
-				E1352BC421B421EE009DDABF /* Aspects.xcodeproj */,
 				755B83501D576CBF0020148B /* Products */,
 				E1352BD021B421FB009DDABF /* Frameworks */,
 			);
@@ -153,6 +127,7 @@
 		75E28AA31D577D0500A80623 /* natalie */ = {
 			isa = PBXGroup;
 			children = (
+				E18F9C2321C653A600461ABD /* Base64.swift */,
 				75E28AA51D577D0500A80623 /* main.swift */,
 				48E3E55A1EE6D5DF000D4B3F /* StoryboardGenerator.swift */,
 				E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */,
@@ -190,16 +165,6 @@
 				C4F8BEDE1F9C79BD0031195F /* Color.swift */,
 			);
 			name = XMLObject;
-			sourceTree = "<group>";
-		};
-		E1352BC521B421EE009DDABF /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				E1352BCB21B421EE009DDABF /* Aspects.framework */,
-				E1352BCD21B421EE009DDABF /* Aspects.framework */,
-				E1352BCF21B421EE009DDABF /* Aspects.framework */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		E1352BD021B421FB009DDABF /* Frameworks */ = {
@@ -279,12 +244,6 @@
 			mainGroup = 755B83461D576CBF0020148B;
 			productRefGroup = 755B83501D576CBF0020148B /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = E1352BC521B421EE009DDABF /* Products */;
-					ProjectRef = E1352BC421B421EE009DDABF /* Aspects.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				755B834E1D576CBF0020148B /* natalie */,
@@ -292,30 +251,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		E1352BCB21B421EE009DDABF /* Aspects.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Aspects.framework;
-			remoteRef = E1352BCA21B421EE009DDABF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E1352BCD21B421EE009DDABF /* Aspects.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Aspects.framework;
-			remoteRef = E1352BCC21B421EE009DDABF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E1352BCF21B421EE009DDABF /* Aspects.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Aspects.framework;
-			remoteRef = E1352BCE21B421EE009DDABF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		750EA4C51D57C65E00782671 /* Resources */ = {
@@ -362,6 +297,7 @@
 				750149411D5782AC00B22C87 /* Storyboard.swift in Sources */,
 				48E3E55D1EE6D85E000D4B3F /* Storyboard+Natalie.swift in Sources */,
 				75E28AB11D577D0500A80623 /* SWXMLHash.swift in Sources */,
+				E18F9C2421C653A600461ABD /* Base64.swift in Sources */,
 				C4F8BEDF1F9C79BD0031195F /* Color.swift in Sources */,
 				75E28AAD1D577D0500A80623 /* main.swift in Sources */,
 				75E28AAC1D577D0500A80623 /* Helpers.swift in Sources */,
