@@ -11,7 +11,10 @@ disabled_rules:
     - type_name
     - identifier_name
     - large_tuple
-
+    - file_length
+    - trailing_whitespace
+    - comma
+    
 shorthand_operator: warning
 
 # some rules are only opt-in

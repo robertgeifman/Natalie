@@ -49,7 +49,7 @@ public protocol AnySegue {
 	var type: NSViewController.Type { get }
 }
 
-public struct Segue<Destination:NSViewController>: AnySegue {
+public struct Segue<Destination: NSViewController>: AnySegue {
 	public let identifier: NSStoryboardSegue.Identifier?
 	public let kind: SegueKind
 	public var type: NSViewController.Type {
@@ -117,6 +117,7 @@ extension NSWindowController {
 		}
 	}
 
+// swiftlint:disable force_try
 	internal func performSegue(withIdentifier identifier: String, sender: Any? = nil, prepare: @escaping (NSStoryboardSegue, Any?) -> Void) {
 		_ = try! aspect_hook(#selector(NSViewController.prepare(for:sender:)), options: .optionAutomaticRemoval) { info in
 			let arguments = info.arguments()!
@@ -125,6 +126,7 @@ extension NSWindowController {
 
 		performSegue(withIdentifier: identifier, sender: sender)
 	}
+// swiftlint:enable force_try
 }
 
 extension NSViewController {
@@ -168,6 +170,7 @@ extension NSViewController {
 		}
 	}
 
+// swiftlint:disable force_try
 	internal func performSegue(withIdentifier identifier: String, sender: Any? = nil, prepare: @escaping (NSStoryboardSegue, Any?) -> Void) {
 		_ = try! aspect_hook(#selector(NSViewController.prepare(for:sender:)), options: .optionAutomaticRemoval) { info in
 			let arguments = info.arguments()!
@@ -176,6 +179,7 @@ extension NSViewController {
 
 		performSegue(withIdentifier: identifier, sender: sender)
 	}
+// swiftlint:enable force_try
 }
 
 extension NSViewController {
@@ -249,6 +253,7 @@ extension UIViewController {
 		}
 	}
 
+// swiftlint:disable force_try
 	internal func performSegue(withIdentifier identifier: String, sender: Any? = nil, prepare: @escaping (UIStoryboardSegue, Any?) -> Void) {
 		_ = try! aspect_hook(#selector(UIViewController.prepare(for:sender:)), options: .optionAutomaticRemoval) { info in
 			let arguments = info.arguments()!
@@ -257,6 +262,7 @@ extension UIViewController {
 
 		performSegue(withIdentifier: identifier, sender: sender)
 	}
+// swiftlint:enable force_try
 }
 
 extension UIViewController {
@@ -508,7 +514,7 @@ extension NSTableRowView: ReusableViewProtocol {
 	public var storyboardIdentifier: NSUserInterfaceItemIdentifier? { return self.identifier }
 }
 #else
-protocol ReusableViewProtocol : IdentifiableProtocol {
+protocol ReusableViewProtocol: IdentifiableProtocol {
 	var viewType: UIView.Type? { get }
 }
 

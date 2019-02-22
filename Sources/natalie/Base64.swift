@@ -66,7 +66,7 @@ public enum Base64Coding {
     */
     func stringContainsIllegalCharacters(_ string: String, ignorePadding: Bool = false) -> Bool {
         if let regEx = self.validityRegEx {
-            var range = NSMakeRange(0, string.count)
+            var range = NSRange(location: 0, length: string.count)
             if ignorePadding {
                 if string.hasSuffix("==") {
                     range.length = string.count - 2
@@ -104,7 +104,7 @@ private extension Base64Coding {
 }
 
 public extension Base64Coding {
-    subscript (position: Int) -> UInt8  {
+    subscript (position: Int) -> UInt8 {
         precondition(position >= 0 && position < alphabet.count, "out-of-range access on a alphabet")
         return alphabet[position]
     }
@@ -201,7 +201,7 @@ public struct Base64 {
             decodedBytes.append((value2 << 6) | value3)
         }
         
-        return decodedBytes.count != 0 ? Data(bytes: UnsafePointer<UInt8>(decodedBytes), count: decodedBytes.count) : nil
+        return decodedBytes.isEmpty ? nil : Data(bytes: UnsafePointer<UInt8>(decodedBytes), count: decodedBytes.count)
     }
     
     /** Encode some data of type `Data`.
@@ -212,7 +212,7 @@ public struct Base64 {
     - returns: A base64 encoded string. In case of failure nil.
     */
     public static func encode(_ data: Data, coding: Base64Coding = .standard, padding: Base64Padding = .on) -> String? {
-        if data.count == 0 { return nil }
+        if data.isEmpty { return nil }
         
         let inputArray = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
         var bytes = [UInt8]()
@@ -270,6 +270,6 @@ public struct Base64 {
                 bytes.append("=".utf8.first!)
             }
         }
-        return bytes.count == 0 ? nil : String(bytes: bytes, encoding: .utf8)
+        return bytes.isEmpty ? nil : String(bytes: bytes, encoding: .utf8)
     }
 }
