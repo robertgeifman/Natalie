@@ -51,7 +51,7 @@ public enum Base64Coding {
     */
     func decodedValue(forIndex idx: Int, inString string: String) -> UInt8? {
         let index = string.utf8.index(string.utf8.startIndex, offsetBy: idx)
-        if let idxPoint = alphabet.index(of: string.utf8[index]) {
+        if let idxPoint = alphabet.firstIndex(of: string.utf8[index]) {
             return UInt8(idxPoint) & UInt8.max
         }
         return nil

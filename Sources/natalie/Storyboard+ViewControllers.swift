@@ -229,7 +229,6 @@ extension Storyboard {
 				let customClass = viewController.customClass
 			else { continue }
 
-			output += "////////////////////////////////////////////////////////////"
 			output += "// MARK: - \(customClass)"
 
 			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)

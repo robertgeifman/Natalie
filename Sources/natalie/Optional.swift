@@ -12,11 +12,11 @@ public enum OptionalError: Error {
 }
 
 public extension Optional {
-    public var canUnwrap: Bool {
+    var canUnwrap: Bool {
         return self != nil
 	}
 
-    public func unwrap() throws->Wrapped {
+    func unwrap() throws->Wrapped {
         guard let value = self else { throw OptionalError.unexpectedNil }
         return value
     }

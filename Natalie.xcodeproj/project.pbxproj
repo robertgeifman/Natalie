@@ -30,6 +30,30 @@
 		E18F9C2421C653A600461ABD /* Base64.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18F9C2321C653A600461ABD /* Base64.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E15AECEF23A6267400E12A90 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15AECE523A6267400E12A90 /* Aspects.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 34B986671B1DE0CE00DE719D;
+			remoteInfo = "Aspects-iOS";
+		};
+		E15AECF123A6267400E12A90 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15AECE523A6267400E12A90 /* Aspects.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 34B9868C1B1E48CD00DE719D;
+			remoteInfo = "Aspects-Mac";
+		};
+		E15AECF323A6267400E12A90 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15AECE523A6267400E12A90 /* Aspects.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 7376F8C31B8EA670009CAB74;
+			remoteInfo = "Aspects-watchOS";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		755B834D1D576CBF0020148B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -67,6 +91,23 @@
 		C4F8BEDE1F9C79BD0031195F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Storyboard+ViewControllers.swift"; sourceTree = "<group>"; };
 		E106751721B5CD6300CDEF9B /* Optional.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
+		E15AECDA23A6267400E12A90 /* Aspects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Aspects.swift; sourceTree = "<group>"; };
+		E15AECDB23A6267400E12A90 /* Require.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Require.swift; sourceTree = "<group>"; };
+		E15AECDC23A6267400E12A90 /* Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localized.swift; sourceTree = "<group>"; };
+		E15AECDD23A6267400E12A90 /* Compatibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Compatibility.swift; sourceTree = "<group>"; };
+		E15AECDE23A6267400E12A90 /* Interoperability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interoperability.swift; sourceTree = "<group>"; };
+		E15AECDF23A6267400E12A90 /* RuntimeErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeErrors.swift; sourceTree = "<group>"; };
+		E15AECE023A6267400E12A90 /* Bindable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bindable.swift; sourceTree = "<group>"; };
+		E15AECE223A6267400E12A90 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		E15AECE323A6267400E12A90 /* Info-watch.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-watch.plist"; sourceTree = "<group>"; };
+		E15AECE423A6267400E12A90 /* Aspects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Aspects.h; sourceTree = "<group>"; };
+		E15AECE523A6267400E12A90 /* Aspects.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Aspects.xcodeproj; sourceTree = "<group>"; };
+		E15AECE823A6267400E12A90 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		E15AECE923A6267400E12A90 /* stacktrace@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stacktrace@2x.png"; sourceTree = "<group>"; };
+		E15AECEA23A6267400E12A90 /* Aspects.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Aspects.m; sourceTree = "<group>"; };
+		E15AECEB23A6267400E12A90 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E15AECF523A626B900E12A90 /* Natalie-Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Natalie-Common.swift"; sourceTree = "<group>"; };
+		E15AECFE23A6278400E12A90 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		E18F9C2321C653A600461ABD /* Base64.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Base64.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -100,6 +141,7 @@
 		755B83461D576CBF0020148B = {
 			isa = PBXGroup;
 			children = (
+				E15AECFE23A6278400E12A90 /* .swiftlint.yml */,
 				75E28AA21D577D0500A80623 /* Sources */,
 				750EA4C81D57C65E00782671 /* natalie-tests */,
 				755B83501D576CBF0020148B /* Products */,
@@ -120,6 +162,7 @@
 			isa = PBXGroup;
 			children = (
 				75E28AA31D577D0500A80623 /* natalie */,
+				E15AECD923A6267400E12A90 /* Support */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -127,19 +170,19 @@
 		75E28AA31D577D0500A80623 /* natalie */ = {
 			isa = PBXGroup;
 			children = (
-				E18F9C2321C653A600461ABD /* Base64.swift */,
-				75E28AA51D577D0500A80623 /* main.swift */,
 				48E3E55A1EE6D5DF000D4B3F /* StoryboardGenerator.swift */,
 				E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */,
 				48E3E55C1EE6D85E000D4B3F /* Storyboard+Natalie.swift */,
+				E18F9C2321C653A600461ABD /* Base64.swift */,
+				75E28AA51D577D0500A80623 /* main.swift */,
 				750149441D5782F100B22C87 /* OS.swift */,
 				750149461D57830A00B22C87 /* StoryboardFile.swift */,
 				75E28AB21D577EEA00A80623 /* XMLObject.swift */,
-				C428BDFE1ECD79D800F037BA /* XMLObject */,
-				75E28AA81D577D0500A80623 /* SWXMLHash */,
 				75E28AA41D577D0500A80623 /* Helpers.swift */,
 				E106751721B5CD6300CDEF9B /* Optional.swift */,
 				75E28AA71D577D0500A80623 /* String+Extension.swift */,
+				C428BDFE1ECD79D800F037BA /* XMLObject */,
+				75E28AA81D577D0500A80623 /* SWXMLHash */,
 			);
 			path = natalie;
 			sourceTree = "<group>";
@@ -174,6 +217,47 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		E15AECD923A6267400E12A90 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				E15AECDA23A6267400E12A90 /* Aspects.swift */,
+				E15AECE023A6267400E12A90 /* Bindable.swift */,
+				E15AECDD23A6267400E12A90 /* Compatibility.swift */,
+				E15AECDE23A6267400E12A90 /* Interoperability.swift */,
+				E15AECDC23A6267400E12A90 /* Localized.swift */,
+				E15AECF523A626B900E12A90 /* Natalie-Common.swift */,
+				E15AECDB23A6267400E12A90 /* Require.swift */,
+				E15AECDF23A6267400E12A90 /* RuntimeErrors.swift */,
+				E15AECE123A6267400E12A90 /* Aspects */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		E15AECE123A6267400E12A90 /* Aspects */ = {
+			isa = PBXGroup;
+			children = (
+				E15AECE223A6267400E12A90 /* LICENSE */,
+				E15AECE323A6267400E12A90 /* Info-watch.plist */,
+				E15AECE423A6267400E12A90 /* Aspects.h */,
+				E15AECE523A6267400E12A90 /* Aspects.xcodeproj */,
+				E15AECE823A6267400E12A90 /* README.md */,
+				E15AECE923A6267400E12A90 /* stacktrace@2x.png */,
+				E15AECEA23A6267400E12A90 /* Aspects.m */,
+				E15AECEB23A6267400E12A90 /* Info.plist */,
+			);
+			path = Aspects;
+			sourceTree = "<group>";
+		};
+		E15AECE623A6267400E12A90 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E15AECF023A6267400E12A90 /* Aspects.framework */,
+				E15AECF223A6267400E12A90 /* Aspects.framework */,
+				E15AECF423A6267400E12A90 /* Aspects.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -198,10 +282,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 755B83561D576CBF0020148B /* Build configuration list for PBXNativeTarget "natalie" */;
 			buildPhases = (
+				48E3E5571EE6CCD7000D4B3F /* swiftlint */,
 				755B834B1D576CBF0020148B /* Sources */,
 				755B834C1D576CBF0020148B /* Frameworks */,
 				755B834D1D576CBF0020148B /* CopyFiles */,
-				48E3E5571EE6CCD7000D4B3F /* swiftlint */,
 			);
 			buildRules = (
 			);
@@ -219,7 +303,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0800;
-				LastUpgradeCheck = 0940;
+				LastUpgradeCheck = 1120;
 				ORGANIZATIONNAME = "Marcin Krzyzanowski";
 				TargetAttributes = {
 					750EA4C61D57C65E00782671 = {
@@ -230,20 +314,28 @@
 					755B834E1D576CBF0020148B = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = HPSN4NS7JC;
+						LastSwiftMigration = 1120;
 						ProvisioningStyle = Automatic;
 					};
 				};
 			};
 			buildConfigurationList = 755B834A1D576CBF0020148B /* Build configuration list for PBXProject "Natalie" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 755B83461D576CBF0020148B;
 			productRefGroup = 755B83501D576CBF0020148B /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E15AECE623A6267400E12A90 /* Products */;
+					ProjectRef = E15AECE523A6267400E12A90 /* Aspects.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				755B834E1D576CBF0020148B /* natalie */,
@@ -251,6 +343,30 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		E15AECF023A6267400E12A90 /* Aspects.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Aspects.framework;
+			remoteRef = E15AECEF23A6267400E12A90 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E15AECF223A6267400E12A90 /* Aspects.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Aspects.framework;
+			remoteRef = E15AECF123A6267400E12A90 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E15AECF423A6267400E12A90 /* Aspects.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Aspects.framework;
+			remoteRef = E15AECF323A6267400E12A90 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		750EA4C51D57C65E00782671 /* Resources */ = {
@@ -457,18 +573,28 @@
 		755B83571D576CBF0020148B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = HPSN4NS7JC;
+				DSTROOT = "$(HOME)";
+				INSTALL_PATH = /bin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		755B83581D576CBF0020148B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEPLOYMENT_LOCATION = NO;
 				DEVELOPMENT_TEAM = HPSN4NS7JC;
+				DSTROOT = "$(HOME)";
+				INSTALL_PATH = /bin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

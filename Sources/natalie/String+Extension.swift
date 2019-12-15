@@ -9,10 +9,13 @@
 import Foundation
 
 extension String {
+    fileprivate static var invalidCharacters: CharacterSet = {
+			var charset = CharacterSet.alphanumerics.inverted
+			charset.remove(charactersIn: "_")
+			return charset
+		}()
     func trimAllWhitespacesAndSpecialCharacters() -> String {
-        var invalidCharacters = NSMutableCharacterSet.alphanumerics.inverted
-        invalidCharacters.remove(charactersIn: "_")
-        let x = self.components(separatedBy: invalidCharacters)
+        let x = self.components(separatedBy: String.invalidCharacters)
         return x.joined(separator: "")
     }
 }

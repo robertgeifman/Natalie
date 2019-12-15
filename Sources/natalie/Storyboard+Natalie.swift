@@ -12,19 +12,23 @@ extension Storyboard {
 	func processStoryboard(storyboardName: String, os: OS) -> [String] {
 		var output = [String]()
 
-		output += "\tstruct \(storyboardName): Storyboard {"
+		let name = swiftRepresentation(for: storyboardName, firstLetter: .capitalize)
+		output += "\tstruct \(name): Storyboard {"
 		output += "\t\tstatic let identifier = \(initIdentifier(for: os.storyboardIdentifierType, value: storyboardName))"
-		output += ""
 
 		if let initialViewControllerClass = self.initialViewControllerClass {
+			output += ""
 			let cast = (initialViewControllerClass == os.storyboardControllerReturnType ? (os == OS.iOS ? "!" : "") : " as! \(initialViewControllerClass)")
 			output += "\t\tstatic func instantiateInitial\(os.storyboardControllerSignatureType)() -> \(initialViewControllerClass) {"
 			output += "\t\t\treturn self.storyboard.instantiateInitial\(os.storyboardControllerSignatureType)()\(cast)"
 			output += "\t\t}"
-			output += ""
 		}
 
-		output += processScenes()
+		let scenes = processScenes()
+		if !scenes.isEmpty {
+			output += ""
+			output += scenes
+		}
 		output += "\t}"
 		output += ""
 
@@ -35,8 +39,7 @@ extension Storyboard {
 		var output = [String]()
 		for scene in self.scenes {
 			if let viewController = scene.viewController, let storyboardIdentifier = viewController.storyboardIdentifier {
-				// The returned class could have the same name as the enclosing Storyboard struct,
-				// so we must qualify controllerClass with the module name.
+				// The returned class could have the same name as the enclosing Storyboard struct, so we must qualify controllerClass with the module name.
 				guard let controllerClass = viewController.customClassWithModule ?? os.controllerType(for: viewController.name) else {
 					continue
 				}
@@ -45,7 +48,6 @@ extension Storyboard {
 				output += "\t\tstatic func instantiate\(swiftRepresentation(for: storyboardIdentifier, firstLetter: .capitalize))() -> \(controllerClass) {"
 				output += "\t\t\treturn self.storyboard.instantiate\(os.storyboardControllerSignatureType)(withIdentifier: \(initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)))\(cast)"
 				output += "\t\t}"
-				output += ""
 			}
 		}
 		return output

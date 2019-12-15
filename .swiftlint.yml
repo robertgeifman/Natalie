@@ -2,6 +2,7 @@ included:
     - Sources
 excluded:
     - Sources/natalie/SWXMLHash
+    - Sources/Support
 
 # rule identifiers to exclude from running
 disabled_rules:
