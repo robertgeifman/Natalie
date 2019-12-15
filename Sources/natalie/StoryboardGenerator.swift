@@ -39,7 +39,7 @@ struct Natalie {
 	let header = Header()
 
 	var storyboardCustomModules: Set<String> {
-		return Set(storyboards.lazy.flatMap { $0.storyboard.customModules })
+		Set(storyboards.lazy.flatMap { $0.storyboard.customModules })
 	}
 
 	init(storyboards: [StoryboardFile]) {

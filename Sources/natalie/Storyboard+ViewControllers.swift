@@ -280,10 +280,10 @@ extension Storyboard {
 			for reusable in reusables {
 				if let identifier = reusable.reuseIdentifier {
 					if let customClass = reusable.customClass {
-						output += "\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass).self) }"
+						output += "\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable { .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass).self) }"
 					} else {
 						let customClass = os.reusableItemsMap[reusable.kind]
-						output += "\t\tstatic var \(swiftRepresentation(for: identifier)): Reusable { return .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass!).self) }"
+						output += "\t\tstatic var \(swiftRepresentation(for: identifier)): Reusable { .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass!).self) }"
 					}
 				}
 			}

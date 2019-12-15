@@ -20,7 +20,7 @@ extension Storyboard {
 			output += ""
 			let cast = (initialViewControllerClass == os.storyboardControllerReturnType ? (os == OS.iOS ? "!" : "") : " as! \(initialViewControllerClass)")
 			output += "\t\tstatic func instantiateInitial\(os.storyboardControllerSignatureType)() -> \(initialViewControllerClass) {"
-			output += "\t\t\treturn self.storyboard.instantiateInitial\(os.storyboardControllerSignatureType)()\(cast)"
+			output += "\t\t\tstoryboard.instantiateInitial\(os.storyboardControllerSignatureType)()\(cast)"
 			output += "\t\t}"
 		}
 
@@ -46,7 +46,7 @@ extension Storyboard {
 
 				let cast = (controllerClass == os.storyboardControllerReturnType ? "" : " as! \(controllerClass)")
 				output += "\t\tstatic func instantiate\(swiftRepresentation(for: storyboardIdentifier, firstLetter: .capitalize))() -> \(controllerClass) {"
-				output += "\t\t\treturn self.storyboard.instantiate\(os.storyboardControllerSignatureType)(withIdentifier: \(initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)))\(cast)"
+				output += "\t\t\tstoryboard.instantiate\(os.storyboardControllerSignatureType)(withIdentifier: \(initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)))\(cast)"
 				output += "\t\t}"
 			}
 		}
@@ -73,15 +73,15 @@ extension Storyboard {
 
 			if isCurrentModule {
 				// Accessors for view controllers defined in the current module should be "internal".
-				output += "\tvar storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { return \(initIdentifierString) }"
+				output += "\tvar storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			} else {
 				// Accessors for view controllers in external modules (whether system or custom frameworks), should be marked public.
-				output += "\tpublic var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { return \(initIdentifierString) }"
+				output += "\tpublic var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			}
-			output += "\tstatic var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { return \(initIdentifierString) }"
+			output += "\tpublic static var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			output += "}"
 			output += ""
-#if false
+#if true // false
 			output += "extension \(os.storyboardSegueType) {"
 			output += "\tfunc selection() -> \(customClass).Segue? {"
 			output += "\t\tif let identifier = self.identifier {"

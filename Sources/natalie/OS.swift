@@ -184,7 +184,7 @@ enum OS: String, CustomStringConvertible {
     var reusableItemsMap: [String: String] {
         switch self {
         case .iOS, .tvOS:
-            return ["collectionReusableView": "UICollectionReusableView", "tableViewCell": "UITableViewCell"]
+            return ["collectionReusableView": "UICollectionReusableView", "collectionViewCell": "UICollectionViewCell", "tableViewCell": "UITableViewCell"]
         case .OSX:
             return ["tableCellView": "NSTableCellView", "tableHeaderView": "NSTableHeaderView", "tableRowView": "NSTableRowView", "collectionViewItem": "NSCollectionViewItem", "collectionViewSectionHeaderView": "NSCollectionViewSectionHeaderView"]
 		}
