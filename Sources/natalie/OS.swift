@@ -92,6 +92,13 @@ enum OS: String, CustomStringConvertible {
         }
     }
 
+    var segueDestinationController: String {
+        switch self {
+        case .iOS, .tvOS: return "destination"
+        case .OSX: return "destinationContoller"
+        }
+    }
+
     var storyboardSegueIdentifierType: String {
         switch self {
         case .iOS, .tvOS: return "String"
@@ -117,6 +124,13 @@ enum OS: String, CustomStringConvertible {
         switch self {
         case .iOS, .tvOS: return "UIViewController"
         case .OSX: return "Any" // NSViewController or NSWindowController
+        }
+    }
+
+    var viewControllerType: String {
+        switch self {
+        case .iOS, .tvOS: return "UIViewController"
+        case .OSX: return "NSViewController"
         }
     }
 

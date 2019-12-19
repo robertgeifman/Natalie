@@ -13,7 +13,7 @@ extension Storyboard {
 		var output = [String]()
 
 		let name = swiftRepresentation(for: storyboardName, firstLetter: .capitalize)
-		output += "\tstruct \(name): Storyboard {"
+		output += "\tstruct \(name): AnyStoryboard {"
 		output += "\t\tstatic let identifier = \(initIdentifier(for: os.storyboardIdentifierType, value: storyboardName))"
 
 		if let initialViewControllerClass = self.initialViewControllerClass {
@@ -78,10 +78,10 @@ extension Storyboard {
 				// Accessors for view controllers in external modules (whether system or custom frameworks), should be marked public.
 				output += "\tpublic var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			}
-			output += "\tpublic static var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+			output += "\tstatic var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			output += "}"
 			output += ""
-#if true // false
+#if false
 			output += "extension \(os.storyboardSegueType) {"
 			output += "\tfunc selection() -> \(customClass).Segue? {"
 			output += "\t\tif let identifier = self.identifier {"

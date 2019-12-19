@@ -39,7 +39,9 @@ enum FirstLetterFormat {
 }
 
 func swiftRepresentation(for string: String, firstLetter: FirstLetterFormat = .none, doNotShadow: String? = nil, prefix: String? = nil) -> String {
-    var str = string.trimAllWhitespacesAndSpecialCharacters()
+    var str = firstLetter == .capitalize ?
+		string.trimCapitalizingAllWhitespacesAndSpecialCharacters() :
+		string.trimAllWhitespacesAndSpecialCharacters()
     str = firstLetter.format(str)
     if str == doNotShadow {
         str += "_"

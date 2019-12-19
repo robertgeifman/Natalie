@@ -50,13 +50,19 @@ extension Storyboard {
 
 		delegateMethods += "@objc protocol \(customClass)SegueController: NSObjectProtocol {"
 
-		matchPatterns += "\t\tvar matchPattern: (String?, String?, String?, Any.Type, String?, String?, NSViewController.Type) {"
+		matchPatterns += "\t\tvar matchPattern: (String?, String?, String?, \(os.viewControllerType).Type, String?, String?, \(os.viewControllerType).Type) {"
 		matchPatterns += "\t\t\tswitch self {"
 
 		seguePatterns += "\t\tvar segue: AnySegue {"
 		seguePatterns += "\t\t\tswitch self {"
-		matchCases += "\toverride func prepare(for segue: NSStoryboardSegue, sender: Any?) {"
-		matchCases += "\t\tguard let controller = segueController as? \(customClass)SegueController else { super.prepare(for: segue, sender: sender); return }"
+
+		matchCases += "\toverride func prepare(for segue: \(os.storyboardSegueType), sender: Any?) {"
+		matchCases += "\t\tguard let controller = segueController as? \(customClass)SegueController else {"
+		// matchCases += "\t\t\tlet segueIdentifier = segue.identifier,"
+		// matchCases += "\t\t\tlet matchingSegue = Segues(rawValue: segueIdentifier)"
+		// matchCases += "\t\telse {"
+		matchCases += "\t\t\treturn super.prepare(for: segue, sender: sender)"
+		matchCases += "\t\t}"
 		matchCases += "\t\tswitch segue.matchPattern {"
 
 		for segue in segues {
@@ -75,14 +81,17 @@ extension Storyboard {
 			let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
 			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
 
-			let pattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedString), \(srcStoryboardID.unwrappedString), \(srcClass).self, \(dstRestorationID.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
-			let casePattern = "(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedPattern), \(srcStoryboardID.unwrappedPattern), is \(srcClass), \(dstRestorationID.unwrappedPattern), \(dstStoryboardID.unwrappedPattern), is \(dstClass))"
+			let pattern =
+				"(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedString), \(srcStoryboardID.unwrappedString), \(srcClass).self, \(dstRestorationID.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
+			
+			let casePattern =
+				"(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedPattern), \(srcStoryboardID.unwrappedPattern), is \(srcClass).Type, \(dstRestorationID.unwrappedPattern), \(dstStoryboardID.unwrappedPattern), is \(dstClass).Type)"
 
 			if let value = patterns[pattern], value > 1 {
 				continue
 			}
 
-			if let segueID = segue.identifier {
+			if let segueID = segue.identifier, !segueID.isEmpty {
 				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
 				let functionName = "prepareForSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
 				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
@@ -103,7 +112,7 @@ extension Storyboard {
 
 //				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
-//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
+//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segu∑e.kind))"
 			} else if segue.kind == "embed" {
 				var dstName: String
 
@@ -309,14 +318,14 @@ extension Optional where Wrapped == String {
 	var unwrappedString: String {
 		switch self {
 		case .none: return "nil"
-		case .some(let value): return "\"\(value)\""
+		case .some(let value): return value.isEmpty ? "nil" : "\"\(value)\""
 		}
 	}
 
 	var unwrappedPattern: String {
 		switch self {
 		case .none: return "_"
-		case .some(let value): return "\"\(value)\""
+		case .some(let value): return value.isEmpty ? "nil" : "\"\(value)\""
 		}
 	}
 }
