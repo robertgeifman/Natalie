@@ -58,11 +58,11 @@ extension Storyboard {
 		if let viewController = scene.viewController,
 			let customClass = viewController.customClass,
 			let storyboardIdentifier = viewController.storyboardIdentifier {
-			output += "protocol \(customClass)IdentifiableProtocol: IdentifiableProtocol { }"
+			output += "protocol \(customClass)Scene: AnyScene { }"
 			output += ""
-			output += "extension \(customClass): \(customClass)IdentifiableProtocol { }"
+			output += "extension \(customClass): \(customClass)Scene { }"
 			output += ""
-			output += "extension IdentifiableProtocol where Self: \(customClass) {"
+			output += "extension AnyScene where Self: \(customClass) {"
 
 			let initIdentifierString = initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)
 

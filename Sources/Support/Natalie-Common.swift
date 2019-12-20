@@ -43,8 +43,8 @@ public protocol IdentifiableProtocol: Equatable {
 	var storyboardIdentifier: NSStoryboard.SceneIdentifier? { get }
 }
 #else
-public protocol IdentifiableProtocol: Equatable {
-	var storyboardIdentifier: UIStoryboard.SceneIdentifier? { get }
+public protocol AnyScene: Equatable {
+	var identifier: UIStoryboard.SceneIdentifier? { get }
 }
 #endif
 
@@ -207,13 +207,13 @@ extension NSSplitViewController {
 	}
 }
 #elseif os(iOS)
-public protocol AnySegue {
+public protocol TypedSegue {
 	var identifier: UIStoryboardSegue.Identifier? { get }
 	var kind: SegueKind { get }
 	var type: UIViewController.Type { get }
 }
 
-public struct Segue<Destination: UIViewController>: AnySegue {
+public struct Segue<Destination: UIViewController>: TypedSegue {
 	public let identifier: UIStoryboardSegue.Identifier?
 	public let kind: SegueKind
 	public var type: UIViewController.Type { Destination.self }
@@ -319,7 +319,7 @@ public extension NSStoryboard {
 	func instantiateViewController<T: NSViewController>(ofType type: T.Type) -> T? where T: IdentifiableProtocol {
 		let instance = type.init()
 		if let identifier = instance.storyboardIdentifier {
-			return instantiateController(withIdentifier: identifier) as? T
+			return instantiateController(identifier) as? T
 		}
 		return nil
 	}
@@ -332,9 +332,9 @@ public extension UIStoryboardSegue {
 public extension UIStoryboard {
 	typealias Name = String
 	typealias SceneIdentifier = String
-	func instantiateViewController<T: UIViewController>(ofType type: T.Type) -> T? where T: IdentifiableProtocol {
+	func instantiateViewController<T: UIViewController>(ofType type: T.Type) -> T? where T: AnyScene {
 		let instance = type.init()
-		if let identifier = instance.storyboardIdentifier {
+		if let identifier = instance.identifier {
 			return instantiateViewController(identifier: identifier) as? T
 		}
 		return nil
@@ -460,49 +460,49 @@ extension Storyboard {
 		UIStoryboard(name: self.identifier, bundle: nil)
 	}
 
-	static func instantiateController(withIdentifier identifier: UIStoryboard.SceneIdentifier) -> UIViewController {
+	static func instantiateController(_ identifier: UIStoryboard.SceneIdentifier) -> UIViewController {
 		storyboard.instantiateViewController(identifier: identifier)
 	}
 
-	static func instantiateViewController<T: UIViewController>(ofType type: T.Type) -> T? where T: IdentifiableProtocol {
+	static func instantiateViewController<T: UIViewController>(ofType type: T.Type) -> T? where T: AnyScene {
 		storyboard.instantiateViewController(ofType: type)
 	}
 }
 
 // MARK: - SegueProtocol
-protocol SegueProtocol {
+protocol AnySegue {
 	var identifier: UIStoryboardSegue.Identifier? { get }
 }
 
-func ==<T: SegueProtocol>(lhs: T, rhs: UIStoryboardSegue.Identifier) -> Bool {
+func ==<T: AnySegue>(lhs: T, rhs: UIStoryboardSegue.Identifier) -> Bool {
 	lhs.identifier == rhs
 }
 
-func ~=<T: SegueProtocol>(lhs: T, rhs: UIStoryboardSegue.Identifier) -> Bool {
+func ~=<T: AnySegue>(lhs: T, rhs: UIStoryboardSegue.Identifier) -> Bool {
 	lhs.identifier == rhs
 }
 
-func ==<T: SegueProtocol>(lhs: UIStoryboardSegue.Identifier, rhs: T) -> Bool {
+func ==<T: AnySegue>(lhs: UIStoryboardSegue.Identifier, rhs: T) -> Bool {
 	lhs == rhs.identifier
 }
 
-func ~=<T: SegueProtocol>(lhs: UIStoryboardSegue.Identifier, rhs: T) -> Bool {
+func ~=<T: AnySegue>(lhs: UIStoryboardSegue.Identifier, rhs: T) -> Bool {
 	lhs == rhs.identifier
 }
 
 // MARK: - Protocol Implementation
-extension UIStoryboardSegue: SegueProtocol {
+extension UIStoryboardSegue: AnySegue {
 }
 
 // MARK: - UIViewController extension
 extension UIViewController {
-	func perform<T: SegueProtocol>(segue: T, sender: Any?) {
+	func perform<T: AnySegue>(segue: T, sender: Any?) {
 		if let identifier = segue.identifier {
 			performSegue(withIdentifier: identifier, sender: sender)
 		}
 	}
 
-	func perform<T: SegueProtocol>(segue: T) {
+	func perform<T: AnySegue>(segue: T) {
 		perform(segue: segue, sender: nil)
 	}
 }
@@ -590,34 +590,34 @@ extension NSTableRowView: ReusableViewProtocol {
 	public var storyboardIdentifier: NSUserInterfaceItemIdentifier? { identifier }
 }
 #else
-protocol ReusableViewProtocol: IdentifiableProtocol {
+protocol ReusableViewProtocol: AnyScene {
 	var viewType: UIView.Type? { get }
 }
 
 // MARK: - UICollectionView
 extension UICollectionView {
 	func dequeue<T: ReusableViewProtocol>(reusable: T, for: IndexPath) -> UICollectionViewCell? {
-		if let identifier = reusable.storyboardIdentifier {
+		if let identifier = reusable.identifier {
 			return dequeueReusableCell(withReuseIdentifier: identifier, for: `for`)
 		}
 		return nil
 	}
 
 	func register<T: ReusableViewProtocol>(reusable: T) {
-		if let type = reusable.viewType, let identifier = reusable.storyboardIdentifier {
+		if let type = reusable.viewType, let identifier = reusable.identifier {
 			register(type, forCellWithReuseIdentifier: identifier)
 		}
 	}
 
 	func dequeueReusableSupplementaryViewOfKind<T: ReusableViewProtocol>(elementKind: String, withReusable reusable: T, for: IndexPath) -> UICollectionReusableView? {
-		if let identifier = reusable.storyboardIdentifier {
+		if let identifier = reusable.identifier {
 			return dequeueReusableSupplementaryView(ofKind: elementKind, withReuseIdentifier: identifier, for: `for`)
 		}
 		return nil
 	}
 
 	func register<T: ReusableViewProtocol>(reusable: T, forSupplementaryViewOfKind elementKind: String) {
-		if let type = reusable.viewType, let identifier = reusable.storyboardIdentifier {
+		if let type = reusable.viewType, let identifier = reusable.identifier {
 			register(type, forSupplementaryViewOfKind: elementKind, withReuseIdentifier: identifier)
 		}
 	}
@@ -625,27 +625,27 @@ extension UICollectionView {
 // MARK: - UITableView
 extension UITableView {
 	func dequeue<T: ReusableViewProtocol>(reusable: T, for: IndexPath) -> UITableViewCell? {
-		if let identifier = reusable.storyboardIdentifier {
+		if let identifier = reusable.identifier {
 			return dequeueReusableCell(withIdentifier: identifier, for: `for`)
 		}
 		return nil
 	}
 
 	func register<T: ReusableViewProtocol>(reusable: T) {
-		if let type = reusable.viewType, let identifier = reusable.storyboardIdentifier {
+		if let type = reusable.viewType, let identifier = reusable.identifier {
 			register(type, forCellReuseIdentifier: identifier)
 		}
 	}
 
 	func dequeueReusableHeaderFooter<T: ReusableViewProtocol>(_ reusable: T) -> UITableViewHeaderFooterView? {
-		if let identifier = reusable.storyboardIdentifier {
+		if let identifier = reusable.identifier {
 			return dequeueReusableHeaderFooterView(withIdentifier: identifier)
 		}
 		return nil
 	}
 
 	func registerReusableHeaderFooter<T: ReusableViewProtocol>(_ reusable: T) {
-		if let type = reusable.viewType, let identifier = reusable.storyboardIdentifier {
+		if let type = reusable.viewType, let identifier = reusable.identifier {
 			 register(type, forHeaderFooterViewReuseIdentifier: identifier)
 		}
 	}
@@ -653,12 +653,12 @@ extension UITableView {
 
 extension UITableViewCell: ReusableViewProtocol {
 	public var viewType: UIView.Type? { type(of: self) }
-	public var storyboardIdentifier: String? { reuseIdentifier }
+	public var identifier: String? { reuseIdentifier }
 }
 
 extension UICollectionReusableView: ReusableViewProtocol {
 	public var viewType: UIView.Type? { type(of: self) }
-	public var storyboardIdentifier: String? { reuseIdentifier }
+	public var identifier: String? { reuseIdentifier }
 }
 #endif // os(iOS)
 

@@ -34,18 +34,27 @@ public extension CGColorSpaceModel {
 }
 
 #if os(macOS)
+/*
 public typealias ViewController = NSViewController
 public typealias View = NSView
 public typealias StackView = NSStackView
 public typealias CollectionView = NSCollectionView
 public typealias CollectionViewDataSource = NSCollectionViewDataSource
 public typealias CollectionViewDelegate = NSCollectionViewDelegate
+*/
 /*
 public typealias CollectionViewLayout = NSCollectionViewLayout
 public typealias CollectionViewTransitionLayout = NSCollectionViewTransitionLayout
 public typealias CollectionViewFlowLayout = NSCollectionViewFlowLayout
 public typealias CollectionViewGridLayout = NSCollectionViewGridLayout
 */
+public typealias LayoutOrientation = NSLayoutConstraint.Orientation
+public typealias Responder = NSResponder
+// public typealias Window = NSWindow
+public typealias Application = NSApplication
+public typealias ApplicationDelegate = NSApplicationDelegate
+public typealias Color = NSColor
+public typealias ColorSpace = NSColorSpace
 // public typealias LayoutGuide = NSLayoutGuide
 public typealias LayoutPriority = NSLayoutConstraint.Priority
 public extension LayoutPriority {
@@ -65,13 +74,6 @@ public extension LayoutPriority {
 	}
 }
 
-public typealias LayoutOrientation = NSLayoutConstraint.Orientation
-public typealias Responder = NSResponder
-public typealias Window = NSWindow
-public typealias Application = NSApplication
-public typealias ApplicationDelegate = NSApplicationDelegate
-public typealias Color = NSColor
-public typealias ColorSpace = NSColorSpace
 public extension ColorSpace {
 	var model: ColorSpaceModel { colorSpaceModel }
 	var stringValue: String { localizedName ?? "unknown" }
@@ -150,6 +152,7 @@ extension NSUserInterfaceItemIdentifier: ExpressibleByStringLiteral {
 ////////////////////////////////////////////////////////////
 #elseif os(iOS) || os(tvOS)
 import UIKit
+/*
 public typealias ViewController = UIViewController
 public typealias View = UIView
 public typealias StackView = UIStackView
@@ -159,12 +162,12 @@ public typealias CollectionViewDelegate = UICollectionViewDelegate
 public typealias CollectionViewLayout = UICollectionViewLayout
 public typealias CollectionViewTransitionLayout = UICollectionViewTransitionLayout
 public typealias CollectionViewFlowLayout = UICollectionViewFlowLayout
-
+public typealias Window = UIWindow
+*/
 public typealias LayoutGuide = UILayoutGuide
 public typealias LayoutPriority = UILayoutPriority
 public typealias LayoutOrientation = NSLayoutConstraint.Axis
 public typealias Responder = UIResponder
-public typealias Window = UIWindow
 public typealias Application = UIApplication
 public typealias ApplicationDelegate = UIApplicationDelegate
 public typealias Color = UIColor
