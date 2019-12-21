@@ -22,8 +22,6 @@ extension Storyboard {
 				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
 			else { continue }
 
-//			let srcID = srcElement.id
-
 			let srcRestorationID = srcElement.xml.element?.attribute(by: "identifier")?.text
 			let dstRestorationID = dstElement.attribute(by: "identifier")?.text
 
@@ -44,6 +42,7 @@ extension Storyboard {
 		var matchPatterns = [String]()
 		var seguePatterns = [String]()
 		var matchCases = [String]()
+		var canMatchCases = [String]()
 		var initWithRawValue = [String]()
 		var staticVarsValue = [String]()
 		var allCases = [String]()
@@ -58,12 +57,15 @@ extension Storyboard {
 
 		matchCases += "\toverride func prepare(for segue: \(os.storyboardSegueType), sender: Any?) {"
 		matchCases += "\t\tguard let controller = segueController as? \(customClass)SegueController else {"
-		// matchCases += "\t\t\tlet segueIdentifier = segue.identifier,"
-		// matchCases += "\t\t\tlet matchingSegue = Segues(rawValue: segueIdentifier)"
-		// matchCases += "\t\telse {"
 		matchCases += "\t\t\treturn super.prepare(for: segue, sender: sender)"
 		matchCases += "\t\t}"
 		matchCases += "\t\tswitch segue.matchPattern {"
+
+		canMatchCases += "\toverride func override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {"
+		canMatchCases += "\t\tguard let controller = segueController as? \(customClass)SegueController else {"
+		canMatchCases += "\t\t\treturn super.shouldPerformSegue(withIdentifier: identifier, sender: sender)"
+		canMatchCases += "\t\t}"
+		canMatchCases += "\t\tswitch identifier {"
 
 		for segue in segues {
 			guard let srcElement = segue.source.viewController,
@@ -72,8 +74,6 @@ extension Storyboard {
 				let dstElement = searchById(id: dstID)?.element,
 				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
 			else { continue }
-
-//			let srcID = srcElement.id
 
 			let srcRestorationID = srcElement.xml.element?.attribute(by: "identifier")?.text
 			let dstRestorationID = dstElement.attribute(by: "identifier")?.text
@@ -96,10 +96,15 @@ extension Storyboard {
 				let functionName = "prepareForSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
 				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
+				let canPerformFunctionName = "canPerformSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let canPerformMethod = "func \(canPerformFunctionName)(sender: Any?)"
+
 				allCases += "\t\t\t" + swiftIdentifier + ","
 
 				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + canPerformMethod
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
@@ -108,10 +113,13 @@ extension Storyboard {
 				matchCases += "\t\tcase \(casePattern):"
 				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(dstClass), sender: sender)"
 
+				canMatchCases += "\t\tcase \(canMatchCases):"
+				canMatchCases += "\t\t\treturn controller.\(canPerformFunctionName)?(sender: sender)"
+
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
-//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
+//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
 //				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segu∑e.kind))"
 			} else if segue.kind == "embed" {
 				var dstName: String
@@ -132,11 +140,15 @@ extension Storyboard {
 				let swiftIdentifier = "embed" + dstName
 				let functionName = "prepareToEmbed" + dstName
 				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
+				let canEmbedFunctionName = "canEmbed" + dstName
+				let canEmbedMethod = "func \(canEmbedFunctionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				allCases += "\t\t\t" + swiftIdentifier + ","
 
 				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + canEmbedMethod
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
@@ -147,8 +159,8 @@ extension Storyboard {
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
-//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
 //				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			} else if segue.kind == "relationship" {
 				let relationshipKind = segue.relationshipKind ?? ""
@@ -171,11 +183,15 @@ extension Storyboard {
 				let swiftIdentifier = "relationship" + dstName
 				let functionName = "prepareRelationship" + dstName
 				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
+				let canEstablishFunctionName = "canEstablishRelationship" + dstName
+				let canEstablishMethod = "func \(canEstablishFunctionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				allCases += "\t\t\t" + swiftIdentifier + ","
 
 				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + canEstablishMethod
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
@@ -186,8 +202,8 @@ extension Storyboard {
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
-//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
 //				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			}
 		}
@@ -212,6 +228,16 @@ extension Storyboard {
 		matchPatterns += "\t\t\t}"
 		matchPatterns += "\t\t}"
 		matchPatterns += ""
+		
+		matchCases += "\t\tdefault:"
+		matchCases += "\t\t\tsuper.prepare(for: segue, sender: sender)"
+		matchCases += "\t\t}"
+		matchCases += "\t}"
+
+		canMatchCases += "\t\tdefault:"
+		canMatchCases += "\t\t\treturn super.shouldPerformSegue(withIdentifier: identifier, sender: sender)"
+		canMatchCases += "\t\t}"
+		canMatchCases += "\t}"
 
 		enumCases += ""
 		enumCases += "\t\tstatic var allCases = ["
@@ -221,13 +247,8 @@ extension Storyboard {
 		enumCases += seguePatterns
 		enumCases += matchPatterns
 
-		matchCases += "\t\tdefault:"
-		matchCases += "\t\t\tsuper.prepare(for: segue, sender: sender)"
-		matchCases += "\t\t}"
-		matchCases += "\t}"
-
 		seguesController = delegateMethods
-		prepareForSegue = matchCases
+		prepareForSegue = canMatchCases + matchCases
 		return enumCases
 	}
 

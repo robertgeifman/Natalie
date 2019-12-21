@@ -60,7 +60,7 @@ final public class Bindable<Value> {
 }
 
 #if false
-class ProfileViewController: NSViewController {
+class ViewUserInfoController: NSViewController {
 	private let user: Bindable<User>
 
 	init(user: Bindable<User>) {
