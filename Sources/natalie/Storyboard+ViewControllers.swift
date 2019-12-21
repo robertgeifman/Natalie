@@ -61,7 +61,7 @@ extension Storyboard {
 		matchCases += "\t\t}"
 		matchCases += "\t\tswitch segue.matchPattern {"
 
-		canMatchCases += "\toverride func override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {"
+		canMatchCases += "\toverride func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {"
 		canMatchCases += "\t\tguard let controller = segueController as? \(customClass)SegueController else {"
 		canMatchCases += "\t\t\treturn super.shouldPerformSegue(withIdentifier: identifier, sender: sender)"
 		canMatchCases += "\t\t}"
@@ -97,7 +97,7 @@ extension Storyboard {
 				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				let canPerformFunctionName = "canPerformSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
-				let canPerformMethod = "func \(canPerformFunctionName)(sender: Any?)"
+				let canPerformMethod = "func \(canPerformFunctionName)(sender: Any?) -> Bool"
 
 				allCases += "\t\t\t" + swiftIdentifier + ","
 
@@ -113,14 +113,12 @@ extension Storyboard {
 				matchCases += "\t\tcase \(casePattern):"
 				matchCases += "\t\t\tcontroller.\(functionName)?(segue.destinationController as? \(dstClass), sender: sender)"
 
-				canMatchCases += "\t\tcase \(canMatchCases):"
-				canMatchCases += "\t\t\treturn controller.\(canPerformFunctionName)?(sender: sender)"
+				canMatchCases += "\t\tcase Segues.\(swiftIdentifier).rawValue:"
+				canMatchCases += "\t\t\treturn controller.\(canPerformFunctionName)?(sender: sender) ?? super.shouldPerformSegue(withIdentifier: identifier, sender: sender)"
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
-//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
-//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segu∑e.kind))"
 			} else if segue.kind == "embed" {
 				var dstName: String
 
@@ -140,15 +138,15 @@ extension Storyboard {
 				let swiftIdentifier = "embed" + dstName
 				let functionName = "prepareToEmbed" + dstName
 				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
-				let canEmbedFunctionName = "canEmbed" + dstName
-				let canEmbedMethod = "func \(canEmbedFunctionName)(_ destination: \(dstClass)?, sender: Any?)"
+				// let canEmbedFunctionName = "canEmbed" + dstName
+				// let canEmbedMethod = "func \(canEmbedFunctionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				allCases += "\t\t\t" + swiftIdentifier + ","
 
 				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
-				delegateMethods += "\t@objc optional"
-				delegateMethods += "\t" + canEmbedMethod
+				// delegateMethods += "\t@objc optional"
+				// delegateMethods += "\t" + canEmbedMethod
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
@@ -160,8 +158,6 @@ extension Storyboard {
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
-//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
-//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			} else if segue.kind == "relationship" {
 				let relationshipKind = segue.relationshipKind ?? ""
 
@@ -183,15 +179,15 @@ extension Storyboard {
 				let swiftIdentifier = "relationship" + dstName
 				let functionName = "prepareRelationship" + dstName
 				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
-				let canEstablishFunctionName = "canEstablishRelationship" + dstName
-				let canEstablishMethod = "func \(canEstablishFunctionName)(_ destination: \(dstClass)?, sender: Any?)"
+				// let canEstablishFunctionName = "canEstablishRelationship" + dstName
+				// let canEstablishMethod = "func \(canEstablishFunctionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				allCases += "\t\t\t" + swiftIdentifier + ","
 
 				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
-				delegateMethods += "\t@objc optional"
-				delegateMethods += "\t" + canEstablishMethod
+				// delegateMethods += "\t@objc optional"
+				// delegateMethods += "\t" + canEstablishMethod
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
 
@@ -203,8 +199,6 @@ extension Storyboard {
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
-//				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return \(dstClass).self"
-//				staticVarsValue += "\t\tstatic var \(swiftIdentifier)Segue = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			}
 		}
 
@@ -327,6 +321,8 @@ extension Storyboard {
 
 		static let functionName = "prepareForSegue%s"
 		static let method = "func %s(_ destination: %s?, sender: Any?)"
+		static let canPerformFunctionName = "canPerformSegue%s"
+		static let canPerformMethod = "func %s(sender: Any?) -> Bool"
 
 		static let enumCase = "\t\tcase %s"
 		static let matchCase = "\t\tcase (\"%s\", %s, \"%s\", %s, \"%s\"): controller.%s?(segue.destinationController as? %s, sender: sender)"

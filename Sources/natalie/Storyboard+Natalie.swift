@@ -73,12 +73,12 @@ extension Storyboard {
 
 			if isCurrentModule {
 				// Accessors for view controllers defined in the current module should be "internal".
-				output += "\tvar storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+				output += "\tvar identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			} else {
 				// Accessors for view controllers in external modules (whether system or custom frameworks), should be marked public.
-				output += "\tpublic var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+				output += "\tpublic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			}
-			output += "\tstatic var storyboardIdentifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+			output += "\tstatic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			output += "}"
 			output += ""
 #if false

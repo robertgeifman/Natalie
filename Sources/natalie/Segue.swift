@@ -17,7 +17,11 @@ class Segue: XMLObject {
 	let source: Scene
     init(xml: XMLIndexer, source: Scene) {
 		self.source = source
-        self.kind = xml.element!.attribute(by: "kind")!.text
+        if let kind = xml.element!.attribute(by: "kind") {
+			self.kind = kind.text
+		} else {
+			self.kind = "unwind"
+		}
         self.identifier = xml.element?.attribute(by: "identifier")?.text
         self.id = (xml.element?.attribute(by: "id"))!.text
         super.init(xml: xml)
