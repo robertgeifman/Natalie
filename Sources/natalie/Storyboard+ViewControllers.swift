@@ -67,6 +67,7 @@ extension Storyboard {
 		canMatchCases += "\t\t}"
 		canMatchCases += "\t\tswitch identifier {"
 
+		var hasIdentifiableSegues = false
 		for segue in segues {
 			guard let srcElement = segue.source.viewController,
 				let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name),
@@ -92,6 +93,7 @@ extension Storyboard {
 			}
 
 			if let segueID = segue.identifier, !segueID.isEmpty {
+				hasIdentifiableSegues = true
 				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
 				let functionName = "prepareForSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
 				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
@@ -242,7 +244,7 @@ extension Storyboard {
 		enumCases += matchPatterns
 
 		seguesController = delegateMethods
-		prepareForSegue = canMatchCases + matchCases
+		prepareForSegue = hasIdentifiableSegues ? canMatchCases + matchCases : matchCases
 		return enumCases
 	}
 
