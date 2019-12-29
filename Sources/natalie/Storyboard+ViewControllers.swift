@@ -41,10 +41,11 @@ extension Storyboard {
 		var delegateMethods = [String]()
 		var matchPatterns = [String]()
 		var seguePatterns = [String]()
-		var matchCases = [String]()
 		var canMatchCases = [String]()
+		var matchCases = [String]()
 
 		var canUnwindCases = [String]()
+		var unwindMethods = [String]()
 		var initWithRawValue = [String]()
 		var staticVarsValue = [String]()
 		var allCases = [String]()
@@ -105,17 +106,25 @@ extension Storyboard {
 				hasIdentifiableSegues = true
 				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
 
-				let functionName = "prepareForSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
-				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
-
 				let canPerformFunctionName = "canPerformSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
 				let canPerformMethod = "func \(canPerformFunctionName)(sender: Any?) -> Bool"
 
-				let unwindFunctionName = "unwind" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
-				let unwindMethod = "func \(unwindFunctionName)(segue: UIStoryboardSegue)"
+				let functionName = "prepareForSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let method = "func \(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				let canUnwindFunctionName = "canUnwind" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
-				let canUnwindMethod = "func \(canUnwindFunctionName)(from: \(dstClass), sender: Any?)"
+				let canUnwindMethod = "func \(canUnwindFunctionName)(from: \(dstClass), sender: Any?) -> Bool"
+
+				let unwindFunctionName = "unwind" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let unwindMethod = "func \(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
+
+				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
+				unwindMethods += "\t\tguard let coordinator = _coordinator as? \(customClass)Coordinator,"
+				unwindMethods += "\t\t\tlet source = segue.source as? \(dstClass),"
+				unwindMethods += "\t\t\tlet destination = segue.destination as? \(srcClass)"
+				unwindMethods += "\t\telse { return }"
+				unwindMethods += "\t\tcoordinator.\(unwindFunctionName)?(from: source, to: destination)"
+				unwindMethods += "\t}"
 
 				allCases += "\t\t\t" + swiftIdentifier + ","
 
@@ -125,9 +134,9 @@ extension Storyboard {
 				delegateMethods += "\t" + canPerformMethod
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
-				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t@available(iOS 13.0, *) @objc optional"
 				delegateMethods += "\t" + canUnwindMethod
-				delegateMethods += "\t@objc"
+				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + unwindMethod
 
 				enumCases += "\t\tcase \(swiftIdentifier) = \"\(segueID)\""
@@ -136,10 +145,11 @@ extension Storyboard {
 				matchCases += "\t\t\tcoordinator.\(functionName)?(segue.destinationController as? \(dstClass), sender: sender)"
 
 				canMatchCases += "\t\tcase Segues.\(swiftIdentifier).rawValue:"
-				canMatchCases += "\t\t\treturn coordinator.\(canPerformFunctionName)?(sender: sender) ?? super.shouldPerformSegue(withIdentifier: identifier, sender: sender)"
+				canMatchCases += "\t\t\treturn coordinator.\(canPerformFunctionName)?(sender: sender) ?? true"
 
-				canUnwindCases += "\t\tcase (#selector(\(unwindFunctionName)(_:)), is \(dstClass)):"
-				canUnwindCases += "\t\t\treturn coordinator.\(canUnwindFunctionName)?(from: from, sender: sender) ?? super.canPerformUnwindSegueAction(action, from: from, sender: sender)"
+				canUnwindCases += "\t\tcase (#selector(\(unwindFunctionName)(segue:)), is \(dstClass)):"
+				canUnwindCases += "\t\t\treturn coordinator.\(canUnwindFunctionName)?(from: from as! \(dstClass), sender: sender) ??"
+				canUnwindCases += "\t\t\t\tsuper.canPerformUnwindSegueAction(action, from: from, sender: sender)"
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
@@ -252,16 +262,19 @@ extension Storyboard {
 		matchCases += "\t\t\tsuper.prepare(for: segue, sender: sender)"
 		matchCases += "\t\t}"
 		matchCases += "\t}"
+		matchCases += ""
 
 		canMatchCases += "\t\tdefault:"
 		canMatchCases += "\t\t\treturn super.shouldPerformSegue(withIdentifier: identifier, sender: sender)"
 		canMatchCases += "\t\t}"
 		canMatchCases += "\t}"
+		canMatchCases += ""
 
 		canUnwindCases += "\t\tdefault:"
 		canUnwindCases += "\t\t\treturn super.canPerformUnwindSegueAction(action, from: from, sender: sender)"
 		canUnwindCases += "\t\t}"
 		canUnwindCases += "\t}"
+		canUnwindCases += ""
 
 		enumCases += ""
 		enumCases += "\t\tstatic var allCases = ["
@@ -272,7 +285,7 @@ extension Storyboard {
 		enumCases += matchPatterns
 
 		seguesController = delegateMethods
-		prepareForSegue = hasIdentifiableSegues ? canMatchCases + canUnwindCases + matchCases : matchCases
+		prepareForSegue = hasIdentifiableSegues ? canMatchCases + canUnwindCases + matchCases + unwindMethods : matchCases
 		return enumCases
 	}
 
