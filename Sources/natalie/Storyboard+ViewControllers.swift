@@ -70,10 +70,9 @@ extension Storyboard {
 		canMatchCases += "\t\t}"
 		canMatchCases += "\t\tswitch identifier {"
 
-		canUnwindCases += "\t@available(iOS 13.0, *)"
-		canUnwindCases += "\toverride func canPerformUnwindSegueAction(_ action: Selector, from: UIViewController, sender: Any?) -> Bool {"
+		canUnwindCases += "\toverride func canPerformUnwindSegueAction(_ action: Selector, from: UIViewController, withSender sender: Any) -> Bool {"
 		canUnwindCases += "\t\tguard let coordinator = _coordinator as? \(customClass)Coordinator else {"
-		canUnwindCases += "\t\t\treturn super.canPerformUnwindSegueAction(action, from: from, sender: sender)"
+		canUnwindCases += "\t\t\treturn super.canPerformUnwindSegueAction(action, from: from, withSender: sender)"
 		canUnwindCases += "\t\t}"
 		canUnwindCases += "\t\tswitch (action, from) {"
 
@@ -134,7 +133,7 @@ extension Storyboard {
 				delegateMethods += "\t" + canPerformMethod
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + method
-				delegateMethods += "\t@available(iOS 13.0, *) @objc optional"
+				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + canUnwindMethod
 				delegateMethods += "\t@objc optional"
 				delegateMethods += "\t" + unwindMethod
@@ -149,7 +148,7 @@ extension Storyboard {
 
 				canUnwindCases += "\t\tcase (#selector(\(unwindFunctionName)(segue:)), is \(dstClass)):"
 				canUnwindCases += "\t\t\treturn coordinator.\(canUnwindFunctionName)?(from: from as! \(dstClass), sender: sender) ??"
-				canUnwindCases += "\t\t\t\tsuper.canPerformUnwindSegueAction(action, from: from, sender: sender)"
+				canUnwindCases += "\t\t\t\tsuper.canPerformUnwindSegueAction(action, from: from, withSender: sender)"
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
@@ -271,8 +270,13 @@ extension Storyboard {
 		canMatchCases += ""
 
 		canUnwindCases += "\t\tdefault:"
-		canUnwindCases += "\t\t\treturn super.canPerformUnwindSegueAction(action, from: from, sender: sender)"
+		canUnwindCases += "\t\t\treturn super.canPerformUnwindSegueAction(action, from: from, withSender: sender)"
 		canUnwindCases += "\t\t}"
+		canUnwindCases += "\t}"
+		canUnwindCases += ""
+		canUnwindCases += "\t@available(iOS 13.0, *)"
+		canUnwindCases += "\toverride func canPerformUnwindSegueAction(_ action: Selector, from: UIViewController, sender: Any?) -> Bool {"
+		canUnwindCases += "\t\tsuper.canPerformUnwindSegueAction(action, from: from, withSender: sender ?? from)"
 		canUnwindCases += "\t}"
 		canUnwindCases += ""
 
