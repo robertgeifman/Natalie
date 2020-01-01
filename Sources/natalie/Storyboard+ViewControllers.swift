@@ -136,10 +136,18 @@ extension Storyboard {
 				delegateMethods += "\t" + unwindMethod
 
 				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
-				unwindMethods += "\t\tguard let coordinator = _coordinator as? \(customClass)Coordinator,"
-				unwindMethods += "\t\t\tlet source = segue.source as? \(dstClass),"
-				unwindMethods += "\t\t\tlet destination = segue.destination as? \(srcClass)"
-				unwindMethods += "\t\telse { return }"
+				unwindMethods += "\t\tguard let coordinator = _coordinator as? \(customClass)Coordinator else { return }"
+				if dstCast == "_" {
+					unwindMethods += "\t\tlet source = segue.source"
+				} else {
+					unwindMethods += "\t\tguard let source = segue.source as? \(dstClass) else { return }"
+				}
+				if srcCast == "_" {
+					unwindMethods += "\t\tlet destination = segue.destination"
+				} else {
+					unwindMethods += "\t\tguard let destination = segue.destination as? \(srcClass) else { return }"
+				}
+				unwindMethods += ""
 				unwindMethods += "\t\tcoordinator.\(unwindFunctionName)?(from: source, to: destination)"
 				unwindMethods += "\t}"
 
