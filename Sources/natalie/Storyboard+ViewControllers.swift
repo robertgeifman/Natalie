@@ -304,7 +304,6 @@ extension Storyboard {
 		matchCases += "\t\t\tsuper.prepare(for: segue, sender: sender)"
 		matchCases += "\t\t}"
 		matchCases += "\t}"
-		matchCases += ""
 
 		canMatchCases += "\t\tdefault:"
 		canMatchCases += "\t\t\treturn super.shouldPerformSegue(withIdentifier: identifier, sender: sender)"
@@ -333,7 +332,12 @@ extension Storyboard {
 		enumCases += matchPatterns
 
 		seguesController = delegateMethods + defaultImplementation
-		prepareForSegue = hasIdentifiableSegues ? matchCases + unwindMethods + canMatchCases + canUnwindCases : matchCases
+		if hasIdentifiableSegues {
+			matchCases += ""
+			prepareForSegue = matchCases + unwindMethods + canMatchCases + canUnwindCases
+		} else {
+			prepareForSegue = matchCases
+		}
 		return enumCases
 	}
 
@@ -344,8 +348,6 @@ extension Storyboard {
 				let customClass = viewController.customClass
 			else { continue }
 
-			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)
-
 			let sceneSegues = scene.segues
 			let sceneReusables = viewController.reusables(os)
 
@@ -353,6 +355,7 @@ extension Storyboard {
 			var prepareForSegue = [String]()
 			let segues = processSegues(sceneSegues, customClass, &seguesController, &prepareForSegue)
 
+			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)
 			let sceneClass_noSegues = segues.isEmpty ? processIdentifier_noSegues(scene: scene, storyboardCustomModules: storyboardCustomModules) : []
 
 			let reusables = processReusables(sceneReusables)
@@ -410,21 +413,6 @@ extension Storyboard {
 			}
 		}
 		return output
-	}
-
-	struct Format {
-		static let pattern = "(\"%s\", %s, \"%s\", %s, \"%s\")"
-		static let matchPattern = "\t\t\tcase .%s: return %s"
-
-		static let functionName = "prepareForSegue%s"
-		static let method = "func %s(_ destination: %s?, sender: Any?)"
-		static let canPerformFunctionName = "canPerformSegue%s"
-		static let canPerformMethod = "func %s(sender: Any?) -> Bool"
-
-		static let enumCase = "\t\tcase %s"
-		static let matchCase = "\t\tcase (\"%s\", %s, \"%s\", %s, \"%s\"): coordinator.%s?(segue.destinationController as? %s, sender: sender)"
-		static let initWithRawValue = "\t\t\tcase (%s, %s, \"%s\", %s, \"%s\"): self = .%s"
-		static let staticVarsValue = "\t\tstatic var %sSegue = Segue<%s>(\"%s\", .%s)"
 	}
 }
 

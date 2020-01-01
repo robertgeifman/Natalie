@@ -88,7 +88,6 @@ struct Natalie {
 			output += file.storyboard.processStoryboard(storyboardName: file.storyboardName, os: os)
 		}
 		output += "}"
-		output += ""
 
 		let colors = storyboards
 			.flatMap { $0.storyboard.colors }
@@ -96,6 +95,7 @@ struct Natalie {
 			.compactMap { $0.assetName }
 
 		if !colors.isEmpty {
+			output += ""
 			output += "// MARK: - Colors"
 			output += "@available(\(os.colorOS), *)"
 			output += "extension \(os.colorType) {"
@@ -103,7 +103,6 @@ struct Natalie {
 				output += "\tstatic let \(swiftRepresentation(for: colorName, firstLetter: .none)) = \(os.colorType)(named: \(initIdentifier(for: os.colorNameType, value: colorName)))"
 			}
 			output += "}"
-			output += ""
 		}
 
 		return output
