@@ -53,17 +53,21 @@ extension Storyboard {
 		return output
 	}
 
+	func processIdentifier_noSegues(scene: Scene, storyboardCustomModules: Set<String>) -> [String] {
+		var output = [String]()
+		if let viewController = scene.viewController,
+			let customClass = viewController.customClass {
+			output += "protocol \(customClass)Scene: AnyScene { }"
+		}
+		return output
+	}
+	
 	func processIdentifier(scene: Scene, storyboardCustomModules: Set<String>) -> [String] {
 		var output = [String]()
 		if let viewController = scene.viewController,
 			let customClass = viewController.customClass,
 			let storyboardIdentifier = viewController.storyboardIdentifier {
-			output += "protocol \(customClass)Scene: AnyScene { }"
-			output += ""
-			output += "extension \(customClass): \(customClass)Scene { }"
-			output += ""
-			output += "extension AnyScene where Self: \(customClass) {"
-
+			output += "extension \(customClass): \(customClass)Scene {"
 			let initIdentifierString = initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)
 
 			var isCurrentModule = false
@@ -71,6 +75,7 @@ extension Storyboard {
 				isCurrentModule = !storyboardCustomModules.contains(customModule)
 			}
 
+			output += "\tstatic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			if isCurrentModule {
 				// Accessors for view controllers defined in the current module should be "internal".
 				output += "\tvar identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
@@ -78,9 +83,9 @@ extension Storyboard {
 				// Accessors for view controllers in external modules (whether system or custom frameworks), should be marked public.
 				output += "\tpublic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			}
-			output += "\tstatic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
 			output += "}"
 			output += ""
+
 #if false
 			output += "extension \(os.storyboardSegueType) {"
 			output += "\tfunc selection() -> \(customClass).Segue? {"
