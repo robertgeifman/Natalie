@@ -1,12 +1,16 @@
 .build
 
+/Packages
+/*.xcodeproj
+project.xcworkspace
+
 #OSX
 .DS_Store
 .AppleDouble
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon?
 
 
 # Thumbnails
@@ -39,6 +43,7 @@ build/
 *.perspectivev3
 !default.perspectivev3
 xcuserdata
+xcshareddata
 *.xccheckout
 *.moved-aside
 DerivedData

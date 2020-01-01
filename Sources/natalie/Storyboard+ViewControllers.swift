@@ -20,7 +20,9 @@ extension Storyboard {
 				let dstID = segue.destination,
 				let dstElement = searchById(id: dstID)?.element,
 				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
-			else { continue }
+			else {
+				continue
+			}
 
 			let srcRestorationID = srcElement.xml.element?.attribute(by: "identifier")?.text
 			let dstRestorationID = dstElement.attribute(by: "identifier")?.text
@@ -94,15 +96,17 @@ extension Storyboard {
 			let pattern =
 				"(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedString), \(srcStoryboardID.unwrappedString), \(srcClass).self, \(dstRestorationID.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
 			
+			let srcCast = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "is \(srcClass).Type"
+			let dstCast = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass).Type"
 			let casePattern =
-				"(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedPattern), \(srcStoryboardID.unwrappedPattern), is \(srcClass).Type, \(dstRestorationID.unwrappedPattern), \(dstStoryboardID.unwrappedPattern), is \(dstClass).Type)"
+				"(\(segue.identifier.unwrappedString), \(srcRestorationID.unwrappedPattern), \(srcStoryboardID.unwrappedPattern), \(srcCast), \(dstRestorationID.unwrappedPattern), \(dstStoryboardID.unwrappedPattern), \(dstCast))"
 
 			if let value = patterns[pattern], value > 1 {
 				continue
 			}
 
-			if let segueID = segue.identifier, !segueID.isEmpty {
-				hasIdentifiableSegues = true
+			if let segueID = segue.identifier, !segueID.isEmpty, segue.kind != "embed", segue.kind != "relationship" {
+				hasIdentifiableSegues = true // hasIdentifiableSegues || (segue.kind != "embed" && segue.kind != "relationship")
 				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
 
 				let canPerformFunctionName = "canPerformSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
@@ -116,6 +120,20 @@ extension Storyboard {
 
 				let unwindFunctionName = "unwind" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
 				let unwindMethod = "func \(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
+			
+				allCases += "\t\t\t" + swiftIdentifier + ","
+
+				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + method
+
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + canPerformMethod
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + canUnwindMethod
+				delegateMethods += "\t@objc optional"
+				delegateMethods += "\t" + unwindMethod
 
 				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
 				unwindMethods += "\t\tguard let coordinator = _coordinator as? \(customClass)Coordinator,"
@@ -125,29 +143,21 @@ extension Storyboard {
 				unwindMethods += "\t\tcoordinator.\(unwindFunctionName)?(from: source, to: destination)"
 				unwindMethods += "\t}"
 
-				allCases += "\t\t\t" + swiftIdentifier + ","
-
-				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
-
-				delegateMethods += "\t@objc optional"
-				delegateMethods += "\t" + canPerformMethod
-				delegateMethods += "\t@objc optional"
-				delegateMethods += "\t" + method
-				delegateMethods += "\t@objc optional"
-				delegateMethods += "\t" + canUnwindMethod
-				delegateMethods += "\t@objc optional"
-				delegateMethods += "\t" + unwindMethod
-
 				enumCases += "\t\tcase \(swiftIdentifier) = \"\(segueID)\""
-
-				matchCases += "\t\tcase \(casePattern):"
-				matchCases += "\t\t\tcoordinator.\(functionName)?(segue.destinationController as? \(dstClass), sender: sender)"
 
 				canMatchCases += "\t\tcase Segues.\(swiftIdentifier).rawValue:"
 				canMatchCases += "\t\t\treturn coordinator.\(canPerformFunctionName)?(sender: sender) ?? true"
 
-				canUnwindCases += "\t\tcase (#selector(\(unwindFunctionName)(segue:)), is \(dstClass)):"
-				canUnwindCases += "\t\t\treturn coordinator.\(canUnwindFunctionName)?(from: from as! \(dstClass), sender: sender) ??"
+				matchCases += "\t\tcase \(casePattern):"
+				canUnwindCases += "\t\tcase (#selector(\(unwindFunctionName)(segue:)), \(dstCast)):"
+				if dstCast == "_" {
+					matchCases += "\t\t\tcoordinator.\(functionName)?(segue.destinationController, sender: sender)"
+					canUnwindCases += "\t\t\treturn coordinator.\(canUnwindFunctionName)?(from: from, sender: sender) ??"
+				} else {
+					matchCases += "\t\t\tcoordinator.\(functionName)?(segue.destinationController as? \(dstClass), sender: sender)"
+					canUnwindCases += "\t\t\treturn coordinator.\(canUnwindFunctionName)?(from: from as! \(dstClass), sender: sender) ??"
+				}
+
 				canUnwindCases += "\t\t\t\tsuper.canPerformUnwindSegueAction(action, from: from, withSender: sender)"
 
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
@@ -155,8 +165,9 @@ extension Storyboard {
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
 			} else if segue.kind == "embed" {
 				var dstName: String
-
-				if let identifier = dstStoryboardID {
+				if let segueID = segue.identifier, !segueID.isEmpty {
+					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				} else if let identifier = dstStoryboardID {
 					dstName = swiftRepresentation(for: identifier, firstLetter: .capitalize)
 				} else if let identifier = dstRestorationID {
 					let customClass = dstElement.attribute(by: "customClass")?.text ?? dstElement.name
@@ -197,7 +208,9 @@ extension Storyboard {
 
 				var dstName = swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + "To"
 
-				if let identifier = dstElement.attribute(by: "storyboardIdentifier")?.text {
+				if let segueID = segue.identifier, !segueID.isEmpty {
+					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				} else if let identifier = dstElement.attribute(by: "storyboardIdentifier")?.text {
 					dstName += swiftRepresentation(for: identifier, firstLetter: .capitalize)
 				} else if let identifier = dstRestorationID {
 					let customClass = dstElement.attribute(by: "customClass")?.text ?? dstElement.name
@@ -233,6 +246,8 @@ extension Storyboard {
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+			} else {
+				print(segue.kind)
 			}
 		}
 
