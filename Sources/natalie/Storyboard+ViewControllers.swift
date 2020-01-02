@@ -192,6 +192,44 @@ extension Storyboard {
 				}
 
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
+			} else if segue.kind == "presentation" { // , dstCast != dstRef {
+				var dstName: String
+				if let segueID = segue.identifier, !segueID.isEmpty {
+					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				} else if let identifier = dstStoryboardID {
+					dstName = swiftRepresentation(for: identifier, firstLetter: .capitalize)
+				} else if let customClass = dstElement.attribute(by: "customClass")?.text {
+					dstName = swiftRepresentation(for: customClass, firstLetter: .capitalize)
+				} else {
+					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
+						// swiftRepresentation(for: dstID, firstLetter: .capitalize)
+				}
+
+				let swiftIdentifier = "present" + dstName
+				let functionName = "prepareToPresent" + dstName
+				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
+
+				allCases += "\t\t\t" + swiftIdentifier + ","
+
+				enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
+				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+
+				if dstCast != dstRef {
+					delegateMethods += "\tfunc " + method
+					defaultImplementation += "\tfunc " + method + " {"
+					defaultImplementation += "\t\tNSLog(\"\(customClass).\(method)\")"
+					defaultImplementation += "\t}"
+
+					matchCases += "\t\tcase \(casePattern):"
+					if dstCast == "_" {
+						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController, sender: sender)"
+					} else {
+						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController as? \(dstClass), sender: sender)"
+					}
+				}
+				
+				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
+				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
 			} else if segue.kind == "embed" { // , dstCast != dstRef {
 				var dstName: String
 				if let segueID = segue.identifier, !segueID.isEmpty {
@@ -272,8 +310,6 @@ extension Storyboard {
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
-			} else {
-				print(segue.kind)
 			}
 		}
 
