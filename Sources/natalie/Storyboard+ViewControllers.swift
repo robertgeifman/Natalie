@@ -102,7 +102,7 @@ extension Storyboard {
 			let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
 			let dstRef = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "\(dstStoryboardID.unwrappedPattern)"
 			let casePattern =
-				"(\(segue.identifier.unwrappedString), \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+				"(\(segue.identifier.unwrappedPattern), \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
 
 			if let value = patterns[pattern], value > 1 {
 				continue
@@ -463,7 +463,7 @@ extension Optional where Wrapped == String {
 	var unwrappedPattern: String {
 		switch self {
 		case .none: return "_"
-		case .some(let value): return value.isEmpty ? "nil" : "\"\(value)\""
+		case .some(let value): return value.isEmpty ? "\"\"" : "\"\(value)\""
 		}
 	}
 }
