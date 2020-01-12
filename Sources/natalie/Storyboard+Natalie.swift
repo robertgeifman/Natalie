@@ -65,38 +65,29 @@ extension Storyboard {
 	func processIdentifier(scene: Scene, storyboardCustomModules: Set<String>) -> [String] {
 		var output = [String]()
 		if let viewController = scene.viewController,
-			let customClass = viewController.customClass,
-			let storyboardIdentifier = viewController.storyboardIdentifier {
-			output += "extension \(customClass): \(customClass)Scene {"
-			let initIdentifierString = initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)
+			let customClass = viewController.customClass {
+			if let storyboardIdentifier = viewController.storyboardIdentifier {
+				output += "extension \(customClass): \(customClass)Scene {"
+				let initIdentifierString = initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)
 
-			var isCurrentModule = false
-			if let customModule = viewController.customModule {
-				isCurrentModule = !storyboardCustomModules.contains(customModule)
-			}
+				var isCurrentModule = false
+				if let customModule = viewController.customModule {
+					isCurrentModule = !storyboardCustomModules.contains(customModule)
+				}
 
-			output += "\tstatic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
-			if isCurrentModule {
-				// Accessors for view controllers defined in the current module should be "internal".
-				output += "\tvar identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+				output += "\tstatic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+				if isCurrentModule {
+					// Accessors for view controllers defined in the current module should be "internal".
+					output += "\tvar identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+				} else {
+					// Accessors for view controllers in external modules (whether system or custom frameworks), should be marked public.
+					output += "\tpublic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+				}
+				output += "}"
+				output += ""
 			} else {
-				// Accessors for view controllers in external modules (whether system or custom frameworks), should be marked public.
-				output += "\tpublic var identifier: \(os.storyboardSceneIdentifierType)? { \(initIdentifierString) }"
+				output += "#warning(\"\(customClass) scene has no storyboardID set in the storyboard\")"
 			}
-			output += "}"
-			output += ""
-
-#if false
-			output += "extension \(os.storyboardSegueType) {"
-			output += "\tfunc selection() -> \(customClass).Segue? {"
-			output += "\t\tif let identifier = self.identifier {"
-			output += "\t\t\treturn \(customClass).Segue(rawValue: identifier)"
-			output += "\t\t}"
-			output += "\t\treturn nil"
-			output += "\t}"
-			output += "}"
-			output += ""
-#endif
 		}
 		return output
 	}

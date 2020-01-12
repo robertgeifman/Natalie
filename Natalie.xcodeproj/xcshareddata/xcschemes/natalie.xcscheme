@@ -66,6 +66,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/robert/Projects/Applications/HairNet-iOS/HairNet/Resources/Base.lproj/Main.storyboard"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Users/robert/Projects/HairNet-iOS/Resources/Base.lproj/Registration.storyboard"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

@@ -15,6 +15,7 @@ extension Storyboard {
 		var patterns = [String: Int]()
 
 		for segue in segues {
+/*
 			guard let srcElement = segue.source.viewController,
 				let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name),
 				let dstID = segue.destination,
@@ -26,8 +27,8 @@ extension Storyboard {
 
 			let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
 			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
-
-			let pattern = "(\(segue.identifier.unwrappedString), \(srcStoryboardID.unwrappedString), \"\(srcClass)\", \(dstStoryboardID.unwrappedString), \"\(dstClass)\")"
+*/
+			let pattern = "(\(segue.identifier.unwrappedString))" // , \(srcStoryboardID.unwrappedString), \(srcClass).self, \(dstStoryboardID.unwrappedString), \(dstClass).self)"
 
 			if let value = patterns[pattern] {
 				patterns[pattern] = value + 1
@@ -54,7 +55,7 @@ extension Storyboard {
 
 		defaultImplementation += "extension \(customClass)Scene {"
 
-		matchPatterns += "\t\tvar matchPattern: (String?, String?, \(os.viewControllerType).Type, String?, \(os.viewControllerType).Type) {"
+		matchPatterns += "\t\tvar matchPattern: (String?) {" //, String?, \(os.viewControllerType).Type, String?, \(os.viewControllerType).Type) {"
 		matchPatterns += "\t\t\tswitch self {"
 
 		seguePatterns += "\t\tvar segue: AnySegue {"
@@ -90,19 +91,18 @@ extension Storyboard {
 				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
 			else { continue }
 
-			let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
+			// let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
 			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
 
-			let pattern =
-				"(\(segue.identifier.unwrappedString), \(srcStoryboardID.unwrappedString), \(srcClass).self, \(dstStoryboardID.unwrappedString), \(dstClass).self)"
+			let pattern = "(\(segue.identifier.unwrappedString))"//, \(srcStoryboardID.unwrappedString), \(srcClass).self, \(dstStoryboardID.unwrappedString), \(dstClass).self)"
 			
 			let srcCast = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "is \(srcClass).Type"
 			let dstCast = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass).Type"
 			let dstCastUnwind = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass)"
-			let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
+			// let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
 			let dstRef = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "\(dstStoryboardID.unwrappedPattern)"
 			let casePattern =
-				"(\(segue.identifier.unwrappedPattern), \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+				"(\(segue.identifier.unwrappedPattern))"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
 
 			if let value = patterns[pattern], value > 1 {
 				continue
@@ -398,8 +398,8 @@ extension Storyboard {
 
 			if !segues.isEmpty || !reusables.isEmpty {
 				output += "// MARK: - \(customClass)Scene"
-				output += sceneClass
 				output += sceneClass_noSegues
+				output += sceneClass
 
 				output += seguesController
 				output += ""
