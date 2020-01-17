@@ -49,7 +49,7 @@ extension Storyboard {
 		var canUnwindCases = [String]()
 		var unwindMethods = [String]()
 		var initWithRawValue = [String]()
-		var staticVarsValue = [String]()
+		// var staticVarsValue = [String]()
 		var allCases = [String]()
 
 		delegateMethods += "protocol \(customClass)Scene: AnyScene {"
@@ -92,15 +92,15 @@ extension Storyboard {
 				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
 			else { continue }
 
-			let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
+			// let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
 			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
 
-			let pattern = "(\(segue.identifier.unwrappedString), \(srcStoryboardID.unwrappedString), \(srcClass).self, \(dstStoryboardID.unwrappedString), \(dstClass).self)"
-			
+			let pattern = "(\(segue.identifier.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
+
 			let srcCast = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "is \(srcClass).Type"
 			let dstCast = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass).Type"
 			let dstCastUnwind = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass)"
-			let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
+			// let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
 			let dstRef = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "\(dstStoryboardID.unwrappedPattern)"
 
 			if let value = patterns[pattern], value > 1 {
@@ -115,7 +115,7 @@ extension Storyboard {
 				let segueIdentifier = segueID
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 
-				let casePattern = "(Segues.\(segueName).identifier, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+				let casePattern = "(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
 
 				let canPerformFunctionName = "canPerformSegue" + dstName
 				let canPerformMethod = "\(canPerformFunctionName)(sender: Any?) -> Bool"
@@ -199,10 +199,9 @@ extension Storyboard {
 				}
 
 				seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
-			}
-			else if segue.kind == "presentation" { // , dstCast != dstRef {
+			} else if segue.kind == "presentation" { // , dstCast != dstRef {
 				var dstName: String
-				var segueIdentifier: String? = nil
+				var segueIdentifier: String?
 				if let segueID = segue.identifier, !segueID.isEmpty {
 					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
 					segueIdentifier = segueID
@@ -216,10 +215,9 @@ extension Storyboard {
 				}
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 				let casePattern = nil == segueIdentifier ?
-					"(_, \(srcRef), \(srcCast), \(dstRef), \(dstCast))" :
-					"(Segues.\(segueName).identifier, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+					"(_, \(dstRef), \(dstCast))" :
+					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
 					
-
 				let swiftIdentifier = "present" + dstName
 				let functionName = "prepareToPresent" + dstName
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
@@ -247,10 +245,9 @@ extension Storyboard {
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 				if nil != segueIdentifier { seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(kind: .\(segue.kind))" }
-			}
-			else if segue.kind == "embed" { // , dstCast != dstRef {
+			} else if segue.kind == "embed" { // , dstCast != dstRef {
 				var dstName: String
-				var segueIdentifier: String? = nil
+				var segueIdentifier: String?
 				if let segueID = segue.identifier, !segueID.isEmpty {
 					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
 					segueIdentifier = segueID
@@ -264,8 +261,8 @@ extension Storyboard {
 				}
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 				let casePattern = nil == segueIdentifier ?
-					"(_, \(srcRef), \(srcCast), \(dstRef), \(dstCast))" :
-					"(Segues.\(segueName).identifier, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+					"(_, \(dstRef), \(dstCast))" :
+					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
 
 				let swiftIdentifier = "embed" + dstName
 				let functionName = "prepareToEmbed" + dstName
@@ -294,13 +291,12 @@ extension Storyboard {
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 				if nil != segueIdentifier { seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(kind: .\(segue.kind))" }
-			}
-			else if segue.kind == "relationship" { // , dstCast != dstRef {
+			} else if segue.kind == "relationship" { // , dstCast != dstRef {
 				let relationshipKind = segue.relationshipKind ?? ""
 
 				var dstName = swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + "To"
 
-				var segueIdentifier: String? = nil
+				var segueIdentifier: String?
 				if let segueID = segue.identifier, !segueID.isEmpty {
 					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
 					segueIdentifier = segueID
@@ -314,8 +310,8 @@ extension Storyboard {
 				}
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 				let casePattern = nil == segueIdentifier ?
-					"(_, \(srcRef), \(srcCast), \(dstRef), \(dstCast))" :
-					"(Segues.\(segueName).identifier, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+					"(_, \(dstRef), \(dstCast))" :
+					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
 
 				let swiftIdentifier = "relationship" + dstName
 				let functionName = "prepareRelationship" + dstName
@@ -352,9 +348,9 @@ extension Storyboard {
 			return [String]()
 		}
 
-		if !staticVarsValue.isEmpty {
+		//if !staticVarsValue.isEmpty {
 			// staticVarsValue += ""
-		}
+		//}
 
 		// staticVarsValue += enumCases
 		// enumCases = staticVarsValue
