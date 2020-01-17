@@ -102,8 +102,6 @@ extension Storyboard {
 			let dstCastUnwind = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass)"
 			// let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
 			let dstRef = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "\(dstStoryboardID.unwrappedPattern)"
-			let casePattern =
-				"(\(segue.identifier.unwrappedPattern))"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
 
 			if let value = patterns[pattern], value > 1 {
 				continue
@@ -112,21 +110,25 @@ extension Storyboard {
 			if let segueID = segue.identifier, !segueID.isEmpty, segue.kind != "embed", segue.kind != "relationship" {
 				hasIdentifiableSegues = true // hasIdentifiableSegues || (segue.kind != "embed" && segue.kind != "relationship")
 				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
+				let dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
+				// let casePattern = "(\(segueName.identifier.unwrappedPattern))"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+				let casePattern = "(Segues.\(segueName).identifier)"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
 
-				let canPerformFunctionName = "canPerformSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let canPerformFunctionName = "canPerformSegue" + dstName
 				let canPerformMethod = "\(canPerformFunctionName)(sender: Any?) -> Bool"
 
-				let functionName = "prepareForSegue" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let functionName = "prepareForSegue" + dstName
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
-				let canUnwindFunctionName = "canUnwind" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let canUnwindFunctionName = "canUnwind" + dstName
 				let canUnwindMethod = "\(canUnwindFunctionName)(from: \(dstClass), sender: Any?) -> Bool"
 
-				let unwindFunctionName = "unwind" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let unwindFunctionName = "unwind" + dstName
 				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
 			
 				// allCases += "\t\t\t_" + swiftIdentifier + ","
-				allCases += "\t\t\t\(swiftIdentifier),"
+				allCases += "\t\t\t\(segueName),"
 
 				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
@@ -175,10 +177,10 @@ extension Storyboard {
 				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
 				numberOfCases += 1
 
-				canMatchCases += "\t\tcase Segues.\(swiftIdentifier).identifier:"
+				canMatchCases += "\t\tcase Segues.\(segueName).identifier:"
 				canMatchCases += "\t\t\treturn coordinator.\(canPerformFunctionName)(sender: sender)"
 
-				if dstCast != dstRef {
+//				if dstCast != dstRef {
 					matchCases += "\t\tcase \(casePattern):"
 					if dstCast == "_" {
 						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController, sender: sender)"
@@ -186,7 +188,7 @@ extension Storyboard {
 						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController as? \(dstClass), sender: sender)"
 					}
 					initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-				}
+//				}
 				
 				canUnwindCases += "\t\tcase (#selector(\(unwindFunctionName)(segue:)), \(dstCastUnwind)):"
 				if dstCast == "_" {
@@ -196,8 +198,9 @@ extension Storyboard {
 				}
 
 				// seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
-				seguePatterns += "\t\tstatic let \(swiftIdentifier) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
-			} else if segue.kind == "presentation" { // , dstCast != dstRef {
+				seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
+			}
+			else if segue.kind == "presentation" { // , dstCast != dstRef {
 				var dstName: String
 				if let segueID = segue.identifier, !segueID.isEmpty {
 					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
@@ -209,13 +212,16 @@ extension Storyboard {
 					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
 						// swiftRepresentation(for: dstID, firstLetter: .capitalize)
 				}
+				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
+				// let casePattern = "(\(segueName.identifier.unwrappedPattern))"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+				let casePattern = "(Segues.\(segueName).identifier)"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
 
 				let swiftIdentifier = "present" + dstName
 				let functionName = "prepareToPresent" + dstName
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				// allCases += "\t\t\t_" + swiftIdentifier + ","
-				allCases += "\t\t\t\(swiftIdentifier),"
+				allCases += "\t\t\t\(segueName),"
 
 				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
 				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
@@ -238,8 +244,9 @@ extension Storyboard {
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 				// seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
-				seguePatterns += "\t\tstatic let \(swiftIdentifier) = Segue<\(dstClass)>(kind: .\(segue.kind))"
-			} else if segue.kind == "embed" { // , dstCast != dstRef {
+				seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(kind: .\(segue.kind))"
+			}
+			else if segue.kind == "embed" { // , dstCast != dstRef {
 				var dstName: String
 				if let segueID = segue.identifier, !segueID.isEmpty {
 					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
@@ -251,13 +258,16 @@ extension Storyboard {
 					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
 						// swiftRepresentation(for: dstID, firstLetter: .capitalize)
 				}
+				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
+				// let casePattern = "(\(segueName.identifier.unwrappedPattern))"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+				let casePattern = "(Segues.\(segueName).identifier)"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
 
 				let swiftIdentifier = "embed" + dstName
 				let functionName = "prepareToEmbed" + dstName
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				// allCases += "\t\t\t_" + swiftIdentifier + ","
-				allCases += "\t\t\t\(swiftIdentifier),"
+				allCases += "\t\t\t\(segueName),"
 
 				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
 				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
@@ -280,8 +290,9 @@ extension Storyboard {
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 				// seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
-				seguePatterns += "\t\tstatic let \(swiftIdentifier) = Segue<\(dstClass)>(kind: .\(segue.kind))"
-			} else if segue.kind == "relationship" { // , dstCast != dstRef {
+				seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(kind: .\(segue.kind))"
+			}
+			else if segue.kind == "relationship" { // , dstCast != dstRef {
 				let relationshipKind = segue.relationshipKind ?? ""
 
 				var dstName = swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + "To"
@@ -296,13 +307,16 @@ extension Storyboard {
 					dstName += swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
 						//swiftRepresentation(for: dstID, firstLetter: .capitalize)
 				}
+				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
+				// let casePattern = "(\(segueName.identifier.unwrappedPattern))"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
+				let casePattern = "(Segues.\(segueName).identifier)"//, \(srcRef), \(srcCast), \(dstRef), \(dstCast))"
 
 				let swiftIdentifier = "relationship" + dstName
 				let functionName = "prepareRelationship" + dstName
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				// allCases += "\t\t\t_" + swiftIdentifier + ","
-				allCases += "\t\t\t\(swiftIdentifier),"
+				allCases += "\t\t\t\(segueName),"
 
 				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
@@ -326,7 +340,7 @@ extension Storyboard {
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 				// seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
-				seguePatterns += "\t\tstatic let \(swiftIdentifier) = Segue<\(dstClass)>(kind: .\(segue.kind))"
+				seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			}
 		}
 
