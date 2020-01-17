@@ -112,7 +112,6 @@ extension Storyboard {
 				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
 				let dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
 
-				let segueIdentifier = segueID
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 
 				let casePattern = "(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
@@ -130,8 +129,6 @@ extension Storyboard {
 				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
 			
 				allCases += "\t\t\t\(segueName),"
-
-				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
 				delegateMethods += "\tfunc " + method
 				delegateMethods += "\tfunc " + canPerformMethod
@@ -174,8 +171,6 @@ extension Storyboard {
 				unwindMethods += "\t}"
 				unwindMethods += ""
 
-				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(segueID)\""
-				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
 				numberOfCases += 1
 
 				canMatchCases += "\t\tcase Segues.\(segueName).identifier:"
@@ -210,8 +205,7 @@ extension Storyboard {
 				} else if let customClass = dstElement.attribute(by: "customClass")?.text {
 					dstName = swiftRepresentation(for: customClass, firstLetter: .capitalize)
 				} else {
-					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
-						// swiftRepresentation(for: dstID, firstLetter: .capitalize)
+					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) + "_" + swiftRepresentation(for: dstID, firstLetter: .capitalize)
 				}
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 				let casePattern = nil == segueIdentifier ?
@@ -224,9 +218,6 @@ extension Storyboard {
 
 				if nil != segueIdentifier { allCases += "\t\t\t\(segueName)," }
 
-				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
-				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
-				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 				numberOfCases += 1
 
 				if dstCast != dstRef {
@@ -244,7 +235,7 @@ extension Storyboard {
 				}
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-				if nil != segueIdentifier { seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(kind: .\(segue.kind))" }
+				if let segueIdentifier = segueIdentifier { seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind))" }
 			} else if segue.kind == "embed" { // , dstCast != dstRef {
 				var dstName: String
 				var segueIdentifier: String?
@@ -256,8 +247,7 @@ extension Storyboard {
 				} else if let customClass = dstElement.attribute(by: "customClass")?.text {
 					dstName = swiftRepresentation(for: customClass, firstLetter: .capitalize)
 				} else {
-					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
-						// swiftRepresentation(for: dstID, firstLetter: .capitalize)
+					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) + "_" + swiftRepresentation(for: dstID, firstLetter: .capitalize)
 				}
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 				let casePattern = nil == segueIdentifier ?
@@ -270,9 +260,6 @@ extension Storyboard {
 
 				if nil != segueIdentifier { allCases += "\t\t\t\(segueName)," }
 
-				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
-				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
-				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 				numberOfCases += 1
 
 				if dstCast != dstRef {
@@ -290,7 +277,7 @@ extension Storyboard {
 				}
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-				if nil != segueIdentifier { seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(kind: .\(segue.kind))" }
+				if let segueIdentifier = segueIdentifier { seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind))" }
 			} else if segue.kind == "relationship" { // , dstCast != dstRef {
 				let relationshipKind = segue.relationshipKind ?? ""
 
@@ -305,8 +292,7 @@ extension Storyboard {
 				} else if let customClass = dstElement.attribute(by: "customClass")?.text {
 					dstName += swiftRepresentation(for: customClass, firstLetter: .capitalize)
 				} else {
-					dstName += swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) // +
-						//swiftRepresentation(for: dstID, firstLetter: .capitalize)
+					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) + "_" + swiftRepresentation(for: dstID, firstLetter: .capitalize)
 				}
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 				let casePattern = nil == segueIdentifier ?
@@ -319,10 +305,6 @@ extension Storyboard {
 
 				if nil != segueIdentifier { allCases += "\t\t\t\(segueName)," }
 
-				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
-
-				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
-				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
 				numberOfCases += 1
 				
 				if dstCast != dstRef {
@@ -340,32 +322,17 @@ extension Storyboard {
 				}
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-				if nil != segueIdentifier { seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(kind: .\(segue.kind))" }
+				if let segueIdentifier = segueIdentifier { seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind))" }
 			}
 		}
 
-		if numberOfCases == 0 { // enumCases.isEmpty {
+		if numberOfCases == 0 {
 			return [String]()
 		}
-
-		//if !staticVarsValue.isEmpty {
-			// staticVarsValue += ""
-		//}
-
-		// staticVarsValue += enumCases
-		// enumCases = staticVarsValue
 
 		delegateMethods += "}"
 		delegateMethods += ""
 		defaultImplementation += "}"
-
-		// seguePatterns += "\t\t\t}"
-		// seguePatterns += "\t\t}"
-		// seguePatterns += ""
-
-		// matchPatterns += "\t\t\t}"
-		// matchPatterns += "\t\t}"
-		// matchPatterns += ""
 		
 		matchCases += "\t\tdefault:"
 		matchCases += "\t\t\tsuper.prepare(for: segue, sender: sender)"
@@ -382,23 +349,8 @@ extension Storyboard {
 		canUnwindCases += "\t\t\treturn super.canPerformUnwindSegueAction(action, from: from, withSender: sender)"
 		canUnwindCases += "\t\t}"
 		canUnwindCases += "\t}"
-/*
-		canUnwindCases += ""
-		canUnwindCases += "\t@available(iOS 13.0, *)"
-		canUnwindCases += "\toverride func canPerformUnwindSegueAction(_ action: Selector, from: UIViewController, sender: Any?) -> Bool {"
-		canUnwindCases += "\t\tsuper.canPerformUnwindSegueAction(action, from: from, withSender: sender ?? from)"
-		canUnwindCases += "\t}"
-		canUnwindCases += ""
-*/
-		// enumCases += ""
-/*
-		enumCases += "\t\tstatic var allCases: [TypedSegue] = ["
-		enumCases += allCases
-		enumCases += "\t\t]"
-		enumCases += ""
-*/
+
 		enumCases += seguePatterns
-		// enumCases += matchPatterns
 
 		seguesController = delegateMethods + defaultImplementation
 		if hasIdentifiableSegues {
