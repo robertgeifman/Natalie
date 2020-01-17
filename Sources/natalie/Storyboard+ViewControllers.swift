@@ -37,10 +37,11 @@ extension Storyboard {
 			}
 		}
 
+		var numberOfCases = 0
 		var enumCases = [String]()
 		var delegateMethods = [String]()
 		var defaultImplementation = [String]()
-		var matchPatterns = [String]()
+		// var matchPatterns = [String]()
 		var seguePatterns = [String]()
 		var canMatchCases = [String]()
 		var matchCases = [String]()
@@ -49,17 +50,17 @@ extension Storyboard {
 		var unwindMethods = [String]()
 		var initWithRawValue = [String]()
 		var staticVarsValue = [String]()
-		var allCases = [String]()
+		// var allCases = [String]()
 
 		delegateMethods += "protocol \(customClass)Scene: AnyScene {"
 
 		defaultImplementation += "extension \(customClass)Scene {"
 
-		matchPatterns += "\t\tvar matchPattern: (String?) {" //, String?, \(os.viewControllerType).Type, String?, \(os.viewControllerType).Type) {"
-		matchPatterns += "\t\t\tswitch self {"
+		// matchPatterns += "\t\tvar matchPattern: (String?) {" //, String?, \(os.viewControllerType).Type, String?, \(os.viewControllerType).Type) {"
+		// matchPatterns += "\t\t\tswitch self {"
 
-		seguePatterns += "\t\tvar segue: AnySegue {"
-		seguePatterns += "\t\t\tswitch self {"
+		// seguePatterns += "\t\tvar segue: AnySegue {"
+		// seguePatterns += "\t\t\tswitch self {"
 
 		matchCases += "\toverride func prepare(for segue: \(os.storyboardSegueType), sender: Any?) {"
 		matchCases += "\t\tguard let coordinator = _sceneCoordinator as? \(customClass)Scene else {"
@@ -124,9 +125,9 @@ extension Storyboard {
 				let unwindFunctionName = "unwind" + swiftRepresentation(for: segueID, firstLetter: .capitalize)
 				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
 			
-				allCases += "\t\t\t" + swiftIdentifier + ","
+				// allCases += "\t\t\t_" + swiftIdentifier + ","
 
-				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
 				delegateMethods += "\tfunc " + method
 				delegateMethods += "\tfunc " + canPerformMethod
@@ -169,9 +170,11 @@ extension Storyboard {
 				unwindMethods += "\t}"
 				unwindMethods += ""
 
-				enumCases += "\t\tcase \(swiftIdentifier) = \"\(segueID)\""
+				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(segueID)\""
+				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
+				numberOfCases += 1
 
-				canMatchCases += "\t\tcase Segues.\(swiftIdentifier).rawValue:"
+				canMatchCases += "\t\tcase Segues.\(swiftIdentifier).identifier:"
 				canMatchCases += "\t\t\treturn coordinator.\(canPerformFunctionName)(sender: sender)"
 
 				if dstCast != dstRef {
@@ -191,7 +194,8 @@ extension Storyboard {
 					canUnwindCases += "\t\t\treturn coordinator.\(canUnwindFunctionName)(from: from as! \(dstClass), sender: sender)"
 				}
 
-				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
+				// seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
+				seguePatterns += "\t\tstatic let \(swiftIdentifier) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind))"
 			} else if segue.kind == "presentation" { // , dstCast != dstRef {
 				var dstName: String
 				if let segueID = segue.identifier, !segueID.isEmpty {
@@ -209,10 +213,12 @@ extension Storyboard {
 				let functionName = "prepareToPresent" + dstName
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
-				allCases += "\t\t\t" + swiftIdentifier + ","
+				// allCases += "\t\t\t_" + swiftIdentifier + ","
 
-				enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
-				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
+				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
+				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+				numberOfCases += 1
 
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
@@ -229,7 +235,8 @@ extension Storyboard {
 				}
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+				// seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+				seguePatterns += "\t\tstatic let \(swiftIdentifier) = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			} else if segue.kind == "embed" { // , dstCast != dstRef {
 				var dstName: String
 				if let segueID = segue.identifier, !segueID.isEmpty {
@@ -247,10 +254,12 @@ extension Storyboard {
 				let functionName = "prepareToEmbed" + dstName
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
-				allCases += "\t\t\t" + swiftIdentifier + ","
+				// allCases += "\t\t\t_" + swiftIdentifier + ","
 
-				enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
-				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
+				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
+				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+				numberOfCases += 1
 
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
@@ -267,7 +276,8 @@ extension Storyboard {
 				}
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+				// seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+				seguePatterns += "\t\tstatic let \(swiftIdentifier) = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			} else if segue.kind == "relationship" { // , dstCast != dstRef {
 				let relationshipKind = segue.relationshipKind ?? ""
 
@@ -288,12 +298,14 @@ extension Storyboard {
 				let functionName = "prepareRelationship" + dstName
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
-				allCases += "\t\t\t" + swiftIdentifier + ","
+				// allCases += "\t\t\t_" + swiftIdentifier + ","
 
-				matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
+				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
-				enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
-
+				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
+				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
+				numberOfCases += 1
+				
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
@@ -309,11 +321,12 @@ extension Storyboard {
 				}
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-				seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+				// seguePatterns += "\t\t\tcase .\(swiftIdentifier):  return Segue<\(dstClass)>(kind: .\(segue.kind))"
+				seguePatterns += "\t\tstatic let \(swiftIdentifier) = Segue<\(dstClass)>(kind: .\(segue.kind))"
 			}
 		}
 
-		if enumCases.isEmpty {
+		if numberOfCases == 0 { // enumCases.isEmpty {
 			return [String]()
 		}
 
@@ -321,19 +334,19 @@ extension Storyboard {
 			staticVarsValue += ""
 		}
 
-		staticVarsValue += enumCases
-		enumCases = staticVarsValue
+		// staticVarsValue += enumCases
+		// enumCases = staticVarsValue
 
 		delegateMethods += "}"
 		delegateMethods += ""
 		defaultImplementation += "}"
 
-		seguePatterns += "\t\t\t}"
-		seguePatterns += "\t\t}"
+		// seguePatterns += "\t\t\t}"
+		// seguePatterns += "\t\t}"
 		seguePatterns += ""
 
-		matchPatterns += "\t\t\t}"
-		matchPatterns += "\t\t}"
+		// matchPatterns += "\t\t\t}"
+		// matchPatterns += "\t\t}"
 		// matchPatterns += ""
 		
 		matchCases += "\t\tdefault:"
@@ -359,13 +372,13 @@ extension Storyboard {
 		canUnwindCases += "\t}"
 		canUnwindCases += ""
 */
-		enumCases += ""
-		enumCases += "\t\tstatic var allCases = ["
-		enumCases += allCases
-		enumCases += "\t\t]"
-		enumCases += ""
+		// enumCases += ""
+		// enumCases += "\t\tstatic var allCases = ["
+		// enumCases += allCases
+		// enumCases += "\t\t]"
+		// enumCases += ""
 		enumCases += seguePatterns
-		enumCases += matchPatterns
+		// enumCases += matchPatterns
 
 		seguesController = delegateMethods + defaultImplementation
 		if hasIdentifiableSegues {
@@ -407,7 +420,7 @@ extension Storyboard {
 				output += "// MARK: - \(customClass)"
 				if !segues.isEmpty {
 					output += "extension \(customClass) {"
-					output += "\tenum Segues: String, CaseIterable {"
+					output += "\tenum Segues {" // : String, CaseIterable {"
 					output += segues
 					output += "\t}"
 					output += ""
