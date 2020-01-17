@@ -50,7 +50,7 @@ extension Storyboard {
 		var unwindMethods = [String]()
 		var initWithRawValue = [String]()
 		var staticVarsValue = [String]()
-		// var allCases = [String]()
+		var allCases = [String]()
 
 		delegateMethods += "protocol \(customClass)Scene: AnyScene {"
 
@@ -126,6 +126,7 @@ extension Storyboard {
 				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
 			
 				// allCases += "\t\t\t_" + swiftIdentifier + ","
+				allCases += "\t\t\t\(swiftIdentifier),"
 
 				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
@@ -214,6 +215,7 @@ extension Storyboard {
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				// allCases += "\t\t\t_" + swiftIdentifier + ","
+				allCases += "\t\t\t\(swiftIdentifier),"
 
 				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
 				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
@@ -255,6 +257,7 @@ extension Storyboard {
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				// allCases += "\t\t\t_" + swiftIdentifier + ","
+				allCases += "\t\t\t\(swiftIdentifier),"
 
 				// enumCases += "\t\tcase \(swiftIdentifier) = \"\(dstID)\""
 				// enumCases += "\t\tcase _\(swiftIdentifier) = \(swiftIdentifier).identifier.rawValue"
@@ -299,6 +302,7 @@ extension Storyboard {
 				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
 
 				// allCases += "\t\t\t_" + swiftIdentifier + ","
+				allCases += "\t\t\t\(swiftIdentifier),"
 
 				// matchPatterns += "\t\t\tcase .\(swiftIdentifier): return \(pattern)"
 
@@ -331,7 +335,7 @@ extension Storyboard {
 		}
 
 		if !staticVarsValue.isEmpty {
-			staticVarsValue += ""
+			// staticVarsValue += ""
 		}
 
 		// staticVarsValue += enumCases
@@ -343,7 +347,7 @@ extension Storyboard {
 
 		// seguePatterns += "\t\t\t}"
 		// seguePatterns += "\t\t}"
-		seguePatterns += ""
+		// seguePatterns += ""
 
 		// matchPatterns += "\t\t\t}"
 		// matchPatterns += "\t\t}"
@@ -373,10 +377,10 @@ extension Storyboard {
 		canUnwindCases += ""
 */
 		// enumCases += ""
-		// enumCases += "\t\tstatic var allCases = ["
-		// enumCases += allCases
-		// enumCases += "\t\t]"
-		// enumCases += ""
+		enumCases += "\t\tstatic var allCases: [TypedSegue] = ["
+		enumCases += allCases
+		enumCases += "\t\t]"
+		enumCases += ""
 		enumCases += seguePatterns
 		// enumCases += matchPatterns
 
