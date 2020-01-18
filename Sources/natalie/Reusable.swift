@@ -7,7 +7,6 @@
 //
 
 class Reusable: XMLObject {
-
     let kind: String
     lazy var customClass: String? = self.xml.element?.attribute(by: "customClass")?.text
     lazy var reuseIdentifier: String? = {
@@ -22,5 +21,4 @@ class Reusable: XMLObject {
         kind = xml.element!.name
         super.init(xml: xml)
     }
-
 }

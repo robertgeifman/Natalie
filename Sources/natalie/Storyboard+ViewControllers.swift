@@ -136,19 +136,19 @@ extension Storyboard {
 				delegateMethods += "\tfunc " + unwindMethod
 
 				defaultImplementation += "\tfunc " + method + " {"
-				defaultImplementation += "\t\tNSLog(\"\(customClass).\(method)\")"
+				defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
 				defaultImplementation += "\t}"
 
 				defaultImplementation += "\tfunc " + canPerformMethod + " {"
-				defaultImplementation += "\t\tNSLog(\"\(customClass).\(canPerformMethod)\"); return true"
+				defaultImplementation += "\t\tprint(\"func \(customClass).\(canPerformMethod) {\\n}\"); return true"
 				defaultImplementation += "\t}"
 
 				defaultImplementation += "\tfunc " + canUnwindMethod + " {"
-				defaultImplementation +=  "\t\tNSLog(\"\(customClass).\(canUnwindMethod)\"); return true"
+				defaultImplementation +=  "\t\tprint(\"func \(customClass).\(canUnwindMethod) {\\n}\"); return true"
 				defaultImplementation += "\t}"
 
 				defaultImplementation += "\tfunc " + unwindMethod + " {"
-				defaultImplementation +=  "\t\tNSLog(\"\(customClass).\(unwindMethod)\")"
+				defaultImplementation +=  "\t\tprint(\"func \(customClass).\(unwindMethod) {\\n}\")"
 				defaultImplementation += "\t}"
 
 				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
@@ -224,7 +224,7 @@ extension Storyboard {
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tNSLog(\"\(customClass).\(method)\")"
+					defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
 					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -267,7 +267,7 @@ extension Storyboard {
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tNSLog(\"\(customClass).\(method)\")"
+					defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
 					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -313,7 +313,7 @@ extension Storyboard {
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tNSLog(\"\(customClass).\(method)\")"
+					defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
 					defaultImplementation += "\t}"	
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -429,10 +429,10 @@ extension Storyboard {
 			for reusable in reusables {
 				if let identifier = reusable.reuseIdentifier {
 					if let customClass = reusable.customClass {
-						output += "\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)): Reusable { .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass).self) }"
+						output += "\t\tstatic var \(swiftRepresentation(for: identifier, doNotShadow: reusable.customClass)) = Reusable(\"\(identifier)\", .\(reusable.kind), \(customClass).self)"
 					} else {
 						let customClass = os.reusableItemsMap[reusable.kind]
-						output += "\t\tstatic var \(swiftRepresentation(for: identifier)): Reusable { .init(\"\(identifier)\", \"\(reusable.kind)\", \(customClass!).self) }"
+						output += "\t\tstatic var \(swiftRepresentation(for: identifier)) = Reusable(\"\(identifier)\", .\(reusable.kind), \(customClass!).self)"
 					}
 				}
 			}
