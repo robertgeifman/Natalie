@@ -311,7 +311,7 @@ extension Storyboard {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
 					defaultImplementation += "\t\tNSLog(\"\(customClass).\(method)\")"
-					defaultImplementation += "\t}"
+					defaultImplementation += "\t}"	
 
 					matchCases += "\t\tcase \(casePattern):"
 					if dstCast == "_" {
