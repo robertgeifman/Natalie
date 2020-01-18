@@ -120,7 +120,7 @@ extension Storyboard {
 				let canPerformMethod = "\(canPerformFunctionName)(sender: Any?) -> Bool"
 
 				let functionName = "prepareForSegue" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
 
 				let canUnwindFunctionName = "canUnwind" + dstName
 				let canUnwindMethod = "\(canUnwindFunctionName)(from: \(dstClass), sender: Any?) -> Bool"
@@ -181,7 +181,8 @@ extension Storyboard {
 					if dstCast == "_" {
 						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController, sender: sender)"
 					} else {
-						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController as? \(dstClass), sender: sender)"
+						matchCases += "\t\t\tguard let dst = segue.destinationController as? \(dstClass) else { runtimeError(in: self) }"
+						matchCases += "\t\t\tcoordinator.\(functionName)(dst, sender: sender)"
 					}
 					initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 //				}
@@ -214,7 +215,7 @@ extension Storyboard {
 					
 				let swiftIdentifier = "present" + dstName
 				let functionName = "prepareToPresent" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
 
 				if nil != segueIdentifier { allCases += "\t\t\t\(segueName)," }
 
@@ -230,7 +231,8 @@ extension Storyboard {
 					if dstCast == "_" {
 						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController, sender: sender)"
 					} else {
-						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController as? \(dstClass), sender: sender)"
+						matchCases += "\t\t\tguard let dst = segue.destinationController as? \(dstClass) else { runtimeError(in: self) }"
+						matchCases += "\t\t\tcoordinator.\(functionName)(dst, sender: sender)"
 					}
 				}
 				
@@ -256,7 +258,7 @@ extension Storyboard {
 
 				let swiftIdentifier = "embed" + dstName
 				let functionName = "prepareToEmbed" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
 
 				if nil != segueIdentifier { allCases += "\t\t\t\(segueName)," }
 
@@ -272,7 +274,8 @@ extension Storyboard {
 					if dstCast == "_" {
 						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController, sender: sender)"
 					} else {
-						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController as? \(dstClass), sender: sender)"
+						matchCases += "\t\t\tguard let dst = segue.destinationController as? \(dstClass) else { runtimeError(in: self) }"
+						matchCases += "\t\t\tcoordinator.\(functionName)(dst, sender: sender)"
 					}
 				}
 				
@@ -301,7 +304,7 @@ extension Storyboard {
 
 				let swiftIdentifier = "relationship" + dstName
 				let functionName = "prepareRelationship" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass)?, sender: Any?)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
 
 				if nil != segueIdentifier { allCases += "\t\t\t\(segueName)," }
 
@@ -317,7 +320,8 @@ extension Storyboard {
 					if dstCast == "_" {
 						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController, sender: sender)"
 					} else {
-						matchCases += "\t\t\tcoordinator.\(functionName)(segue.destinationController as? \(dstClass), sender: sender)"
+						matchCases += "\t\t\tguard let dst = segue.destinationController as? \(dstClass) else { runtimeError(in: self) }"
+						matchCases += "\t\t\tcoordinator.\(functionName)(dst, sender: sender)"
 					}
 				}
 				
