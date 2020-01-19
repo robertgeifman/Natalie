@@ -112,15 +112,16 @@ extension Storyboard {
 					if let customSegueClassAttr = segue.xml.element?.attribute(by: "customClass") {
 						let customSegueClass = customSegueClassAttr.text
 						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind)(\(customSegueClass).self)) {"
-						seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
-						seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+						seguePatterns += "\t\t\tsource, destination, segue, kind in"
+						seguePatterns += "\t\t\tsource.\(functionName)(destination, sender: source)"
 						seguePatterns += "\t\t}"
 					} else {
 						seguePatterns += "\t\t#warning(\"no custom class set for segue \(segueName) to \(dstClass) (\(segueID))\")"
 					}
 				} else {
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind)) {"
-					seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+					seguePatterns += "\t\t\tsource, destination, segue, kind in"
+					seguePatterns += "\t\t\tsource.\(functionName)(destination, sender: source)"
 					seguePatterns += "\t\t}"
 				}
 
@@ -212,7 +213,8 @@ extension Storyboard {
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
-					seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+					seguePatterns += "\t\t\tsource, destination, segue, kind in"
+					seguePatterns += "\t\t\tsource.\(functionName)(destination, sender: source)"
 					seguePatterns += "\t\t}"
 				}
 
@@ -261,7 +263,8 @@ extension Storyboard {
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
-					seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+					seguePatterns += "\t\t\tsource, destination, segue, kind in"
+					seguePatterns += "\t\t\tsource.\(functionName)(destination, sender: source)"
 					seguePatterns += "\t\t}"
 				}
 
@@ -312,7 +315,8 @@ extension Storyboard {
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
-					seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+					seguePatterns += "\t\t\tsource, destination, segue, kind in"
+					seguePatterns += "\t\t\tsource.\(functionName)(destination, sender: source)"
 					seguePatterns += "\t\t}"
 				}
 
@@ -420,7 +424,8 @@ extension Storyboard {
 					output += "\t\tpublic var type: UIViewController.Type { Destination.self }"
 					output += ""
 					
-					output += "\t\tpublic init(_ identifier: TypedSegue.Identifier? = nil, kind: SegueKind, prepare: @escaping (Source, Destination, UIStoryboardSegue, Self) -> Void = { _, _, _, _ in }) {"
+					output += "\t\tpublic init(_ identifier: TypedSegue.Identifier? = nil, kind: SegueKind, "
+					output += "\t\t\tprepare: @escaping (Source, Destination, UIStoryboardSegue, Self) -> Void = { _, _, _, _ in }) {"
 					output += "\t\t\tself.identifier = identifier"
 					output += "\t\t\tself.kind = kind"
 					output += "\t\t\tself.prepare = prepare"
@@ -440,7 +445,20 @@ extension Storyboard {
 					output += "\t\t\t\tfatalError(\"\\(segueDescription()): expected destination view controller hierarchy to include \\(Destination.self)\")"
 					output += "\t\t\t}"
 					output += ""
-					output += "\t\t\tsegue.prepare(self, destination)"
+					output += "\t\t\tsegue.prepare(self, destination, storyboardSegue, segue)"
+					output += "\t\t}"
+					output += "\t}"
+					output += ""
+					output += "\tfunc perform<Destination>(_ segue: Segue<Destination>, "
+					output += "\t\tprepare: @escaping (\(customClass), Destination, UIStoryboardSegue, Segue<Destination>) -> Void) {"
+					output += "\t\tguard let segueIdentifier = segue.identifier else { runtimeError(in: self) }"
+					output += ""
+					output += "\t\tperformSegue(withIdentifier: segueIdentifier) { [segueDescription = { String(reflecting: segue) }] storyboardSegue, _ in"
+					output += "\t\t\tguard let destination = storyboardSegue.destinationViewController(ofType: Destination.self) else {"
+					output += "\t\t\t\tfatalError(\"\\(segueDescription()): expected destination view controller hierarchy to include \\(Destination.self)\")"
+					output += "\t\t\t}"
+					output += ""
+					output += "\t\t\tprepare(self, destination, storyboardSegue, segue)"
 					output += "\t\t}"
 					output += "\t}"
 					output += ""
