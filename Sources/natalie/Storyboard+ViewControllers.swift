@@ -82,7 +82,6 @@ extension Storyboard {
 			let dstCastUnwind = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass)"
 			// let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
 			let dstRef = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "\(dstStoryboardID.unwrappedPattern)"
-
 			if let value = patterns[pattern], value > 1 {
 				continue
 			}
@@ -109,8 +108,21 @@ extension Storyboard {
 				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
 		
 				allCases += "\t\t\t\(segueName),"
-				seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind), " +
-					"prepare: { $0.\(functionName)($1, sender: $0) } )"
+				if segue.kind == "custom" {
+					if let customSegueClassAttr = segue.xml.element?.attribute(by: "customClass") {
+						let customSegueClass = customSegueClassAttr.text
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind)(\(customSegueClass).self)) {"
+						seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+						seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+						seguePatterns += "\t\t}"
+					} else {
+						seguePatterns += "\t\t#warning(\"no custom class set for segue \(segueName) to \(dstClass) (\(segueID))\")"
+					}
+				} else {
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueID)\", kind: .\(segue.kind)) {"
+					seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+					seguePatterns += "\t\t}"
+				}
 
 				delegateMethods += "\tfunc " + method
 				delegateMethods += "\tfunc " + canPerformMethod
@@ -174,7 +186,7 @@ extension Storyboard {
 				} else {
 					canUnwindCases += "\t\t\treturn sceneCoordinator.\(canUnwindFunctionName)(from: from as! \(dstClass), sender: sender)"
 				}
-			} else if segue.kind == "presentation" { // , dstCast != dstRef {
+			} else if segue.kind == "presentation" {
 				var dstName: String
 				var segueIdentifier: String?
 				if let segueID = segue.identifier, !segueID.isEmpty {
@@ -199,8 +211,9 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind), " +
-						"prepare: { $0.\(functionName)($1, sender: $0) } )"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
+					seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+					seguePatterns += "\t\t}"
 				}
 
 				numberOfCases += 1
@@ -221,7 +234,7 @@ extension Storyboard {
 				}
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-			} else if segue.kind == "embed" { // , dstCast != dstRef {
+			} else if segue.kind == "embed" {
 				var dstName: String
 				var segueIdentifier: String?
 				if let segueID = segue.identifier, !segueID.isEmpty {
@@ -247,8 +260,9 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind), " +
-						"prepare: { $0.\(functionName)($1, sender: $0) } )"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
+					seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+					seguePatterns += "\t\t}"
 				}
 
 				numberOfCases += 1
@@ -269,7 +283,7 @@ extension Storyboard {
 				}
 				
 				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-			} else if segue.kind == "relationship" { // , dstCast != dstRef {
+			} else if segue.kind == "relationship" {
 				let relationshipKind = segue.relationshipKind ?? ""
 
 				var dstName = swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + "To"
@@ -297,8 +311,9 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind), " +
-						"prepare: { $0.\(functionName)($1, sender: $0) } )"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass)>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
+					seguePatterns += "\t\t\t$0.\(functionName)($1, sender: $0)"
+					seguePatterns += "\t\t}"
 				}
 
 				numberOfCases += 1
@@ -399,13 +414,13 @@ extension Storyboard {
 					output += "\t\ttypealias Source = \(customClass)"
 					output += "\t\tpublic let identifier: TypedSegue.Identifier?"
 					output += "\t\tpublic let kind: SegueKind"
-					output += "\t\tpublic let prepare: (Source, Destination) -> Void"
+					output += "\t\tpublic let prepare: (Source, Destination, UIStoryboardSegue, Self) -> Void"
 					output += ""
 					
 					output += "\t\tpublic var type: UIViewController.Type { Destination.self }"
 					output += ""
 					
-					output += "\t\tpublic init(_ identifier: TypedSegue.Identifier? = nil, kind: SegueKind, prepare: @escaping (Source, Destination) -> Void = { _, _ in }) {"
+					output += "\t\tpublic init(_ identifier: TypedSegue.Identifier? = nil, kind: SegueKind, prepare: @escaping (Source, Destination, UIStoryboardSegue, Self) -> Void = { _, _, _, _ in }) {"
 					output += "\t\t\tself.identifier = identifier"
 					output += "\t\t\tself.kind = kind"
 					output += "\t\t\tself.prepare = prepare"
