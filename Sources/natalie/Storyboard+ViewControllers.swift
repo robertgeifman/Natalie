@@ -175,7 +175,7 @@ extension Storyboard {
 					if dstCast == "_" {
 						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
 					} else {
-						matchCases += "\t\t\tguard let dst = segue.destinationController as? \(dstClass) else { runtimeError(in: self) }"
+						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
 						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
 					}
 					initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
@@ -230,7 +230,7 @@ extension Storyboard {
 					if dstCast == "_" {
 						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
 					} else {
-						matchCases += "\t\t\tguard let dst = segue.destinationController as? \(dstClass) else { runtimeError(in: self) }"
+						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
 						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
 					}
 				}
@@ -280,7 +280,7 @@ extension Storyboard {
 					if dstCast == "_" {
 						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
 					} else {
-						matchCases += "\t\t\tguard let dst = segue.destinationController as? \(dstClass) else { runtimeError(in: self) }"
+						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
 						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
 					}
 				}
@@ -332,7 +332,7 @@ extension Storyboard {
 					if dstCast == "_" {
 						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
 					} else {
-						matchCases += "\t\t\tguard let dst = segue.destinationController as? \(dstClass) else { runtimeError(in: self) }"
+						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
 						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
 					}
 				}
@@ -438,12 +438,11 @@ extension Storyboard {
 					output += "\t}"
 					output += ""
 					output += "\tfunc perform<Destination>(_ segue: Segue<Destination>)  {"
-					output += "\t\tguard let segueIdentifier = segue.identifier else { runtimeError(in: self) }"
+					output += "\t\tlet segueIdentifier = segue.identifier.require()"
 					output += ""
 					output += "\t\tperformSegue(withIdentifier: segueIdentifier) { [segueDescription = { String(reflecting: segue) }] storyboardSegue, _ in"
-					output += "\t\t\tguard let destination = storyboardSegue.destinationViewController(ofType: Destination.self) else {"
-					output += "\t\t\t\tfatalError(\"\\(segueDescription()): expected destination view controller hierarchy to include \\(Destination.self)\")"
-					output += "\t\t\t}"
+					output += "\t\t\tlet destination = storyboardSegue.destinationViewController(ofType: Destination.self)"
+					output += "\t\t\t\t.require(\"\\(segueDescription()): expected destination view controller hierarchy to include \\(Destination.self)\")"
 					output += ""
 					output += "\t\t\tsegue.prepare(self, destination, storyboardSegue, segue)"
 					output += "\t\t}"
@@ -451,12 +450,11 @@ extension Storyboard {
 					output += ""
 					output += "\tfunc perform<Destination>(_ segue: Segue<Destination>, "
 					output += "\t\tprepare: @escaping (\(customClass), Destination, UIStoryboardSegue, Segue<Destination>) -> Void) {"
-					output += "\t\tguard let segueIdentifier = segue.identifier else { runtimeError(in: self) }"
+					output += "\t\tlet segueIdentifier = segue.identifier.require()"
 					output += ""
 					output += "\t\tperformSegue(withIdentifier: segueIdentifier) { [segueDescription = { String(reflecting: segue) }] storyboardSegue, _ in"
-					output += "\t\t\tguard let destination = storyboardSegue.destinationViewController(ofType: Destination.self) else {"
-					output += "\t\t\t\tfatalError(\"\\(segueDescription()): expected destination view controller hierarchy to include \\(Destination.self)\")"
-					output += "\t\t\t}"
+					output += "\t\t\tlet destination = storyboardSegue.destinationViewController(ofType: Destination.self)"
+					output += "\t\t\t\t.require(\"\\(segueDescription()): expected destination view controller hierarchy to include \\(Destination.self)\")"
 					output += ""
 					output += "\t\t\tprepare(self, destination, storyboardSegue, segue)"
 					output += "\t\t}"
