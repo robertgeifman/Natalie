@@ -160,7 +160,6 @@ extension Storyboard {
 					unwindMethods += "\t\tguard let destination = segue.destination as? \(srcClass) else { return }"
 				}
 				
-				unwindMethods += ""
 				unwindMethods += "\t\tsceneCoordinator.\(unwindFunctionName)(from: source, to: destination)"
 				unwindMethods += "\t}"
 				unwindMethods += ""
@@ -170,16 +169,14 @@ extension Storyboard {
 				canMatchCases += "\t\tcase Segues.\(segueName).identifier:"
 				canMatchCases += "\t\t\treturn sceneCoordinator.\(canPerformFunctionName)(sender: sender)"
 
-//				if dstCast != dstRef {
-					matchCases += "\t\tcase \(casePattern):"
-					if dstCast == "_" {
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
-					} else {
-						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
-					}
-					initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-//				}
+				matchCases += "\t\tcase \(casePattern):"
+				if dstCast == "_" {
+					matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
+				} else {
+					matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
+					matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
+				}
+				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
 				
 				canUnwindCases += "\t\tcase (#selector(\(unwindFunctionName)(segue:)), \(dstCastUnwind)):"
 				if dstCast == "_" {
