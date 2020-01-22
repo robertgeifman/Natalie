@@ -86,7 +86,7 @@ extension Storyboard {
 				output += "}"
 				output += ""
 			} else {
-				output += "#warning(\"\(customClass) scene has no storyboardID set in the storyboard\")"
+				output += "#error(\"\(customClass) scene has no storyboardID set in the storyboard\")"
 			}
 		}
 		return output
