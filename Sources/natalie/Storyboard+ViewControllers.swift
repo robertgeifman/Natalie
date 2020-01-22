@@ -454,7 +454,7 @@ extension Storyboard {
 					output += segues
 					output += "\t}"
 					output += ""
-					output += "\tfunc perform<Destination: UIViewController, T: UIStoryboardSegue>(_ segue: Segue<Destination, T>)  {"
+					output += "\tfunc perform<Destination: UIViewController, T: UIStoryboardSegue>(_ segue: Segue<Destination, T>) {"
 					output += "\t\tlet segueIdentifier = segue.identifier.require()"
 					output += ""
 					output += "\t\tperformSegue(withIdentifier: segueIdentifier) { [segueDescription = { String(reflecting: segue) }] storyboardSegue, _ in"
