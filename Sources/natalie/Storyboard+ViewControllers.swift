@@ -60,9 +60,6 @@ extension Storyboard {
 		canMatchCases += "\toverride func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {"
 		canMatchCases += "\t\tswitch identifier {"
 
-		canUnwindCases += "\toverride func canPerformUnwindSegueAction(_ action: Selector, from: UIViewController, withSender sender: Any) -> Bool {"
-		canUnwindCases += "\t\tswitch (action, from) {"
-
 		var hasIdentifiableSegues = false
 		for segue in segues {
 			guard let srcElement = segue.source.viewController,
@@ -110,7 +107,7 @@ extension Storyboard {
 						delegateMethods += "\tfunc " + method
 
 						defaultImplementation += "\tfunc " + method + " {"
-						defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
+						defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 						defaultImplementation += "\t}"
 
 						matchCases += "\t\tcase \(casePattern):"
@@ -133,7 +130,7 @@ extension Storyboard {
 					delegateMethods += "\tfunc " + method
 
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
+					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -161,15 +158,15 @@ extension Storyboard {
 				delegateMethods += "\tfunc " + unwindMethod
 
 				defaultImplementation += "\tfunc " + canPerformMethod + " {"
-				defaultImplementation += "\t\tprint(\"func \(customClass).\(canPerformMethod) {\\n}\"); return true"
+				defaultImplementation += "\t\tprint(\"\(customClass).\(canPerformMethod)\"); return true"
 				defaultImplementation += "\t}"
 
 				defaultImplementation += "\tfunc " + canUnwindMethod + " {"
-				defaultImplementation +=  "\t\tprint(\"func \(customClass).\(canUnwindMethod) {\\n}\"); return true"
+				defaultImplementation +=  "\t\tprint(\"\(customClass).\(canUnwindMethod)\"); return true"
 				defaultImplementation += "\t}"
 
 				defaultImplementation += "\tfunc " + unwindMethod + " {"
-				defaultImplementation +=  "\t\tprint(\"func \(customClass).\(unwindMethod) {\\n}\")"
+				defaultImplementation +=  "\t\tprint(\"\(customClass).\(unwindMethod)\")"
 				defaultImplementation += "\t}"
 
 				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
@@ -238,7 +235,7 @@ extension Storyboard {
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
+					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -287,7 +284,7 @@ extension Storyboard {
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
+					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -338,7 +335,7 @@ extension Storyboard {
 				if dstCast != dstRef {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tprint(\"func \(customClass).\(method) {\\n}\")"
+					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 					defaultImplementation += "\t}"	
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -373,17 +370,16 @@ extension Storyboard {
 		canMatchCases += "\t}"
 		canMatchCases += ""
 
+		// tweaked so that 13.* does not give me grief
+		canUnwindCases.insert("\t@available(iOS 13, *)", at: 0)
+		canUnwindCases.insert("\toverride func canPerformUnwindSegueAction(_ action: Selector, from: UIViewController, sender: Any?) -> Bool {", at: 1)
+		canUnwindCases.insert("\t\tswitch (action, from) {", at: 2)
+
 		canUnwindCases += "\t\tdefault:"
-		canUnwindCases += "\t\t\treturn super.canPerformUnwindSegueAction(action, from: from, withSender: sender)"
+		canUnwindCases += "\t\t\treturn super.canPerformUnwindSegueAction(action, from: from, sender: sender)"
 		canUnwindCases += "\t\t}"
 		canUnwindCases += "\t}"
-/*
-		var performSegue = [String]()
-		performSegue += ""
-		performSegue += "\tfunc perform(_ segue: Segue) {"
-		performSegue += "\t\tperform(segue, prepare: segue.prepare)"
-		performSegue += "\t}"
-*/
+		
 		enumCases += seguePatterns
 
 		seguesController = delegateMethods + defaultImplementation
@@ -410,11 +406,10 @@ extension Storyboard {
 			var seguesController = [String]()
 			var prepareForSegue = [String]()
 			let segues = processSegues(sceneSegues, customClass, &seguesController, &prepareForSegue)
+			let reusables = processReusables(sceneReusables)
 
 			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)
-			let sceneClass_noSegues = segues.isEmpty ? processIdentifier_noSegues(scene: scene, storyboardCustomModules: storyboardCustomModules) : []
-
-			let reusables = processReusables(sceneReusables)
+			let sceneClass_noSegues = (seguesController.isEmpty) ? processIdentifier_noSegues(scene: scene, storyboardCustomModules: storyboardCustomModules) : []
 
 			if !segues.isEmpty || !reusables.isEmpty {
 				output += "// MARK: - \(customClass)Scene"
@@ -447,7 +442,7 @@ extension Storyboard {
 					output += "\t\t}"
 					output += ""
 					output += "\t\tpublic func typedSegue(for storyboardSegue: UIStoryboardSegue) -> T { (storyboardSegue as? T).require() }"
-					output += "}"
+					output += "\t}"
 					output += ""
 
 					output += "\tenum Segues {"
@@ -508,12 +503,12 @@ extension Storyboard {
 					if let customClass = reusable.customClass {
 						let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize, doNotShadow: customClass)
 						let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
-						output += "\t\tstatic var \(reusableIdentifier) = Reusable(\"\(identifier)\", .\(reusable.kind), \(customClass).self)"
+						output += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(identifier: \"\(identifier)\", kind: .\(reusable.kind))"
 					} else {
 						let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize)
 						let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
 						let customClass = os.reusableItemsMap[reusable.kind]
-						output += "\t\tstatic var \(reusableIdentifier) = Reusable(\"\(identifier)\", .\(reusable.kind), \(customClass!).self)"
+						output += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass!)>(identifier: \"\(identifier)\", kind: .\(reusable.kind))"
 					}
 				}
 			}
