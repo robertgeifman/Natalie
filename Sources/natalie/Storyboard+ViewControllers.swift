@@ -100,7 +100,7 @@ extension Storyboard {
 						
 						let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: \(customSegueClass))"
 
-						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass), \(customSegueClass)>(\"\(segueID)\", kind: .\(segue.kind)) {"
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), \(customSegueClass)>(\"\(segueID)\", kind: .\(segue.kind)) {"
 						seguePatterns += "\t\t\tsource, destination, segue in source.\(functionName)(destination, sender: source, segue: segue)"
 						seguePatterns += "\t\t}"
 
@@ -123,7 +123,7 @@ extension Storyboard {
 				} else {
 					let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
 
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass), UIStoryboardSegue>(\"\(segueID)\", kind: .\(segue.kind)) {"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), UIStoryboardSegue>(\"\(segueID)\", kind: .\(segue.kind)) {"
 					seguePatterns += "\t\t\tsource, destination, _ in source.\(functionName)(destination, sender: source)"
 					seguePatterns += "\t\t}"
 
@@ -225,7 +225,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
 					seguePatterns += "\t\t\tsource, destination, _ in source.\(functionName)(destination, sender: source)"
 					seguePatterns += "\t\t}"
 				}
@@ -274,7 +274,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
 					seguePatterns += "\t\t\tsource, destination, _ in source.\(functionName)(destination, sender: source)"
 					seguePatterns += "\t\t}"
 				}
@@ -325,7 +325,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
 					seguePatterns += "\t\t\tsource, destination, _ in source.\(functionName)(destination, sender: source)"
 					seguePatterns += "\t\t}"
 				}
@@ -422,34 +422,12 @@ extension Storyboard {
 				output += "// MARK: - \(customClass)"
 				if !segues.isEmpty {
 					output += "extension \(customClass) {"
-					output += "\tpublic struct Segue<Destination: UIViewController, T: UIStoryboardSegue>: TypedSegue {"
-					output += "\t\ttypealias Source = \(customClass)"
-					output += "\t\tpublic let identifier: TypedSegue.Identifier?"
-					output += "\t\tpublic let kind: SegueKind"
-					output += "\t\tpublic let customClass: T.Type"
-					output += "\t\tpublic let prepare: (Source, Destination, T) -> Void"
-					output += ""
-					
-					output += "\t\tpublic var type: UIViewController.Type { Destination.self }"
-					output += ""
-					
-					output += "\t\tpublic init(_ identifier: TypedSegue.Identifier? = nil, kind: SegueKind, "
-					output += "\t\t\tprepare: @escaping (Source, Destination, T) -> Void = { _, _, _ in }) {"
-					output += "\t\t\tself.identifier = identifier"
-					output += "\t\t\tself.kind = kind"
-					output += "\t\t\tself.customClass = T.self"
-					output += "\t\t\tself.prepare = prepare"
-					output += "\t\t}"
-					output += ""
-					output += "\t\tpublic func typedSegue(for storyboardSegue: UIStoryboardSegue) -> T { (storyboardSegue as? T).require() }"
-					output += "\t}"
-					output += ""
-
 					output += "\tenum Segues {"
 					output += segues
 					output += "\t}"
 					output += ""
-					output += "\tfunc perform<Destination: UIViewController, T: UIStoryboardSegue>(_ segue: Segue<Destination, T>) {"
+					output += "\t@available(*, deprecated)"
+					output += "\tfunc perform<Destination: UIViewController, T: UIStoryboardSegue>(_ segue: Segue<\(customClass), Destination, T>) {"
 					output += "\t\tlet segueIdentifier = segue.identifier.require()"
 					output += ""
 					output += "\t\tperformSegue(withIdentifier: segueIdentifier) { [segueDescription = { String(reflecting: segue) }] storyboardSegue, _ in"
@@ -460,7 +438,8 @@ extension Storyboard {
 					output += "\t\t}"
 					output += "\t}"
 					output += ""
-					output += "\tfunc perform<Destination: UIViewController, T: UIStoryboardSegue>(_ segue: Segue<Destination, T>, "
+					output += "\t@available(*, deprecated)"
+					output += "\tfunc perform<Destination: UIViewController, T: UIStoryboardSegue>(_ segue: Segue<\(customClass), Destination, T>, "
 					output += "\t\tprepare: @escaping (\(customClass), Destination, T) -> Void) {"
 					output += "\t\tlet segueIdentifier = segue.identifier.require()"
 					output += ""
