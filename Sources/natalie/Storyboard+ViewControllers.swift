@@ -100,7 +100,7 @@ extension Storyboard {
 						
 						let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: \(customSegueClass))"
 
-						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customSegueClass), \(dstClass)>(\"\(segueID)\", segueKind: .\(segue.kind))"
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customSegueClass), \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
 
 						delegateMethods += "\tfunc " + method
 
@@ -121,7 +121,7 @@ extension Storyboard {
 				} else {
 					let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
 
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(\"\(segueID)\", segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
 
 					delegateMethods += "\tfunc " + method
 
@@ -221,7 +221,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(\"\(segueIdentifier)\", segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
 
 				numberOfCases += 1
@@ -268,7 +268,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(\"\(segueIdentifier)\", segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
 
 				numberOfCases += 1
@@ -317,7 +317,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(\"\(segueIdentifier)\", segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
 
 				numberOfCases += 1
@@ -450,12 +450,12 @@ extension Storyboard {
 					if let customClass = reusable.customClass {
 						let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize, doNotShadow: customClass)
 						let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
-						output += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(identifier: \"\(identifier)\", kind: .\(reusable.kind))"
+						output += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
 					} else {
 						let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize)
 						let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
 						let customClass = os.reusableItemsMap[reusable.kind]
-						output += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass!)>(identifier: \"\(identifier)\", kind: .\(reusable.kind))"
+						output += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass!)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
 					}
 				}
 			}
