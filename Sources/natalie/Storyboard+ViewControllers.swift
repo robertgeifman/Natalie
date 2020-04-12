@@ -100,9 +100,7 @@ extension Storyboard {
 						
 						let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: \(customSegueClass))"
 
-						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), \(customSegueClass)>(\"\(segueID)\", kind: .\(segue.kind)) {"
-						seguePatterns += "\t\t\tsource, destination, segue in source.\(functionName)(destination, sender: source, segue: segue)"
-						seguePatterns += "\t\t}"
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customSegueClass), \(dstClass)>(\"\(segueID)\", segueKind: .\(segue.kind))"
 
 						delegateMethods += "\tfunc " + method
 
@@ -121,11 +119,9 @@ extension Storyboard {
 						seguePatterns += "\t\t#error(\"no custom class set for segue \(segueName) to \(dstClass) (\(segueID))\")"
 					}
 				} else {
-					let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
+					let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
 
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), UIStoryboardSegue>(\"\(segueID)\", kind: .\(segue.kind)) {"
-					seguePatterns += "\t\t\tsource, destination, _ in source.\(functionName)(destination, sender: source)"
-					seguePatterns += "\t\t}"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(\"\(segueID)\", segueKind: .\(segue.kind))"
 
 					delegateMethods += "\tfunc " + method
 
@@ -135,10 +131,10 @@ extension Storyboard {
 
 					matchCases += "\t\tcase \(casePattern):"
 					if dstCast == "_" {
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender, segue: segue)"
 					} else {
 						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender, segue: segue)"
 					}
 				}
 
@@ -221,13 +217,11 @@ extension Storyboard {
 					
 				let swiftIdentifier = "present" + dstName
 				let functionName = "prepareToPresent" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
-					seguePatterns += "\t\t\tsource, destination, _ in source.\(functionName)(destination, sender: source)"
-					seguePatterns += "\t\t}"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(\"\(segueIdentifier)\", segueKind: .\(segue.kind))"
 				}
 
 				numberOfCases += 1
@@ -240,10 +234,10 @@ extension Storyboard {
 
 					matchCases += "\t\tcase \(casePattern):"
 					if dstCast == "_" {
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender, segue: segue)"
 					} else {
 						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender, segue: segue)"
 					}
 				}
 				
@@ -270,13 +264,11 @@ extension Storyboard {
 
 				let swiftIdentifier = "embed" + dstName
 				let functionName = "prepareToEmbed" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
-					seguePatterns += "\t\t\tsource, destination, _ in source.\(functionName)(destination, sender: source)"
-					seguePatterns += "\t\t}"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(\"\(segueIdentifier)\", segueKind: .\(segue.kind))"
 				}
 
 				numberOfCases += 1
@@ -289,10 +281,10 @@ extension Storyboard {
 
 					matchCases += "\t\tcase \(casePattern):"
 					if dstCast == "_" {
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender, segue: segue)"
 					} else {
 						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender, segue: segue)"
 					}
 				}
 				
@@ -321,13 +313,11 @@ extension Storyboard {
 
 				let swiftIdentifier = "relationship" + dstName
 				let functionName = "prepareRelationship" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customClass), \(dstClass), UIStoryboardSegue>(\"\(segueIdentifier)\", kind: .\(segue.kind)) {"
-					seguePatterns += "\t\t\tsource, destination, _ in source.\(functionName)(destination, sender: source)"
-					seguePatterns += "\t\t}"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(\"\(segueIdentifier)\", segueKind: .\(segue.kind))"
 				}
 
 				numberOfCases += 1
@@ -340,10 +330,10 @@ extension Storyboard {
 
 					matchCases += "\t\tcase \(casePattern):"
 					if dstCast == "_" {
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender)"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender, segue: segue)"
 					} else {
 						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender)"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender, segue: segue)"
 					}
 				}
 				
@@ -426,30 +416,8 @@ extension Storyboard {
 					output += segues
 					output += "\t}"
 					output += ""
-					output += "\t@available(*, deprecated)"
-					output += "\tfunc perform<Destination: UIViewController, T: UIStoryboardSegue>(_ segue: Segue<\(customClass), Destination, T>) {"
-					output += "\t\tlet segueIdentifier = segue.identifier.require()"
-					output += ""
-					output += "\t\tperformSegue(withIdentifier: segueIdentifier) { [segueDescription = { String(reflecting: segue) }] storyboardSegue, _ in"
-					output += "\t\t\tlet destination = storyboardSegue.destinationViewController(ofType: Destination.self)"
-					output += "\t\t\t\t.require(\"\\(segueDescription()): expected destination view controller hierarchy to include \\(Destination.self)\")"
-					output += ""
-					output += "\t\t\tsegue.prepare(self, destination, segue.typedSegue(for: storyboardSegue))"
-					output += "\t\t}"
-					output += "\t}"
-					output += ""
-					output += "\t@available(*, deprecated)"
-					output += "\tfunc perform<Destination: UIViewController, T: UIStoryboardSegue>(_ segue: Segue<\(customClass), Destination, T>, "
-					output += "\t\tprepare: @escaping (\(customClass), Destination, T) -> Void) {"
-					output += "\t\tlet segueIdentifier = segue.identifier.require()"
-					output += ""
-					output += "\t\tperformSegue(withIdentifier: segueIdentifier) { [segueDescription = { String(reflecting: segue) }] storyboardSegue, _ in"
-					output += "\t\t\tlet destination = storyboardSegue.destinationViewController(ofType: Destination.self)"
-					output += "\t\t\t\t.require(\"\\(segueDescription()): expected destination view controller hierarchy to include \\(Destination.self)\")"
-					output += ""
-					output += "\t\t\tprepare(self, destination, segue.typedSegue(for: storyboardSegue))"
-					output += "\t\t}"
-					output += "\t}"
+					output += "\t@inline(__always)"
+					output += "\tfunc perform<Kind: UIStoryboardSegue, To: UIViewController>(_ segue: Segue<Kind, To>) { segue.perform(from: self) }"
 					output += ""
 				} else {
 					output += "extension \(customClass) {"
