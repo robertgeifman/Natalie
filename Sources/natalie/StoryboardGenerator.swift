@@ -72,6 +72,9 @@ struct Natalie {
 
 		output += header.description
 		output += "import \(os.framework)"
+		output += "#if canImport(\(os.framework)Additions)"
+		output += "import \(os.framework)Additions"
+		output += "#endif"
 		for module in storyboardCustomModules {
 			output += "import \(module)"
 		}

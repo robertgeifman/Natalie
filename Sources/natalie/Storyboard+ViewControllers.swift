@@ -90,7 +90,8 @@ extension Storyboard {
 
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 
-				let casePattern = "(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+//				let casePattern = "(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+				let casePattern = "(Segues.\(segueName).identifier, \(dstCast))"
 		
 				let functionName = "prepareForSegue" + dstName
 
@@ -212,8 +213,10 @@ extension Storyboard {
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 
 				let casePattern = nil == segueIdentifier ?
-					"(_, \(dstRef), \(dstCast))" :
-					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+//					"(_, \(dstRef), \(dstCast))" :
+//					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+					"(_, \(dstCast))" :
+					"(Segues.\(segueName).identifier, \(dstCast))"
 					
 				let swiftIdentifier = "present" + dstName
 				let functionName = "prepareToPresent" + dstName
@@ -259,8 +262,10 @@ extension Storyboard {
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 
 				let casePattern = nil == segueIdentifier ?
-					"(_, \(dstRef), \(dstCast))" :
-					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+//					"(_, \(dstRef), \(dstCast))" :
+//					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+					"(_,\(dstCast))" :
+					"(Segues.\(segueName).identifier,\(dstCast))"
 
 				let swiftIdentifier = "embed" + dstName
 				let functionName = "prepareToEmbed" + dstName
@@ -308,8 +313,10 @@ extension Storyboard {
 
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 				let casePattern = nil == segueIdentifier ?
-					"(_, \(dstRef), \(dstCast))" :
-					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+//					"(_, \(dstRef), \(dstCast))" :
+//					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+					"(_, \(dstCast))" :
+					"(Segues.\(segueName).identifier, \(dstCast))"
 
 				let swiftIdentifier = "relationship" + dstName
 				let functionName = "prepareRelationship" + dstName

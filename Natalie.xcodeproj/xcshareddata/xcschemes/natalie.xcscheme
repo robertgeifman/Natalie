@@ -61,7 +61,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/robert/Projects/Wiwiri/Resources/Base.lproj/Search.storyboard"
+            argument = "/Users/robert/Projects/Outside/Resources/Base.lproj"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
