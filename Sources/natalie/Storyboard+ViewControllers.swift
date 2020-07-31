@@ -62,12 +62,27 @@ extension Storyboard {
 
 		var hasIdentifiableSegues = false
 		for segue in segues {
-			guard let srcElement = segue.source.viewController,
-				let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name),
-				let dstID = segue.destination,
-				let dstElement = searchById(id: dstID)?.element,
-				let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name))
-			else { continue }
+			guard let srcElement = segue.source.viewController else { continue }
+			guard let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name) else { continue }
+			guard let dstID = segue.destination else { continue }
+			guard let dstElement = searchById(id: dstID)?.element else { continue }
+			
+			if segue.kind == "unwind", let segueID = segue.identifier, !segueID.isEmpty {
+				let dstName: String = swiftRepresentation(for: segueID, firstLetter: .capitalize)
+				let segueIdentifier: String? = segueID
+
+				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
+
+				if let segueIdentifier = segueIdentifier {
+					allCases += "\t\t\t\(segueName),"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, UIViewController>(identifier: \"\(segueIdentifier)\")"
+				}
+
+				numberOfCases += 1
+				continue
+			}
+
+			guard let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name)) else { continue }
 
 			// let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
 			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
@@ -83,7 +98,11 @@ extension Storyboard {
 				continue
 			}
 
-			if let segueID = segue.identifier, !segueID.isEmpty, segue.kind != "embed", segue.kind != "relationship" {
+			guard let segueID = segue.identifier, !segueID.isEmpty else {
+				continue
+			}
+			
+			if segue.kind != "embed", segue.kind != "relationship" {
 				hasIdentifiableSegues = true // hasIdentifiableSegues || (segue.kind != "embed" && segue.kind != "relationship")
 				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
 				let dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
@@ -227,9 +246,9 @@ extension Storyboard {
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
 
-				numberOfCases += 1
 
 				if dstCast != dstRef {
+					numberOfCases += 1
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
 					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
@@ -276,9 +295,9 @@ extension Storyboard {
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
 
-				numberOfCases += 1
 
 				if dstCast != dstRef {
+					numberOfCases += 1
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
 					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
@@ -326,10 +345,9 @@ extension Storyboard {
 					allCases += "\t\t\t\(segueName),"
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
-
-				numberOfCases += 1
 				
 				if dstCast != dstRef {
+					numberOfCases += 1
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
 					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
