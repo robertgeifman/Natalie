@@ -67,19 +67,21 @@ extension Storyboard {
 			guard let dstID = segue.destination else { continue }
 			guard let dstElement = searchById(id: dstID)?.element else { continue }
 			
-			if segue.kind == "unwind", let segueID = segue.identifier, !segueID.isEmpty {
-				let dstName: String = swiftRepresentation(for: segueID, firstLetter: .capitalize)
-				let segueIdentifier: String? = segueID
+			if segue.kind == "unwind" {
+				if let segueID = segue.identifier, !segueID.isEmpty {
+					let dstName: String = swiftRepresentation(for: segueID, firstLetter: .capitalize)
+					let segueIdentifier: String? = segueID
 
-				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
+					let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 
-				if let segueIdentifier = segueIdentifier {
-					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, UIViewController>(identifier: \"\(segueIdentifier)\")"
+					if let segueIdentifier = segueIdentifier {
+						allCases += "\t\t\t\(segueName),"
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, UIViewController>(identifier: \"\(segueIdentifier)\")"
+					}
+
+					numberOfCases += 1
+					continue
 				}
-
-				numberOfCases += 1
-				continue
 			}
 
 			guard let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name)) else { continue }
@@ -164,10 +166,12 @@ extension Storyboard {
 				let canPerformMethod = "\(canPerformFunctionName)(sender: Any?) -> Bool"
 
 				let canUnwindFunctionName = "canUnwind" + dstName
-				let canUnwindMethod = "\(canUnwindFunctionName)(from: \(dstClass), sender: Any?) -> Bool"
+//				let canUnwindMethod = "\(canUnwindFunctionName)(from: \(dstClass), sender: Any?) -> Bool"
+				let canUnwindMethod = "\(canUnwindFunctionName)(from: UIViewController, sender: Any?) -> Bool"
 
 				let unwindFunctionName = "unwind" + dstName
-				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
+//				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
+				let unwindMethod = "\(unwindFunctionName)(from: UIViewController, to: UIViewController)"
 
 				delegateMethods += "\tfunc " + canPerformMethod
 				delegateMethods += "\tfunc " + canUnwindMethod
@@ -187,17 +191,19 @@ extension Storyboard {
 
 				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
 				
-				if dstCast == "_" {
-					unwindMethods += "\t\tlet source = segue.source"
-				} else {
-					unwindMethods += "\t\tguard let source = segue.source as? \(dstClass) else { return }"
-				}
+				unwindMethods += "\t\tlet source = segue.source"
+				unwindMethods += "\t\tlet destination = segue.destination"
+//				if dstCast == "_" {
+//					unwindMethods += "\t\tlet source = segue.source"
+//				} else {
+//					unwindMethods += "\t\tguard let source = segue.source as? \(dstClass) else { return }"
+//				}
 				
-				if srcCast == "_" {
-					unwindMethods += "\t\tlet destination = segue.destination"
-				} else {
-					unwindMethods += "\t\tguard let destination = segue.destination as? \(srcClass) else { return }"
-				}
+//				if srcCast == "_" {
+//					unwindMethods += "\t\tlet destination = segue.destination"
+//				} else {
+//					unwindMethods += "\t\tguard let destination = segue.destination as? \(srcClass) else { return }"
+//				}
 				
 				unwindMethods += "\t\tsceneCoordinator.\(unwindFunctionName)(from: source, to: destination)"
 				unwindMethods += "\t}"
