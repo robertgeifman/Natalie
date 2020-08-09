@@ -456,6 +456,26 @@ extension Storyboard {
 
 				if !reusables.isEmpty {
 					output += "\tenum Reusables {"
+					output += "\t\ttypealias Reusables = Self"
+					output += "\t\tstruct Prototypes: PrototypeCollection {"
+					output += "\t\t\tlet cells: [String: UICollectionViewCell]"
+					output += ""
+					output += "\t\t\tinit(collectionView: UICollectionView) {"
+					output += "\t\t\t\tvar cells = [String: UICollectionViewCell]()"
+					output += "\t\t\t\tfor identifier in Reusables.allCells {"
+					output += "\t\t\t\t\tcells[identifier] = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: IndexPath())"
+					output += "\t\t\t\t}"
+					output += "\t\t\t\tself.cells = cells"
+					output += "\t\t\t}"
+					output += ""
+					output += "\t\t\tsubscript<Content>(reusable: Reusable<Content>) -> Content where Content: UICollectionViewCell {"
+					output += "\t\t\t\tguard let content = cells[reusable.identifier] as? Content else {"
+					output += "\t\t\t\t\truntimeError(\"No prorotype cell with identifier \\(reusable.identifier)\", in: self)"
+					output += "\t\t\t\t}"
+					output += "\t\t\t\treturn content"
+					output += "\t\t\t}"
+					output += "\t\t}"
+					output += ""
 					output += reusables
 					output += "\t}"
 				}
@@ -474,23 +494,44 @@ extension Storyboard {
 	}
 	
 	func processReusables(_ sceneReusables: [Reusable]?) -> [String] {
-		var output = [String]()
-		if let reusables = sceneReusables, !reusables.isEmpty { // ?.filter({ return $0.reuseIdentifier != nil })
-			for reusable in reusables {
-				if let identifier = reusable.reuseIdentifier {
-					if let customClass = reusable.customClass {
-						let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize, doNotShadow: customClass)
-						let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
-						output += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
-					} else {
-						let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize)
-						let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
-						let customClass = os.reusableItemsMap[reusable.kind]
-						output += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass!)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
-					}
+		var declarations = [String]()
+		var allCases = [(String, String)]()
+		guard let reusables = sceneReusables, !reusables.isEmpty else { return [] }
+
+		for reusable in reusables {
+			if let identifier = reusable.reuseIdentifier {
+				if let customClass = reusable.customClass {
+					let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize, doNotShadow: customClass)
+					let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
+					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
+					allCases.append((reusable.kind, reusableIdentifier))
+				} else {
+					let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize)
+					let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
+					let customClass = os.reusableItemsMap[reusable.kind]
+					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass!)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
+					allCases.append((reusable.kind, reusableIdentifier))
 				}
 			}
 		}
+
+		var output = [String]()
+//		output += "\t\ttypealias AllCases = [AnyReusable]"
+		output += "\t\tstatic var allReusables: [String] = [" + allCases.map { $0.1 + ".identifier" }.joined(separator: ", ") + "]"
+		let table = Dictionary(grouping: allCases) { $0.0 }
+		for (key, values) in table {
+			var string = "\t\tstatic var all"
+			switch key {
+			case "collectionReusableView": string += "ReusableViews"
+			case "collectionViewCell": string += "Cells"
+			default: string += swiftRepresentation(for: key, firstLetter: .capitalize) + "s" // pluralizing Item, TableViewCell
+			}
+			
+			string += ": [String] = [" + values.map { $0.1 + ".identifier" }.joined(separator: ", ") + "]"
+			output += string
+		}
+
+		output.append(contentsOf: declarations)
 		return output
 	}
 }

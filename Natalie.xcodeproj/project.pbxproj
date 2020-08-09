@@ -123,8 +123,8 @@
 			children = (
 				75E28AA21D577D0500A80623 /* Sources */,
 				755B83501D576CBF0020148B /* Products */,
-				E15AECFE23A6278400E12A90 /* .swiftlint.yml */,
 				E1352BD021B421FB009DDABF /* Frameworks */,
+				E15AECFE23A6278400E12A90 /* .swiftlint.yml */,
 			);
 			sourceTree = "<group>";
 		};

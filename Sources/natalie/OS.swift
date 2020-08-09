@@ -189,7 +189,7 @@ enum OS: String, CustomStringConvertible {
     var resuableItems: [String]? {
         switch self {
         case .iOS, .tvOS:
-            return ["collectionReusableView", "tableViewCell"]
+            return ["collectionReusableView", "collectionViewCell", "tableViewCell"]
         case .OSX:
             return ["tableCellView", "tableHeaderView", "tableRowView", "collectionViewItem", "collectionViewSectionHeaderView"]
         }
