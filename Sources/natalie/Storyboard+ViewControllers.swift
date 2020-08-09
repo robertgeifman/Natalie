@@ -459,18 +459,32 @@ extension Storyboard {
 					output += "\t\ttypealias Reusables = Self"
 					output += "\t\tstruct Prototypes: PrototypeCollection {"
 					output += "\t\t\tlet cells: [String: UICollectionViewCell]"
+					output += "\t\t\tlet reusableViews: [String: UICollectionReusableView]"
 					output += ""
 					output += "\t\t\tinit(collectionView: UICollectionView) {"
 					output += "\t\t\t\tvar cells = [String: UICollectionViewCell]()"
 					output += "\t\t\t\tfor identifier in Reusables.allCells {"
 					output += "\t\t\t\t\tcells[identifier] = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: IndexPath())"
 					output += "\t\t\t\t}"
+
+					output += "\t\t\t\tvar reusableViews = [String: UICollectionReusableView]()"
+					output += "\t\t\t\tfor (identifier, kind) in Reusables.allReusableViews {"
+					output += "\t\t\t\t\treusableViews[identifier] = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: identifier, for: IndexPath())"
+					output += "\t\t\t\t}"
+
 					output += "\t\t\t\tself.cells = cells"
+					output += "\t\t\t\tself.reusableViews = reusableViews"
 					output += "\t\t\t}"
 					output += ""
 					output += "\t\t\tsubscript<Content>(reusable: Reusable<Content>) -> Content where Content: UICollectionViewCell {"
 					output += "\t\t\t\tguard let content = cells[reusable.identifier] as? Content else {"
 					output += "\t\t\t\t\truntimeError(\"No prorotype cell with identifier \\(reusable.identifier)\", in: self)"
+					output += "\t\t\t\t}"
+					output += "\t\t\t\treturn content"
+					output += "\t\t\t}"
+					output += "\t\t\tsubscript<Content>(reusable: Reusable<Content>) -> Content where Content: UICollectionReusableView {"
+					output += "\t\t\t\tguard let content = reusableViews[reusable.identifier] as? Content else {"
+					output += "\t\t\t\t\truntimeError(\"No prorotype reusable view with identifier \\(reusable.identifier)\", in: self)"
 					output += "\t\t\t\t}"
 					output += "\t\t\t\treturn content"
 					output += "\t\t\t}"
@@ -495,7 +509,7 @@ extension Storyboard {
 	
 	func processReusables(_ sceneReusables: [Reusable]?) -> [String] {
 		var declarations = [String]()
-		var allCases = [(String, String)]()
+		var allCases = [(String, String, String)]()
 		guard let reusables = sceneReusables, !reusables.isEmpty else { return [] }
 
 		for reusable in reusables {
@@ -504,31 +518,39 @@ extension Storyboard {
 					let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize, doNotShadow: customClass)
 					let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
 					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
-					allCases.append((reusable.kind, reusableIdentifier))
+					allCases.append((reusable.kind, reusableIdentifier, reusable.key))
 				} else {
 					let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize)
 					let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
 					let customClass = os.reusableItemsMap[reusable.kind]
 					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass!)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
-					allCases.append((reusable.kind, reusableIdentifier))
+					allCases.append((reusable.kind, reusableIdentifier, reusable.key))
 				}
 			}
 		}
 
 		var output = [String]()
-//		output += "\t\ttypealias AllCases = [AnyReusable]"
-		output += "\t\tstatic var allReusables: [String] = [" + allCases.map { $0.1 + ".identifier" }.joined(separator: ", ") + "]"
 		let table = Dictionary(grouping: allCases) { $0.0 }
 		for (key, values) in table {
-			var string = "\t\tstatic var all"
 			switch key {
-			case "collectionReusableView": string += "ReusableViews"
-			case "collectionViewCell": string += "Cells"
-			default: string += swiftRepresentation(for: key, firstLetter: .capitalize) + "s" // pluralizing Item, TableViewCell
+			case "collectionReusableView":
+				output += "\t\tstatic var allReusableViews: [(String, String)] = ["
+				output += "\t\t\t" + values.compactMap {
+					switch $0.2 {
+					case "sectionHeaderView": return "(\($0.1 + ".identifier"), UICollectionView.elementKindSectionHeader)"
+					case "sectionFooterView": return "(\($0.1 + ".identifier"), UICollectionView.elementKindSectionFooter)"
+					default: return nil // "(\($0.1 + ".identifier"), \"\($0.2)\")"
+					}
+				}.joined(separator: ", ")
+				output += "\t\t]"
+			case "collectionViewCell":
+				output += "\t\tstatic var allCells: [String] = ["
+				output += "\t\t\t" + values.map {
+					$0.1 + ".identifier"
+				}.joined(separator: ", ")
+				output += "\t\t]"
+			default: continue
 			}
-			
-			string += ": [String] = [" + values.map { $0.1 + ".identifier" }.joined(separator: ", ") + "]"
-			output += string
 		}
 
 		output.append(contentsOf: declarations)
