@@ -515,7 +515,7 @@ extension Storyboard {
 		for reusable in reusables {
 			if let identifier = reusable.reuseIdentifier {
 				if let customClass = reusable.customClass {
-					let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize, doNotShadow: customClass)
+					let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize) // , doNotShadow: customClass)
 					let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
 					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
 					allCases.append((reusable.kind, reusableIdentifier, reusable.key))

@@ -52,7 +52,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Volumes/Work/Shared/Projects/TicketScan/Resources/TicketScan.storyboard"
+            argument = "/Volumes/Work/Shared/Projects/Sandbox/Resources/Base.lproj/Main.storyboard"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
