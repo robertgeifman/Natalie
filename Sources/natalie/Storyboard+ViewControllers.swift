@@ -9,7 +9,8 @@
 import Foundation
 
 extension Storyboard {
-	func processSegues(_ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String], _ prepareForSegue: inout [String]) -> [String] {
+	func processSegues(_ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String],
+		_ prepareForSegue: inout [String], storyboardCustomModules: inout Set<String>) -> [String] {
 		guard let segues = sceneSegues, !segues.isEmpty else { return [String]() }
 
 		var patterns = [String: Int]()
@@ -119,7 +120,10 @@ extension Storyboard {
 				if segue.kind == "custom" {
 					if let customSegueClassAttr = segue.xml.element?.attribute(by: "customClass") {
 						let customSegueClass = customSegueClassAttr.text
-						
+						if let customModule = segue.xml.element?.attribute(by: "customModule")?.text {
+							storyboardCustomModules.insert(customModule)
+						}
+						 
 						let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: \(customSegueClass))"
 
 						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customSegueClass), \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
@@ -414,7 +418,7 @@ extension Storyboard {
 		return enumCases
 	}
 
-	func processViewControllers(storyboardCustomModules: Set<String>) -> [String] {
+	func processViewControllers(storyboardCustomModules: inout Set<String>) -> [String] {
 		var output = [String]()
 		for scene in self.scenes {
 			guard let viewController = scene.viewController,
@@ -426,7 +430,7 @@ extension Storyboard {
 
 			var seguesController = [String]()
 			var prepareForSegue = [String]()
-			let segues = processSegues(sceneSegues, customClass, &seguesController, &prepareForSegue)
+			let segues = processSegues(sceneSegues, customClass, &seguesController, &prepareForSegue, storyboardCustomModules: &storyboardCustomModules)
 			let reusables = processReusables(sceneReusables)
 
 			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)

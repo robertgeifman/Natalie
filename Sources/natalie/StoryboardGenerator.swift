@@ -69,20 +69,10 @@ struct Natalie {
 
 	func process(os: OS) -> [String] {
 		var output = [String]()
-
-		output += header.description
-		output += "import \(os.framework)"
-		output += "#if canImport(\(os.framework)Additions)"
-		output += "import \(os.framework)Additions"
-		output += "#endif"
-		for module in storyboardCustomModules {
-			output += "import \(module)"
-		}
-		output += ""
-
-		let storyboardModules = storyboardCustomModules
+		var customModules = Set<String>()
+//		customModules.insert("\(os.framework)Additions")
 		for file in storyboards {
-			output += file.storyboard.processViewControllers(storyboardCustomModules: storyboardModules)
+			output += file.storyboard.processViewControllers(storyboardCustomModules: &customModules)
 		}
 		
 		output += "// MARK: - Storyboard"
@@ -108,6 +98,20 @@ struct Natalie {
 			output += "}"
 		}
 
-		return output
+		var prefixedOutput = [String]()
+
+		prefixedOutput += header.description
+		prefixedOutput += "import \(os.framework)"
+		prefixedOutput += "#if canImport(\(os.framework)Additions)"
+		prefixedOutput += "import \(os.framework)Additions"
+		prefixedOutput += "#endif"
+		
+		customModules.formUnion(storyboardCustomModules)
+		for module in customModules where module != "\(os.framework)Additions" {
+			prefixedOutput += "import \(module)"
+		}
+		prefixedOutput += ""
+		prefixedOutput.append(contentsOf: output)
+		return prefixedOutput
 	}
 }
