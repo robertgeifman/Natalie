@@ -155,7 +155,7 @@ extension Storyboard {
 
 			let pattern = "(\(segue.identifier.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
 
-			let srcCast = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "is \(srcClass).Type"
+			_ = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "is \(srcClass).Type"
 			let dstCast = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass).Type"
 			let dstCastUnwind = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass)"
 			// let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
@@ -510,6 +510,10 @@ extension Storyboard {
 	func processReusableCases(_ cases: [(String, String, String)]) -> [String] {
 		var output = [String]()
 		let table = Dictionary(grouping: cases) { $0.0 }
+#if true
+		output.append(contentsOf: processCollectionView(values: table))
+		output.append(contentsOf: processTableView(values: table))
+#else
 		for (key, values) in table {
 			switch key {
 			case "collectionReusableView": output.append(contentsOf: processReusableViews(key: key, values: values))
@@ -518,9 +522,94 @@ extension Storyboard {
 			default: continue
 			}
 		}
+#endif
 		return output
 	}
 
+	func processCollectionView(values: [String: [(String, String, String)]]) -> [String] {
+		var output = [String]()
+		output += "\t\t" + "struct Prototypes: CollectionViewPrototypes {"
+		output += "\t\t\t" + "typealias Kind = UICollectionView"
+		output += "\t\t\t" + "static var cells: [ReusableProtocol] = ["
+		if let reusables = values["collectionViewCell"] {
+			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
+		}
+		output += "\t\t\t" + "]"
+		output += "\t\t\t" + "static var reusableViews: [ReusableProtocol] = ["
+		if let reusables = values["collectionReusableView"] {
+			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
+		}
+		output += "\t\t\t" + "]"
+		output += "\t\t\t" + "let cells: [String: UICollectionViewCell]"
+		output += "\t\t\t" + "let reusableViews: [String: UICollectionReusableView]"
+		output += ""
+		output += "\t\t\t" + "init(collectionView: UICollectionView) {"
+		output += "\t\t\t\t" + "var cells = [String: UICollectionViewCell]()"
+		output += "\t\t\t\t" + "var reusableViews = [String: UICollectionReusableView]()"
+		output += "\t\t\t\t" + "for reusable in Self.cells {"
+		output += "\t\t\t\t\t" + "cells[reusable.identifier] = collectionView.dequeueReusableCell(withReuseIdentifier: reusable.identifier, for: IndexPath())"
+		output += "\t\t\t\t" + "}"
+		output += "\t\t\t\t" + "for reusable in Self.reusableViews {"
+		output += "\t\t\t\t\t" + "reusableViews[reusable.identifier] = collectionView.dequeueReusableSupplementaryView("
+		output += "\t\t\t\t\t\t" + "ofKind: reusable.elementKind, withReuseIdentifier: reusable.identifier, for: IndexPath())"
+		output += "\t\t\t\t" + "}"
+		output += "\t\t\t\t" + "self.cells = cells"
+		output += "\t\t\t\t" + "self.reusableViews = reusableViews"
+		output += "\t\t\t}"
+		output += "\t\t\t" + "subscript<Content>(reusable: Reusable<Content>) -> Content"
+		output += "\t\t\t\t" + "where Content: UICollectionViewCell {"
+		output += "\t\t\t\t" + "(cells[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
+		output += "\t\t\t" + "}"
+
+		output += "\t\t\t" + "subscript<Content>(reusable: Reusable<Content>) -> Content"
+		output += "\t\t\t\t" + "where Content: UICollectionReusableView {"
+		output += "\t\t\t\t" + "(reusableViews[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
+		output += "\t\t\t" + "}"
+		output += "\t\t}"
+		return output
+	}
+	func processTableView(values: [String: [(String, String, String)]]) -> [String] {
+		var output = [String]()
+		output += "\t\t" + "struct TablePrototypes: TableViewPrototypes {"
+		output += "\t\t\t" + "typealias Kind = UITableView"
+		output += "\t\t\t" + "static var cells: [ReusableProtocol] = ["
+		if let reusables = values["tableViewCell"] {
+			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
+		}
+		output += "\t\t\t" + "]"
+		output += "\t\t\t" + "static var reusableViews: [ReusableProtocol] = ["
+		if let reusables = values["tableViewHeaderFooterView"] {
+			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
+		}
+		output += "\t\t\t" + "]"
+		output += "\t\t\t" + "let cells: [String: UITableViewCell]"
+		output += "\t\t\t" + "let reusableViews: [String: UITableViewHeaderFooterView]"
+		output += ""
+		output += "\t\t\t" + "init(tableView: UITableView) {"
+		output += "\t\t\t\t" + "var cells = [String: UITableViewCell]()"
+		output += "\t\t\t\t" + "var reusableViews = [String: UITableViewHeaderFooterView]()"
+		output += "\t\t\t\t" + "for reusable in Self.cells {"
+		output += "\t\t\t\t\t" + "cells[reusable.identifier] = tableView.dequeueReusableCell(withIdentifier: reusable.identifier, for: IndexPath())"
+		output += "\t\t\t\t" + "}"
+		output += "\t\t\t\t" + "for reusable in Self.reusableViews {"
+		output += "\t\t\t\t\t" + "reusableViews[reusable.identifier] = tableView.dequeueReusableHeaderFooterView(withIdentifier: reusable.identifier)"
+		output += "\t\t\t\t" + "}"
+		output += "\t\t\t\t" + "self.cells = cells"
+		output += "\t\t\t\t" + "self.reusableViews = reusableViews"
+		output += "\t\t\t}"
+		output += "\t\t\t" + "subscript<Content>(reusable: Reusable<Content>) -> Content"
+		output += "\t\t\t\t" + "where Content: UITableViewCell {"
+		output += "\t\t\t\t" + "(cells[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
+		output += "\t\t\t" + "}"
+
+		output += "\t\t\t" + "subscript<Content>(reusable: Reusable<Content>) -> Content"
+		output += "\t\t\t\t" + "where Content: UITableViewHeaderFooterView {"
+		output += "\t\t\t\t" + "(reusableViews[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
+		output += "\t\t\t" + "}"
+		output += "\t\t}"
+		return output
+	}
+	
 	func processCells(key: String, values: [(String, String, String)]) -> [String] {
 		var output = [String]()
 		output += "\t\t" + "struct Cells: PrototypeCollection {"
