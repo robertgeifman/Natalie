@@ -9,6 +9,69 @@
 import Foundation
 
 extension Storyboard {
+	// MARK: - View Controllers
+	func processViewControllers(storyboardCustomModules: inout Set<String>) -> [String] {
+		var output = [String]()
+		for scene in self.scenes {
+			guard let viewController = scene.viewController,
+				let customClass = viewController.customClass
+			else { continue }
+
+			let sceneSegues = scene.segues
+			let sceneReusables = viewController.reusables(os)
+
+			var seguesController = [String]()
+			var prepareForSegue = [String]()
+			let segues = processSegues(sceneSegues, customClass, &seguesController, &prepareForSegue, storyboardCustomModules: &storyboardCustomModules)
+			let reusables = processReusables(sceneReusables)
+
+			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)
+			let sceneClass_noSegues = (seguesController.isEmpty) ? processIdentifier_noSegues(scene: scene, storyboardCustomModules: storyboardCustomModules) : []
+
+			if !segues.isEmpty || !reusables.declarations.isEmpty {
+				output += "// MARK: - \(customClass)Scene"
+				output += sceneClass_noSegues
+				output += sceneClass
+
+				output += seguesController
+				output += ""
+
+				output += "// MARK: - \(customClass)"
+				if !segues.isEmpty {
+					output += "extension \(customClass) {"
+					output += "\t" + "enum Segues {"
+					output += segues
+					output += "\t" + "}"
+					output += ""
+					output += "\t" + "@inline(__always)"
+					output += "\t" + "func perform<Kind: UIStoryboardSegue, To: UIViewController>(_ segue: Segue<Kind, To>) { segue.perform(from: self) }"
+					output += ""
+				} else {
+					output += "extension \(customClass) {"
+				}
+
+				if !reusables.declarations.isEmpty {
+					output += "\tenum Reusables {"
+					output += "\t\ttypealias Reusables = Self"
+					output.append(contentsOf: processReusableCases(reusables.cases))
+					output.append(contentsOf: reusables.declarations)
+					output += "\t}"
+				}
+
+				if !segues.isEmpty && !reusables.declarations.isEmpty {
+					output += ""
+				}
+
+				output += prepareForSegue
+				output += "}"
+			}
+
+			output += ""
+		}
+		return output
+	}
+
+	// MARK: - Segues
 	func processSegues(_ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String],
 		_ prepareForSegue: inout [String], storyboardCustomModules: inout Set<String>) -> [String] {
 		guard let segues = sceneSegues, !segues.isEmpty else { return [String]() }
@@ -417,163 +480,122 @@ extension Storyboard {
 		}
 		return enumCases
 	}
-
-	func processViewControllers(storyboardCustomModules: inout Set<String>) -> [String] {
-		var output = [String]()
-		for scene in self.scenes {
-			guard let viewController = scene.viewController,
-				let customClass = viewController.customClass
-			else { continue }
-
-			let sceneSegues = scene.segues
-			let sceneReusables = viewController.reusables(os)
-
-			var seguesController = [String]()
-			var prepareForSegue = [String]()
-			let segues = processSegues(sceneSegues, customClass, &seguesController, &prepareForSegue, storyboardCustomModules: &storyboardCustomModules)
-			let reusables = processReusables(sceneReusables)
-
-			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)
-			let sceneClass_noSegues = (seguesController.isEmpty) ? processIdentifier_noSegues(scene: scene, storyboardCustomModules: storyboardCustomModules) : []
-
-			if !segues.isEmpty || !reusables.isEmpty {
-				output += "// MARK: - \(customClass)Scene"
-				output += sceneClass_noSegues
-				output += sceneClass
-
-				output += seguesController
-				output += ""
-
-				output += "// MARK: - \(customClass)"
-				if !segues.isEmpty {
-					output += "extension \(customClass) {"
-					output += "\tenum Segues {"
-					output += segues
-					output += "\t}"
-					output += ""
-					output += "\t@inline(__always)"
-					output += "\tfunc perform<Kind: UIStoryboardSegue, To: UIViewController>(_ segue: Segue<Kind, To>) { segue.perform(from: self) }"
-					output += ""
-				} else {
-					output += "extension \(customClass) {"
-				}
-
-				if !reusables.isEmpty {
-					output += "\tenum Reusables {"
-					output += "\t\ttypealias Reusables = Self"
-					output += "\t\tstruct Prototypes: PrototypeCollection {"
-					output += "\t\t\tlet cells: [String: UICollectionViewCell]"
-					output += "\t\t\tlet reusableViews: [String: UICollectionReusableView]"
-					output += ""
-					output += "\t\t\tinit(collectionView: UICollectionView) {"
-					output += "\t\t\t\tvar cells = [String: UICollectionViewCell]()"
-					output += "\t\t\t\tfor identifier in Reusables.allCells {"
-					output += "\t\t\t\t\tcells[identifier] = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: IndexPath())"
-					output += "\t\t\t\t}"
-
-					output += "\t\t\t\tvar reusableViews = [String: UICollectionReusableView]()"
-					output += "\t\t\t\tfor (identifier, kind) in Reusables.allReusableViews {"
-					output += "\t\t\t\t\treusableViews[identifier] = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: identifier, for: IndexPath())"
-					output += "\t\t\t\t}"
-
-					output += "\t\t\t\tself.cells = cells"
-					output += "\t\t\t\tself.reusableViews = reusableViews"
-					output += "\t\t\t}"
-					output += ""
-					output += "\t\t\tsubscript<Content>(reusable: Reusable<Content>) -> Content where Content: UICollectionViewCell {"
-					output += "\t\t\t\tguard let content = cells[reusable.identifier] as? Content else {"
-					output += "\t\t\t\t\truntimeError(\"No prorotype cell with identifier \\(reusable.identifier)\", in: self)"
-					output += "\t\t\t\t}"
-					output += "\t\t\t\treturn content"
-					output += "\t\t\t}"
-					output += "\t\t\tsubscript<Content>(reusable: Reusable<Content>) -> Content where Content: UICollectionReusableView {"
-					output += "\t\t\t\tguard let content = reusableViews[reusable.identifier] as? Content else {"
-					output += "\t\t\t\t\truntimeError(\"No prorotype reusable view with identifier \\(reusable.identifier)\", in: self)"
-					output += "\t\t\t\t}"
-					output += "\t\t\t\treturn content"
-					output += "\t\t\t}"
-					output += "\t\t}"
-					output += ""
-					output += reusables
-					output += "\t}"
-				}
-
-				if !segues.isEmpty && !reusables.isEmpty {
-					output += ""
-				}
-
-				output += prepareForSegue
-				output += "}"
-			}
-
-			output += ""
-		}
-		return output
-	}
 	
-	func processReusables(_ sceneReusables: [Reusable]?) -> [String] {
+	// MARK: - Reusables
+	func processReusables(_ sceneReusables: [Reusable]?) -> (declarations: [String], cases: [(String, String, String)]) {
 		var declarations = [String]()
 		var allCases = [(String, String, String)]()
-		guard let reusables = sceneReusables, !reusables.isEmpty else { return [] }
+		guard let reusables = sceneReusables, !reusables.isEmpty else { return (declarations: [], cases: []) }
 
 		for reusable in reusables {
-			if let identifier = reusable.reuseIdentifier {
-				if let customClass = reusable.customClass {
-					let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize) // , doNotShadow: customClass)
-					let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
-					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
-					allCases.append((reusable.kind, reusableIdentifier, reusable.key))
+			guard let identifier = reusable.reuseIdentifier else { continue }
+			let customClass = reusable.customClass ?? os.reusableItemsMap[reusable.kind]!
+			let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize)
+			let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
+			if reusable.kind == "collectionReusableView" {
+				if reusable.key == "sectionHeaderView" {
+					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(header: \"\(identifier)\")"
+				} else if reusable.key == "sectionFooterView" {
+					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(footer: \"\(identifier)\")"
 				} else {
-					let swiftIdentifier = swiftRepresentation(for: identifier, firstLetter: .capitalize)
-					let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
-					let customClass = os.reusableItemsMap[reusable.kind]
-					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass!)>(identifier: \"\(identifier)\")"//, kind: .\(reusable.kind))"
-					allCases.append((reusable.kind, reusableIdentifier, reusable.key))
+					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", elementKind: reusable.key)"
 				}
+			} else {
+				declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", kind: .\(reusable.kind))"
 			}
+			allCases.append((reusable.kind, reusableIdentifier, reusable.key))
 		}
-
+		return (declarations: declarations, cases: allCases)
+	}
+	func processReusableCases(_ cases: [(String, String, String)]) -> [String] {
 		var output = [String]()
-		let table = Dictionary(grouping: allCases) { $0.0 }
+		let table = Dictionary(grouping: cases) { $0.0 }
 		for (key, values) in table {
 			switch key {
-			case "collectionReusableView":
-				output += "\t\tstatic var allReusableViews: [(String, String)] = ["
-				output += "\t\t\t" + values.compactMap {
-					switch $0.2 {
-					case "sectionHeaderView": return "(\($0.1 + ".identifier"), UICollectionView.elementKindSectionHeader)"
-					case "sectionFooterView": return "(\($0.1 + ".identifier"), UICollectionView.elementKindSectionFooter)"
-					default: return nil // "(\($0.1 + ".identifier"), \"\($0.2)\")"
-					}
-				}.joined(separator: ", ")
-				output += "\t\t]"
-			case "collectionViewCell":
-				output += "\t\tstatic var allCells: [String] = ["
-				output += "\t\t\t" + values.map {
-					$0.1 + ".identifier"
-				}.joined(separator: ", ")
-				output += "\t\t]"
+			case "collectionReusableView": output.append(contentsOf: processReusableViews(key: key, values: values))
+			case "collectionViewCell": output.append(contentsOf: processCells(key: key, values: values))
+			case "tableViewCell": output.append(contentsOf: processTableCells(key: key, values: values))
 			default: continue
 			}
 		}
-
-		output.append(contentsOf: declarations)
 		return output
 	}
-}
 
-extension Optional where Wrapped == String {
-	var unwrappedString: String {
-		switch self {
-		case .none: return "nil"
-		case .some(let value): return value.isEmpty ? "nil" : "\"\(value)\""
-		}
+	func processCells(key: String, values: [(String, String, String)]) -> [String] {
+		var output = [String]()
+		output += "\t\t" + "struct Cells: PrototypeCollection {"
+		output += "\t\t\t" + "typealias Kind = UICollectionViewCell"
+		output += "\t\t\t" + "static var reusables: [ReusableProtocol] = ["
+		output += "\t\t\t\t" + values.map { $0.1 }.joined(separator: ", ")
+		output += "\t\t\t" + "]"
+		output += "\t\t\t" + "let prototypes: [String: Kind]"
+		output += ""
+		output += "\t\t\t" + "init(collectionView: UICollectionView) {"
+		output += "\t\t\t\t" + "var prototypes = [String: Kind]()"
+		output += "\t\t\t\t" + "for reusable in Self.reusables {"
+		output += "\t\t\t\t\t" + "prototypes[reusable.identifier] = collectionView.dequeueReusableCell(withReuseIdentifier: reusable.identifier, for: IndexPath())"
+		output += "\t\t\t\t" + "}"
+		output += "\t\t\t\t" + "self.prototypes = prototypes"
+		output += "\t\t\t}"
+		output += "\t\t}"
+		return output
 	}
-
-	var unwrappedPattern: String {
-		switch self {
-		case .none: return "_"
-		case .some(let value): return value.isEmpty ? "\"\"" : "\"\(value)\""
-		}
+	func processReusableViews(key: String, values: [(String, String, String)]) -> [String] {
+		var output = [String]()
+		output += "\t\t" + "struct ReusableViews: PrototypeCollection {"
+		output += "\t\t\t" + "typealias Kind = UICollectionReusableView"
+		output += "\t\t\t" + "static var reusables: [ReusableProtocol] = ["
+		output += "\t\t\t\t" + values.map { $0.1 }.joined(separator: ", ")
+		output += "\t\t\t" + "]"
+		output += "\t\t\t" + "let prototypes: [String: Kind]"
+		output += ""
+		output += "\t\t\t" + "init(collectionView: UICollectionView) {"
+		output += "\t\t\t\t" + "var prototypes = [String: Kind]()"
+		output += "\t\t\t\t" + "for reusable in Self.reusables {"
+		output += "\t\t\t\t\t" + "prototypes[reusable.identifier] = collectionView.dequeueReusableSupplementaryView("
+		output += "\t\t\t\t\t\t" + "ofKind: reusable.elementKind, withReuseIdentifier: reusable.identifier, for: IndexPath())"
+		output += "\t\t\t\t" + "}"
+		output += "\t\t\t\t" + "self.prototypes = prototypes"
+		output += "\t\t\t}"
+		output += "\t\t}"
+		return output
+	}
+	func processTableCells(key: String, values: [(String, String, String)]) -> [String] {
+		var output = [String]()
+		output += "\t\t" + "struct TableCells: PrototypeCollection {"
+		output += "\t\t\t" + "typealias Kind = UITableViewCell"
+		output += "\t\t\t" + "static var reusables: [ReusableProtocol] = ["
+		output += "\t\t\t\t" + values.map { $0.1 }.joined(separator: ", ")
+		output += "\t\t\t" + "]"
+		output += "\t\t\t" + "let prototypes: [String: Kind]"
+		output += ""
+		output += "\t\t\t" + "init(tableView: UITableView) {"
+		output += "\t\t\t\t" + "var prototypes = [String: Kind]()"
+		output += "\t\t\t\t" + "for reusable in Self.reusables {"
+		output += "\t\t\t\t\t" + "prototypes[reusable.identifier] = tableView.dequeueReusableCell(withIdentifier: reusable.identifier, for: IndexPath())"
+		output += "\t\t\t\t" + "}"
+		output += "\t\t\t\t" + "self.prototypes = prototypes"
+		output += "\t\t\t}"
+		output += "\t\t}"
+		return output
+	}
+	func processHeaderFooterViews(key: String, values: [(String, String, String)]) -> [String] {
+		var output = [String]()
+		output += "\t\t" + "struct ReusableTableViews: PrototypeCollection {"
+		output += "\t\t\t" + "typealias Kind = UITableCell"
+		output += "\t\t\t" + "static var reusables: [ReusableProtocol] = ["
+		output += "\t\t\t\t" + values.map { $0.1 }.joined(separator: ", ")
+		output += "\t\t\t" + "]"
+		output += "\t\t\t" + "let prototypes: [String: Kind]"
+		output += ""
+		output += "\t\t\t" + "init(tableView: UITableView) {"
+		output += "\t\t\t\t" + "var prototypes = [String: Kind]()"
+		output += "\t\t\t\t" + "for reusable in Self.reusables {"
+		output += "\t\t\t\t\t" + "prototypes[reusable.identifier] = tableView.dequeueReusableHeaderFooterView(withIdentifier: reusable.identifier)"
+		output += "\t\t\t\t" + "}"
+		output += "\t\t\t\t" + "self.prototypes = prototypes"
+		output += "\t\t\t}"
+		output += "\t\t}"
+		return output
 	}
 }

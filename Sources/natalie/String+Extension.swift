@@ -26,3 +26,19 @@ extension String {
         }.joined(separator: "")
     }
 }
+
+extension Optional where Wrapped == String {
+	var unwrappedString: String {
+		switch self {
+		case .none: return "nil"
+		case .some(let value): return value.isEmpty ? "nil" : "\"\(value)\""
+		}
+	}
+
+	var unwrappedPattern: String {
+		switch self {
+		case .none: return "_"
+		case .some(let value): return value.isEmpty ? "\"\"" : "\"\(value)\""
+		}
+	}
+}
