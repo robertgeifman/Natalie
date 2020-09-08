@@ -155,7 +155,7 @@ extension Storyboard {
 
 			let pattern = "(\(segue.identifier.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
 
-			_ = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "is \(srcClass).Type"
+//			let srcCastUnwind = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "is \(srcClass).Type"
 			let dstCast = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass).Type"
 			let dstCastUnwind = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass)"
 			// let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
@@ -260,13 +260,13 @@ extension Storyboard {
 				
 				unwindMethods += "\t\tlet source = segue.source"
 				unwindMethods += "\t\tlet destination = segue.destination"
-//				if dstCast == "_" {
+//				if dstCastUnwind == "_" {
 //					unwindMethods += "\t\tlet source = segue.source"
 //				} else {
 //					unwindMethods += "\t\tguard let source = segue.source as? \(dstClass) else { return }"
 //				}
-				
-//				if srcCast == "_" {
+//
+//				if srcCastUnwind == "_" {
 //					unwindMethods += "\t\tlet destination = segue.destination"
 //				} else {
 //					unwindMethods += "\t\tguard let destination = segue.destination as? \(srcClass) else { return }"
@@ -319,7 +319,6 @@ extension Storyboard {
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
 
-
 				if dstCast != dstRef {
 					numberOfCases += 1
 					delegateMethods += "\tfunc " + method
@@ -367,7 +366,6 @@ extension Storyboard {
 					allCases += "\t\t\t\(segueName),"
 					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
-
 
 				if dstCast != dstRef {
 					numberOfCases += 1
