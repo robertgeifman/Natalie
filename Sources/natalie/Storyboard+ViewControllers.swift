@@ -194,7 +194,7 @@ extension Storyboard {
 						delegateMethods += "\tfunc " + method
 
 						defaultImplementation += "\tfunc " + method + " {"
-						defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
+//						defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 						defaultImplementation += "\t}"
 
 						matchCases += "\t\tcase \(casePattern):"
@@ -215,7 +215,7 @@ extension Storyboard {
 					delegateMethods += "\tfunc " + method
 
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
+//					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -245,15 +245,17 @@ extension Storyboard {
 				delegateMethods += "\tfunc " + unwindMethod
 
 				defaultImplementation += "\tfunc " + canPerformMethod + " {"
-				defaultImplementation += "\t\tprint(\"\(customClass).\(canPerformMethod)\"); return true"
+//				defaultImplementation += "\t\tprint(\"\(customClass).\(canPerformMethod)\"); return true"
+				defaultImplementation += "\t\treturn true"
 				defaultImplementation += "\t}"
 
 				defaultImplementation += "\tfunc " + canUnwindMethod + " {"
-				defaultImplementation +=  "\t\tprint(\"\(customClass).\(canUnwindMethod)\"); return true"
+//				defaultImplementation +=  "\t\tprint(\"\(customClass).\(canUnwindMethod)\"); return true"
+				defaultImplementation += "\t\treturn true"
 				defaultImplementation += "\t}"
 
 				defaultImplementation += "\tfunc " + unwindMethod + " {"
-				defaultImplementation +=  "\t\tprint(\"\(customClass).\(unwindMethod)\")"
+//				defaultImplementation +=  "\t\tprint(\"\(customClass).\(unwindMethod)\")"
 				defaultImplementation += "\t}"
 
 				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
@@ -323,7 +325,7 @@ extension Storyboard {
 					numberOfCases += 1
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
+//					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -371,7 +373,7 @@ extension Storyboard {
 					numberOfCases += 1
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
+//					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
@@ -421,7 +423,7 @@ extension Storyboard {
 					numberOfCases += 1
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
-					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
+//					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
 					defaultImplementation += "\t}"	
 
 					matchCases += "\t\tcase \(casePattern):"
