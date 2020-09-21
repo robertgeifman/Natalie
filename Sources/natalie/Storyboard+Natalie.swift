@@ -19,7 +19,7 @@ extension Storyboard {
 		if let initialViewControllerClass = self.initialViewControllerClass {
 			output += ""
 			let cast = (initialViewControllerClass == os.storyboardControllerReturnType ? (os == OS.iOS ? "!" : "") : " as! \(initialViewControllerClass)")
-			output += "\t\tstatic func instantiateInitial\(os.storyboardControllerSignatureType)() -> \(initialViewControllerClass) {"
+			output += "\t\tstatic func makeInitial\(os.storyboardControllerSignatureType)() -> \(initialViewControllerClass) {"
 			output += "\t\t\tstoryboard.instantiateInitial\(os.storyboardControllerSignatureType)()\(cast)"
 			output += "\t\t}"
 		}
@@ -45,7 +45,7 @@ extension Storyboard {
 				}
 
 				let cast = (controllerClass == os.storyboardControllerReturnType ? "" : " as! \(controllerClass)")
-				output += "\t\tstatic func instantiate\(swiftRepresentation(for: storyboardIdentifier, firstLetter: .capitalize))() -> \(controllerClass) {"
+				output += "\t\tstatic func make\(swiftRepresentation(for: storyboardIdentifier, firstLetter: .capitalize))() -> \(controllerClass) {"
 				output += "\t\t\tstoryboard.instantiate\(os.storyboardControllerSignatureType)(withIdentifier: \(initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)))\(cast)"
 				output += "\t\t}"
 			}
