@@ -72,8 +72,7 @@ extension Storyboard {
 	}
 
 	// MARK: - Segues
-	func processSegues(_ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String],
-		_ prepareForSegue: inout [String], storyboardCustomModules: inout Set<String>) -> [String] {
+	func processSegues(_ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String], _ prepareForSegue: inout [String], storyboardCustomModules: inout Set<String>) -> [String] {
 		guard let segues = sceneSegues, !segues.isEmpty else { return [String]() }
 
 		var patterns = [String: Int]()
@@ -424,7 +423,7 @@ extension Storyboard {
 					delegateMethods += "\tfunc " + method
 					defaultImplementation += "\tfunc " + method + " {"
 //					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
-					defaultImplementation += "\t}"	
+					defaultImplementation += "\t}"
 
 					matchCases += "\t\tcase \(casePattern):"
 					if dstCast == "_" {
@@ -494,14 +493,14 @@ extension Storyboard {
 			let reusableIdentifier = swiftIdentifier.first!.lowercased() + swiftIdentifier.dropFirst()
 			if reusable.kind == "collectionReusableView" {
 				if reusable.key == "sectionHeaderView" {
-					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(header: \"\(identifier)\")"
+					declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(header: \"\(identifier)\")"
 				} else if reusable.key == "sectionFooterView" {
-					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(footer: \"\(identifier)\")"
+					declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(footer: \"\(identifier)\")"
 				} else {
-					declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", elementKind: reusable.key)"
+					declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", elementKind: reusable.key)"
 				}
 			} else {
-				declarations += "\t\tstatic var \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", kind: .\(reusable.kind))"
+				declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", kind: .\(reusable.kind))"
 			}
 			allCases.append((reusable.kind, reusableIdentifier, reusable.key))
 		}
@@ -510,19 +509,8 @@ extension Storyboard {
 	func processReusableCases(_ cases: [(String, String, String)]) -> [String] {
 		var output = [String]()
 		let table = Dictionary(grouping: cases) { $0.0 }
-#if true
 		output.append(contentsOf: processCollectionView(values: table))
 		output.append(contentsOf: processTableView(values: table))
-#else
-		for (key, values) in table {
-			switch key {
-			case "collectionReusableView": output.append(contentsOf: processReusableViews(key: key, values: values))
-			case "collectionViewCell": output.append(contentsOf: processCells(key: key, values: values))
-			case "tableViewCell": output.append(contentsOf: processTableCells(key: key, values: values))
-			default: continue
-			}
-		}
-#endif
 		return output
 	}
 
@@ -530,12 +518,12 @@ extension Storyboard {
 		var output = [String]()
 		output += "\t\t" + "struct Prototypes: CollectionViewPrototypes {"
 		output += "\t\t\t" + "typealias Kind = UICollectionView"
-		output += "\t\t\t" + "static var cells: [ReusableProtocol] = ["
+		output += "\t\t\t" + "static let cells: [ReusableProtocol] = ["
 		if let reusables = values["collectionViewCell"] {
 			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
 		}
 		output += "\t\t\t" + "]"
-		output += "\t\t\t" + "static var reusableViews: [ReusableProtocol] = ["
+		output += "\t\t\t" + "static let reusableViews: [ReusableProtocol] = ["
 		if let reusables = values["collectionReusableView"] {
 			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
 		}
@@ -574,12 +562,12 @@ extension Storyboard {
 		var output = [String]()
 		output += "\t\t" + "struct TablePrototypes: TableViewPrototypes {"
 		output += "\t\t\t" + "typealias Kind = UITableView"
-		output += "\t\t\t" + "static var cells: [ReusableProtocol] = ["
+		output += "\t\t\t" + "static let cells: [ReusableProtocol] = ["
 		if let reusables = values["tableViewCell"] {
 			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
 		}
 		output += "\t\t\t" + "]"
-		output += "\t\t\t" + "static var reusableViews: [ReusableProtocol] = ["
+		output += "\t\t\t" + "static let reusableViews: [ReusableProtocol] = ["
 		if let reusables = values["tableViewHeaderFooterView"] {
 			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
 		}
@@ -610,84 +598,6 @@ extension Storyboard {
 		output += "\t\t\t\t" + "where Content: UITableViewHeaderFooterView {"
 		output += "\t\t\t\t" + "(reusableViews[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
 		output += "\t\t\t" + "}"
-		output += "\t\t}"
-		return output
-	}
-	
-	func processCells(key: String, values: [(String, String, String)]) -> [String] {
-		var output = [String]()
-		output += "\t\t" + "struct Cells: PrototypeCollection {"
-		output += "\t\t\t" + "typealias Kind = UICollectionViewCell"
-		output += "\t\t\t" + "static var reusables: [ReusableProtocol] = ["
-		output += "\t\t\t\t" + values.map { $0.1 }.joined(separator: ", ")
-		output += "\t\t\t" + "]"
-		output += "\t\t\t" + "let prototypes: [String: Kind]"
-		output += ""
-		output += "\t\t\t" + "init(collectionView: UICollectionView) {"
-		output += "\t\t\t\t" + "var prototypes = [String: Kind]()"
-		output += "\t\t\t\t" + "for reusable in Self.reusables {"
-		output += "\t\t\t\t\t" + "prototypes[reusable.identifier] = collectionView.dequeueReusableCell(withReuseIdentifier: reusable.identifier, for: IndexPath())"
-		output += "\t\t\t\t" + "}"
-		output += "\t\t\t\t" + "self.prototypes = prototypes"
-		output += "\t\t\t}"
-		output += "\t\t}"
-		return output
-	}
-	func processReusableViews(key: String, values: [(String, String, String)]) -> [String] {
-		var output = [String]()
-		output += "\t\t" + "struct ReusableViews: PrototypeCollection {"
-		output += "\t\t\t" + "typealias Kind = UICollectionReusableView"
-		output += "\t\t\t" + "static var reusables: [ReusableProtocol] = ["
-		output += "\t\t\t\t" + values.map { $0.1 }.joined(separator: ", ")
-		output += "\t\t\t" + "]"
-		output += "\t\t\t" + "let prototypes: [String: Kind]"
-		output += ""
-		output += "\t\t\t" + "init(collectionView: UICollectionView) {"
-		output += "\t\t\t\t" + "var prototypes = [String: Kind]()"
-		output += "\t\t\t\t" + "for reusable in Self.reusables {"
-		output += "\t\t\t\t\t" + "prototypes[reusable.identifier] = collectionView.dequeueReusableSupplementaryView("
-		output += "\t\t\t\t\t\t" + "ofKind: reusable.elementKind, withReuseIdentifier: reusable.identifier, for: IndexPath())"
-		output += "\t\t\t\t" + "}"
-		output += "\t\t\t\t" + "self.prototypes = prototypes"
-		output += "\t\t\t}"
-		output += "\t\t}"
-		return output
-	}
-	func processTableCells(key: String, values: [(String, String, String)]) -> [String] {
-		var output = [String]()
-		output += "\t\t" + "struct TableCells: PrototypeCollection {"
-		output += "\t\t\t" + "typealias Kind = UITableViewCell"
-		output += "\t\t\t" + "static var reusables: [ReusableProtocol] = ["
-		output += "\t\t\t\t" + values.map { $0.1 }.joined(separator: ", ")
-		output += "\t\t\t" + "]"
-		output += "\t\t\t" + "let prototypes: [String: Kind]"
-		output += ""
-		output += "\t\t\t" + "init(tableView: UITableView) {"
-		output += "\t\t\t\t" + "var prototypes = [String: Kind]()"
-		output += "\t\t\t\t" + "for reusable in Self.reusables {"
-		output += "\t\t\t\t\t" + "prototypes[reusable.identifier] = tableView.dequeueReusableCell(withIdentifier: reusable.identifier, for: IndexPath())"
-		output += "\t\t\t\t" + "}"
-		output += "\t\t\t\t" + "self.prototypes = prototypes"
-		output += "\t\t\t}"
-		output += "\t\t}"
-		return output
-	}
-	func processHeaderFooterViews(key: String, values: [(String, String, String)]) -> [String] {
-		var output = [String]()
-		output += "\t\t" + "struct ReusableTableViews: PrototypeCollection {"
-		output += "\t\t\t" + "typealias Kind = UITableCell"
-		output += "\t\t\t" + "static var reusables: [ReusableProtocol] = ["
-		output += "\t\t\t\t" + values.map { $0.1 }.joined(separator: ", ")
-		output += "\t\t\t" + "]"
-		output += "\t\t\t" + "let prototypes: [String: Kind]"
-		output += ""
-		output += "\t\t\t" + "init(tableView: UITableView) {"
-		output += "\t\t\t\t" + "var prototypes = [String: Kind]()"
-		output += "\t\t\t\t" + "for reusable in Self.reusables {"
-		output += "\t\t\t\t\t" + "prototypes[reusable.identifier] = tableView.dequeueReusableHeaderFooterView(withIdentifier: reusable.identifier)"
-		output += "\t\t\t\t" + "}"
-		output += "\t\t\t\t" + "self.prototypes = prototypes"
-		output += "\t\t\t}"
 		output += "\t\t}"
 		return output
 	}
