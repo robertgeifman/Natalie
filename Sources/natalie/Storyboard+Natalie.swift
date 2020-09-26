@@ -13,12 +13,13 @@ extension Storyboard {
 		var output = [String]()
 
 		let name = swiftRepresentation(for: storyboardName, firstLetter: .capitalize)
-		output += "\tstruct \(name): AnyStoryboard {"
-		output += "\t\tstatic let identifier = \(initIdentifier(for: os.storyboardIdentifierType, value: storyboardName))"
+		output += "\tenum \(name): AnyStoryboard {"
+		output += "\t\t@_transparent static var identifier: String { \(initIdentifier(for: os.storyboardIdentifierType, value: storyboardName)) }"
 
 		if let initialViewControllerClass = self.initialViewControllerClass {
 			output += ""
 			let cast = (initialViewControllerClass == os.storyboardControllerReturnType ? (os == OS.iOS ? "!" : "") : " as! \(initialViewControllerClass)")
+			output += "\t\t@_transparent"
 			output += "\t\tstatic func makeInitial\(os.storyboardControllerSignatureType)() -> \(initialViewControllerClass) {"
 			output += "\t\t\tstoryboard.instantiateInitial\(os.storyboardControllerSignatureType)()\(cast)"
 			output += "\t\t}"
@@ -45,6 +46,7 @@ extension Storyboard {
 				}
 
 				let cast = (controllerClass == os.storyboardControllerReturnType ? "" : " as! \(controllerClass)")
+				output += "\t\t@_transparent"
 				output += "\t\tstatic func make\(swiftRepresentation(for: storyboardIdentifier, firstLetter: .capitalize))() -> \(controllerClass) {"
 				output += "\t\t\tstoryboard.instantiate\(os.storyboardControllerSignatureType)(withIdentifier: \(initIdentifier(for: os.storyboardSceneIdentifierType, value: storyboardIdentifier)))\(cast)"
 				output += "\t\t}"
