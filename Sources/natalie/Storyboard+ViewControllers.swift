@@ -500,7 +500,7 @@ extension Storyboard {
 					declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", elementKind: reusable.key)"
 				}
 			} else {
-				declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", kind: .\(reusable.kind))"
+				declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\")"//, kind: .\(reusable.kind))"
 			}
 			allCases.append((reusable.kind, reusableIdentifier, reusable.key))
 		}
