@@ -556,6 +556,9 @@ extension Storyboard {
 		output += "\t\t\t\t" + "(reusableViews[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
 		output += "\t\t\t" + "}"
 		output += "\t\t}"
+		output += "\t\t" + "static func callAsFunction(_ collectionView: UICollectionView) -> Prototypes {"
+		output += "\t\t\t" + ".init(collectionView: collectionView)"
+		output += "\t\t" + "}"
 		return output
 	}
 	func processTableView(values: [String: [(String, String, String)]]) -> [String] {
@@ -599,6 +602,9 @@ extension Storyboard {
 		output += "\t\t\t\t" + "(reusableViews[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
 		output += "\t\t\t" + "}"
 		output += "\t\t}"
+		output += "\t\t" + "static func callAsFunction(_ tableView: UITableView) -> TablePrototypes {"
+		output += "\t\t\t" + ".init(tableView: tableView)"
+		output += "\t\t" + "}"
 		return output
 	}
 }

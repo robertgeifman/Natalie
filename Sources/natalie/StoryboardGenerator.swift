@@ -102,12 +102,10 @@ struct Natalie {
 
 		prefixedOutput += header.description
 		prefixedOutput += "import \(os.framework)"
-		prefixedOutput += "#if canImport(\(os.framework)Additions)"
-		prefixedOutput += "import \(os.framework)Additions"
-		prefixedOutput += "#endif"
+		prefixedOutput += "import NatalieSupport"
 		
 		customModules.formUnion(storyboardCustomModules)
-		for module in customModules where module != "\(os.framework)Additions" {
+		for module in customModules {
 			prefixedOutput += "import \(module)"
 		}
 		prefixedOutput += ""

@@ -16,7 +16,7 @@ Natalie generates Swift code based on storyboard files to make work with Storybo
 
 Proof of concept implementation to address the String issue for strongly typed Swift language. Natalie is a Swift command-line application (written in Swift) that produces a single `.swift` file with a bunch of extensions to project classes along the generated Storyboard enum.
 
-Natalie is written in Swift and requires Swift to run. The project uses [SWXMLHash](https://github.com/drmohundro/SWXMLHash) as a dependency to parse XML and due to framework limitations.
+Natalie is written in Swift and requires Swift to run. The project uses [SWXMLHash](https://github.com/drmohundro/SWXMLHash) as a dependency to parse XML and due to framework limitations. Based on commit: 2211b35c2e0e8b08493f86ba52b26e530cabb751
 
 ### Enumerate Storyboards
 Generated enum Storyboards with a convenient interface (drop-in replacement for UIStoryboard).
