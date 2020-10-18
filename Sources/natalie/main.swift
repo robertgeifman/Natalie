@@ -36,15 +36,4 @@ let storyboardFiles = filePaths.compactMap { try? StoryboardFile(filePath: $0) }
 
 let output = Natalie.process(storyboards: storyboardFiles)
 print(output.joined(separator: "\n"))
-
-// swi ftlint:disable:next line_length
-let natalieBase64String = """
-"""
-
-do {
-	if let natalieBase64Data = try Base64.decode(natalieBase64String),
-		let string = String(data: natalieBase64Data, encoding: .utf8) {
-		print(string)
-	}
-} catch {}
 exit(0)
