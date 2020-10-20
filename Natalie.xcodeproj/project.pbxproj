@@ -26,7 +26,6 @@
 		E106750F21B47EC900CDEF9B /* natalie in CopyFiles */ = {isa = PBXBuildFile; fileRef = 755B834F1D576CBF0020148B /* natalie */; };
 		E106751621B5AF7400CDEF9B /* Storyboard+ViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */; };
 		E106751821B5CD6300CDEF9B /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = E106751721B5CD6300CDEF9B /* Optional.swift */; };
-		E18F9C2421C653A600461ABD /* Base64.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18F9C2321C653A600461ABD /* Base64.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -63,7 +62,6 @@
 		E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Storyboard+ViewControllers.swift"; sourceTree = "<group>"; };
 		E106751721B5CD6300CDEF9B /* Optional.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
 		E15AECFE23A6278400E12A90 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
-		E18F9C2321C653A600461ABD /* Base64.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Base64.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,7 +107,6 @@
 				48E3E55A1EE6D5DF000D4B3F /* StoryboardGenerator.swift */,
 				E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */,
 				48E3E55C1EE6D85E000D4B3F /* Storyboard+Natalie.swift */,
-				E18F9C2321C653A600461ABD /* Base64.swift */,
 				75E28AA51D577D0500A80623 /* main.swift */,
 				750149441D5782F100B22C87 /* OS.swift */,
 				750149461D57830A00B22C87 /* StoryboardFile.swift */,
@@ -236,7 +233,6 @@
 				750149411D5782AC00B22C87 /* Storyboard.swift in Sources */,
 				48E3E55D1EE6D85E000D4B3F /* Storyboard+Natalie.swift in Sources */,
 				75E28AB11D577D0500A80623 /* SWXMLHash.swift in Sources */,
-				E18F9C2421C653A600461ABD /* Base64.swift in Sources */,
 				C4F8BEDF1F9C79BD0031195F /* Color.swift in Sources */,
 				75E28AAD1D577D0500A80623 /* main.swift in Sources */,
 				75E28AAC1D577D0500A80623 /* Helpers.swift in Sources */,
