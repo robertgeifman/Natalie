@@ -8,6 +8,18 @@
 
 import Foundation
 
+struct NavSegue {
+	let dstID: String
+	let dstController: ViewController
+	let rootSegue: Segue
+	let rootController: ViewController
+	let segueID: String
+	let dstName: String
+	let rootClass: String
+	let segueName: String
+	let customSegueClass: String
+}
+
 extension Storyboard {
 	// MARK: - View Controllers
 	func processViewControllers(storyboardCustomModules: inout Set<String>) -> [String] {
@@ -203,6 +215,7 @@ extension Storyboard {
 				continue
 			}
 
+			var navSegue: NavSegue?
 			if dstElement.name == "navigationController", let dstController = viewControllers[dstID],
 				let segues = dstController.searchNamed(name: "segue")?.map({ Segue(xml: $0, source: scene) }),
 				let rootSegue = segues.first(where: { $0.kind == "relationship" && $0.relationshipKind == "rootViewController"}),
@@ -212,7 +225,6 @@ extension Storyboard {
 					seguePatterns += "\t\t#error(\"no segue id for NavigationSegue from \(srcElement.id ?? srcElement.name), root: \(rootController.storyboardIdentifier  ?? rootController.name )\")"
 					continue
 				}
-//				print(segue.identifier)
 				let dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
 //				} else if let identifier = rootController.storyboardIdentifier {
 //					dstName = swiftRepresentation(for: identifier, firstLetter: .capitalize)
@@ -226,18 +238,15 @@ extension Storyboard {
 				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
 //				let swiftIdentifier = dstName.first!.lowercased() + dstName.dropFirst()
 	//					"(_, \(dstRef), \(dstCast))"
-				if let customSegueClassAttr = segue.xml.element?.attribute(by: "customClass") {
-					let customSegueClass = customSegueClassAttr.text
+				let customSegueClass = segue.xml.element?.attribute(by: "customClass")?.text ?? "UIStoryboardSegue"
+				if nil != segue.xml.element?.attribute(by: "customClass") {
 					if let customModule = segue.xml.element?.attribute(by: "customModule")?.text {
 						storyboardCustomModules.insert(customModule)
 					}
-
-					seguePatterns += "\t\tstatic let \(segueName) = NavigationSegue<\(customSegueClass), \(dstClass), \(rootClass)>(identifier: \"\(segueID)\")"
-				} else {
-					seguePatterns += "\t\tstatic let \(segueName) = NavigationSegue<UIStoryboardSegue, \(dstClass), \(rootClass)>(identifier: \"\(segueID)\")"
 				}
+				seguePatterns += "\t\tstatic let \(segueName) = NavigationSegue<\(customSegueClass), \(dstClass), \(rootClass)>(identifier: \"\(segueID)\")"
 
-				continue
+				navSegue = .init(dstID: dstID, dstController: dstController, rootSegue: rootSegue, rootController: rootController, segueID: segueID, dstName: dstName, rootClass: rootClass, segueName: segueName, customSegueClass: customSegueClass)
 			}
 			
 			let pattern = "(\(segue.identifier.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
@@ -279,7 +288,9 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					if nil == navSegue {
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					}
 				}
 				
 				if dstCast != dstRef {
@@ -320,8 +331,9 @@ extension Storyboard {
 						 
 						let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: \(customSegueClass))"
 
-						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customSegueClass), \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
-
+						if nil == navSegue {
+							seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customSegueClass), \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
+						}
 						delegateMethods += "\tfunc " + method
 
 						defaultImplementation += "\tfunc " + method + " {"
@@ -336,13 +348,16 @@ extension Storyboard {
 							matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender, segue: (segue as? \(customSegueClass)).require())"
 						}
 					} else {
-						seguePatterns += "\t\t#error(\"no custom class set for segue \(segueName) to \(dstClass) (\(segueID))\")"
+						if nil == navSegue {
+							seguePatterns += "\t\t#error(\"no custom class set for segue \(segueName) to \(dstClass) (\(segueID))\")"
+						}
 					}
 				} else {
 					let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
 
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
-
+					if nil == navSegue {
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
+					}
 					delegateMethods += "\tfunc " + method
 
 					defaultImplementation += "\tfunc " + method + " {"
@@ -367,43 +382,44 @@ extension Storyboard {
 //				let canUnwindMethod = "\(canUnwindFunctionName)(from: \(dstClass), sender: Any?) -> Bool"
 				let canUnwindMethod = "\(canUnwindFunctionName)(from: UIViewController, sender: Any?) -> Bool"
 
-				let unwindFunctionName = "unwind" + dstName
-//				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
-				let unwindMethod = "\(unwindFunctionName)(from: UIViewController, to: UIViewController)"
-
 				delegateMethods += "\tfunc " + canPerformMethod
 				delegateMethods += "\tfunc " + canUnwindMethod
+
+				defaultImplementation += "\tfunc " + canPerformMethod + " { true }"
+				defaultImplementation += "\tfunc " + canUnwindMethod + " { true }"
+
+				let unwindFunctionName = "unwind" + dstName
+				var unwindMethod: String
+				if let n = navSegue {
+					unwindMethod = "\(unwindFunctionName)(from: \(n.rootClass), to: UIViewController)"
+				} else {
+					unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: UIViewController)"
+				}
+//				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
+//				let unwindMethod = "\(unwindFunctionName)(from: UIViewController, to: UIViewController)"
 				delegateMethods += "\tfunc " + unwindMethod
-
-				defaultImplementation += "\tfunc " + canPerformMethod + " {"
-//				defaultImplementation += "\t\tprint(\"\(customClass).\(canPerformMethod)\"); return true"
-				defaultImplementation += "\t\treturn true"
-				defaultImplementation += "\t}"
-
-				defaultImplementation += "\tfunc " + canUnwindMethod + " {"
-//				defaultImplementation +=  "\t\tprint(\"\(customClass).\(canUnwindMethod)\"); return true"
-				defaultImplementation += "\t\treturn true"
-				defaultImplementation += "\t}"
-
-				defaultImplementation += "\tfunc " + unwindMethod + " {"
-//				defaultImplementation +=  "\t\tprint(\"\(customClass).\(unwindMethod)\")"
-				defaultImplementation += "\t}"
+				defaultImplementation += "\tfunc " + unwindMethod + " {}"
 
 				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
-				
-				unwindMethods += "\t\tlet source = segue.source"
-				unwindMethods += "\t\tlet destination = segue.destination"
-//				if dstCastUnwind == "_" {
+				if let n = navSegue {
+//				if dstCastUnwind != "_" {
+					unwindMethods += n.rootClass == "UIViewController" ?
+						"\t\tlet source = segue.source" :
+						"\t\tguard let source = segue.source as? \(n.rootClass) else { return }"
+				} else {
+					unwindMethods += dstClass == "UIViewController" ?
+						"\t\tlet source = segue.source" :
+						"\t\tguard let source = segue.source as? \(dstClass) else { return }"
 //					unwindMethods += "\t\tlet source = segue.source"
-//				} else {
-//					unwindMethods += "\t\tguard let source = segue.source as? \(dstClass) else { return }"
-//				}
-//
-//				if srcCastUnwind == "_" {
-//					unwindMethods += "\t\tlet destination = segue.destination"
-//				} else {
+				}
+//				unwindMethods += "\t\tlet source = segue.source"
+
+//				if srcCastUnwind != "_" {
 //					unwindMethods += "\t\tguard let destination = segue.destination as? \(srcClass) else { return }"
+//				} else {
+//					unwindMethods += "\t\tlet destination = segue.destination"
 //				}
+				unwindMethods += "\t\tlet destination = segue.destination"
 				
 				unwindMethods += "\t\tsceneCoordinator.\(unwindFunctionName)(from: source, to: destination)"
 				unwindMethods += "\t}"
@@ -449,7 +465,9 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					if nil == navSegue {
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					}
 				}
 
 				if dstCast != dstRef {
@@ -497,7 +515,9 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					if nil == navSegue {
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					}
 				}
 
 				if dstCast != dstRef {
@@ -637,7 +657,7 @@ extension Storyboard {
 		output += "\t\t\t\t" + "where Content: UICollectionReusableView {"
 		output += "\t\t\t\t" + "(reusableViews[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
 		output += "\t\t\t" + "}"
-		output += "\t\t}"
+		output += "\t\t" + "}"
 		output += "\t\t" + "static func callAsFunction(_ collectionView: UICollectionView) -> Prototypes {"
 		output += "\t\t\t" + ".init(collectionView: collectionView)"
 		output += "\t\t" + "}"
