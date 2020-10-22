@@ -10,24 +10,20 @@ import Foundation
 
 extension Storyboard {
 	// MARK: - View Controllers
-	func processViewControllers(storyboardCustomModules: inout Set<String>) -> [String] {
+	func processViewControllersMac(storyboardCustomModules: inout Set<String>) -> [String] {
 		var output = [String]()
-		var viewControllers = [String: ViewController]()
-		for vc in scenes {
-			if let id = vc.viewController?.id { viewControllers[id] = vc.viewController }
-		}
-		for scene in self.scenes {
+		for scene in scenes {
 			guard let viewController = scene.viewController,
 				let customClass = viewController.customClass
 			else { continue }
-
+			let kind = viewController.name
 			let sceneSegues = scene.segues
 			let sceneReusables = viewController.reusables(os)
 
 			var seguesController = [String]()
 			var prepareForSegue = [String]()
-			let segues = processSegues(viewControllers, scene, sceneSegues, customClass, &seguesController, &prepareForSegue, storyboardCustomModules: &storyboardCustomModules)
-			let reusables = processReusables(sceneReusables)
+			let segues = processSeguesMac(sceneSegues, customClass, &seguesController, &prepareForSegue, storyboardCustomModules: &storyboardCustomModules)
+			let reusables = processReusablesMac(sceneReusables)
 
 			let sceneClass = processIdentifier(scene: scene, storyboardCustomModules: storyboardCustomModules)
 			let sceneClass_noSegues = (seguesController.isEmpty) ? processIdentifier_noSegues(scene: scene, storyboardCustomModules: storyboardCustomModules) : []
@@ -48,51 +44,17 @@ extension Storyboard {
 					output += "\t" + "}"
 					output += ""
 					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<Kind: UIStoryboardSegue, To: UIViewController>(_ segue: Segue<Kind, To>) { segue.perform(from: self) }"
+					output += "\t" + "func perform<Kind: NSStoryboardSegue, To: NSViewController>(_ segue: Segue<Kind, To>) { segue.perform(from: self) }"
 					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<Kind: UIStoryboardSegue, To: UIViewController>(_ segue: Segue<Kind, To>, "
+					output += "\t" + "func perform<Kind: NSStoryboardSegue, To: NSViewController>(_ segue: Segue<Kind, To>, "
 					output += "\t\t" + "prepare body: @escaping (Kind, To) -> Void) {"
-					output += "\t\t" + "segue.perform(from: self, prepare: body)"
-					output += "\t" + "}"
+					output += "\t\tsegue.perform(from: self, prepare: body)"
+					output += "\t}"
 					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<To: UIViewController>(_ segue: Segue<UIStoryboardSegue, To>) { "
-					output += "\t\t" + "segue.perform(from: self)"
-					output += "\t" + "}"
-					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<To: UIViewController>(_ segue: Segue<UIStoryboardSegue, To>, "
+					output += "\t" + "func perform<To: NSViewController>(_ segue: Segue<NSStoryboardSegue, To>, "
 					output += "\t\t" + "prepare body: @escaping (To) -> Void) {"
-					output += "\t\t" + "segue.perform(from: self, prepare: body)"
-					output += "\t" + "}"
-					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<Kind, To, Root>(_ segue: NavigationSegue<Kind, To, Root>) "
-					output += "\t\t" + "where Kind: UIStoryboardSegue, To: UINavigationController, Root: UIViewController { "
-					output += "\t\t" + "segue.perform(from: self)"
-					output += "\t" + "}"
-					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<Kind, To, Root>(_ segue: NavigationSegue<Kind, To, Root>, "
-					output += "\t\t" + "prepare body: @escaping (Kind, To) -> Void)"
-					output += "\t\t" + "where Kind: UIStoryboardSegue, To: UINavigationController, Root: UIViewController { "
-					output += "\t\t" + "segue.perform(from: self) { kind, to, _ in body(kind, to) }"
-					output += "\t" + "}"
-					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<Kind, To, Root>(_ segue: NavigationSegue<Kind, To, Root>, "
-					output += "\t\t" + "prepare body: @escaping (Kind, To, Root) -> Void)"
-					output += "\t\t" + "where Kind: UIStoryboardSegue, To: UINavigationController, Root: UIViewController { "
-					output += "\t\t" + "segue.perform(from: self, prepare: body)"
-					output += "\t" + "}"
-
-					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<To, Root>(_ segue: NavigationSegue<UIStoryboardSegue, To, Root>, "
-					output += "\t\t" + "prepare body: @escaping (To) -> Void)"
-					output += "\t\t" + "where To: UINavigationController, Root: UIViewController { "
-					output += "\t\t" + "segue.perform(from: self) { _, to, _ in body(to) }"
-					output += "\t" + "}"
-					output += "\t" + "@inline(__always)"
-					output += "\t" + "func perform<To, Root>(_ segue: NavigationSegue<UIStoryboardSegue, To, Root>, "
-					output += "\t\t" + "prepare body: @escaping (To, Root) -> Void)"
-					output += "\t\t" + "where To: UINavigationController, Root: UIViewController { "
-					output += "\t\t" + "segue.perform(from: self) { body($1, $2) }"
-					output += "\t" + "}"
+					output += "\t\tsegue.perform(from: self, prepare: body)"
+					output += "\t}"
 					output += ""
 				} else {
 					output += "extension \(customClass) {"
@@ -101,7 +63,7 @@ extension Storyboard {
 				if !reusables.declarations.isEmpty {
 					output += "\tenum Reusables {"
 					output += "\t\ttypealias Reusables = Self"
-					output.append(contentsOf: processReusableCases(reusables.cases))
+					output.append(contentsOf: processReusableCasesMac(reusables.cases))
 					output.append(contentsOf: reusables.declarations)
 					output += "\t}"
 				}
@@ -120,14 +82,14 @@ extension Storyboard {
 	}
 
 	// MARK: - Segues
-	func processSegues(_ viewControllers: [String: ViewController], _ scene: Scene, _ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String], _ prepareForSegue: inout [String], storyboardCustomModules: inout Set<String>) -> [String] {
+	func processSeguesMac(_ sceneSegues: [Segue]?, _ customClass: String, _ seguesController: inout [String], _ prepareForSegue: inout [String], storyboardCustomModules: inout Set<String>) -> [String] {
 		guard let segues = sceneSegues, !segues.isEmpty else { return [String]() }
 
 		var patterns = [String: Int]()
 
 		for segue in segues {
 			guard
-				let srcElement = segue.source.viewController,
+				// let srcElement = segue.source.viewController,
 				// let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name),
 				let dstID = segue.destination,
 				let dstElement = searchById(id: dstID)?.element,
@@ -135,6 +97,7 @@ extension Storyboard {
 			else {
 				continue
 			}
+
 			// let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
 			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
 			let pattern = "(\(segue.identifier.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
@@ -173,7 +136,7 @@ extension Storyboard {
 		var hasIdentifiableSegues = false
 		for segue in segues {
 			guard let srcElement = segue.source.viewController else { continue }
-			// guard let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name) else { continue }
+			guard let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name) else { continue }
 			guard let dstID = segue.destination else { continue }
 			guard let dstElement = searchById(id: dstID)?.element else { continue }
 			
@@ -186,7 +149,7 @@ extension Storyboard {
 
 					if let segueIdentifier = segueIdentifier {
 						allCases += "\t\t\t\(segueName),"
-						seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, UIViewController>(identifier: \"\(segueIdentifier)\")"
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, NSViewController>(identifier: \"\(segueIdentifier)\")"
 					}
 
 					numberOfCases += 1
@@ -195,109 +158,26 @@ extension Storyboard {
 			}
 
 			guard let dstClass = (dstElement.attribute(by: "customClass")?.text ?? os.controllerType(for: dstElement.name)) else { continue }
+
 			// let srcStoryboardID = srcElement.xml.element?.attribute(by: "storyboardIdentifier")?.text
 			let dstStoryboardID = dstElement.attribute(by: "storyboardIdentifier")?.text
-			guard let segueID = segue.identifier, !segueID.isEmpty else {
-				continue
-			}
 
-			if dstElement.name == "navigationController", let dstController = viewControllers[dstID],
-				let segues = dstController.searchNamed(name: "segue")?.map({ Segue(xml: $0, source: scene) }),
-				let rootSegue = segues.first(where: { $0.kind == "relationship" && $0.relationshipKind == "rootViewController"}),
-				let destination = rootSegue.destination,
-				let rootController = viewControllers[destination] {
-				guard let segueID = segue.identifier, !segueID.isEmpty else {
-					seguePatterns += "\t\t#error(\"no segue id for NavigationSegue from \(srcElement.id ?? srcElement.name), root: \(rootController.storyboardIdentifier  ?? rootController.name )\")"
-					continue
-				}
-//				print(segue.identifier)
-				let dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
-//				} else if let identifier = rootController.storyboardIdentifier {
-//					dstName = swiftRepresentation(for: identifier, firstLetter: .capitalize)
-//				} else if let customClass = rootController.customClass {
-//					dstName = swiftRepresentation(for: customClass, firstLetter: .capitalize)
-//				} else {
-//					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) + "_" + swiftRepresentation(for: dstID, firstLetter: .capitalize)
-//				}
-
-				let rootClass = rootController.customClass ?? "UIViewController"
-				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
-//				let swiftIdentifier = dstName.first!.lowercased() + dstName.dropFirst()
-	//					"(_, \(dstRef), \(dstCast))"
-				if let customSegueClassAttr = segue.xml.element?.attribute(by: "customClass") {
-					let customSegueClass = customSegueClassAttr.text
-					if let customModule = segue.xml.element?.attribute(by: "customModule")?.text {
-						storyboardCustomModules.insert(customModule)
-					}
-
-					seguePatterns += "\t\tstatic let \(segueName) = NavigationSegue<\(customSegueClass), \(dstClass), \(rootClass)>(identifier: \"\(segueID)\")"
-				} else {
-					seguePatterns += "\t\tstatic let \(segueName) = NavigationSegue<UIStoryboardSegue, \(dstClass), \(rootClass)>(identifier: \"\(segueID)\")"
-				}
-
-				continue
-			}
-			
 			let pattern = "(\(segue.identifier.unwrappedString), \(dstStoryboardID.unwrappedString), \(dstClass).self)"
-			let dstCast = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass).Type"
-			let dstCastUnwind = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass)"
-			// let srcRef = (srcClass == "UIViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
-			let dstRef = (dstClass == "UIViewController"||dstClass == "NSViewController") ? "_" : "\(dstStoryboardID.unwrappedPattern)"
+
+//			let srcCastUnwind = (srcClass == "NSViewController"||srcClass == "NSViewController") ? "_" : "is \(srcClass).Type"
+			let dstCast = (dstClass == "NSViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass).Type"
+			let dstCastUnwind = (dstClass == "NSViewController"||dstClass == "NSViewController") ? "_" : "is \(dstClass)"
+			// let srcRef = (srcClass == "NSViewController"||srcClass == "NSViewController") ? "_" : "\(srcStoryboardID.unwrappedPattern)"
+			let dstRef = (dstClass == "NSViewController"||dstClass == "NSViewController") ? "_" : "\(dstStoryboardID.unwrappedPattern)"
 			if let value = patterns[pattern], value > 1 {
 				continue
 			}
+
+			guard let segueID = segue.identifier, !segueID.isEmpty else {
+				continue
+			}
 			
-			if segue.kind == "relationship" {
-				let relationshipKind = segue.relationshipKind ?? ""
-
-				var dstName = swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + "To"
-
-				var segueIdentifier: String?
-				if let segueID = segue.identifier, !segueID.isEmpty {
-					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
-					segueIdentifier = segueID
-				} else if let identifier = dstElement.attribute(by: "storyboardIdentifier")?.text {
-					dstName += swiftRepresentation(for: identifier, firstLetter: .capitalize)
-				} else if let customClass = dstElement.attribute(by: "customClass")?.text {
-					dstName += swiftRepresentation(for: customClass, firstLetter: .capitalize)
-				} else {
-					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) + "_" + swiftRepresentation(for: dstID, firstLetter: .capitalize)
-				}
-
-				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
-				let casePattern = nil == segueIdentifier ?
-//					"(_, \(dstRef), \(dstCast))" :
-//					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
-					"(_, \(dstCast))" :
-					"(Segues.\(segueName).identifier, \(dstCast))"
-
-				let swiftIdentifier = "relationship" + dstName
-				let functionName = "prepareRelationship" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
-
-				if let segueIdentifier = segueIdentifier {
-					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
-				}
-				
-				if dstCast != dstRef {
-					numberOfCases += 1
-					delegateMethods += "\tfunc " + method
-					defaultImplementation += "\tfunc " + method + " {"
-//					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
-					defaultImplementation += "\t}"
-
-					matchCases += "\t\tcase \(casePattern):"
-					if dstCast == "_" {
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender, segue: segue)"
-					} else {
-						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
-						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender, segue: segue)"
-					}
-				}
-				
-				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
-			} else if segue.kind != "embed", segue.kind != "relationship" {
+			if segue.kind != "embed", segue.kind != "relationship" {
 				hasIdentifiableSegues = true // hasIdentifiableSegues || (segue.kind != "embed" && segue.kind != "relationship")
 				let swiftIdentifier = swiftRepresentation(for: segueID, firstLetter: .lowercase)
 				let dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
@@ -337,9 +217,9 @@ extension Storyboard {
 						seguePatterns += "\t\t#error(\"no custom class set for segue \(segueName) to \(dstClass) (\(segueID))\")"
 					}
 				} else {
-					let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
+					let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: NSStoryboardSegue)"
 
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
 
 					delegateMethods += "\tfunc " + method
 
@@ -363,11 +243,11 @@ extension Storyboard {
 
 				let canUnwindFunctionName = "canUnwind" + dstName
 //				let canUnwindMethod = "\(canUnwindFunctionName)(from: \(dstClass), sender: Any?) -> Bool"
-				let canUnwindMethod = "\(canUnwindFunctionName)(from: UIViewController, sender: Any?) -> Bool"
+				let canUnwindMethod = "\(canUnwindFunctionName)(from: NSViewController, sender: Any?) -> Bool"
 
 				let unwindFunctionName = "unwind" + dstName
 //				let unwindMethod = "\(unwindFunctionName)(from: \(dstClass), to: \(srcClass))"
-				let unwindMethod = "\(unwindFunctionName)(from: UIViewController, to: UIViewController)"
+				let unwindMethod = "\(unwindFunctionName)(from: NSViewController, to: NSViewController)"
 
 				delegateMethods += "\tfunc " + canPerformMethod
 				delegateMethods += "\tfunc " + canUnwindMethod
@@ -387,7 +267,7 @@ extension Storyboard {
 //				defaultImplementation +=  "\t\tprint(\"\(customClass).\(unwindMethod)\")"
 				defaultImplementation += "\t}"
 
-				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: UIStoryboardSegue) {"
+				unwindMethods += "\t@IBAction func \(unwindFunctionName)(segue: NSStoryboardSegue) {"
 				
 				unwindMethods += "\t\tlet source = segue.source"
 				unwindMethods += "\t\tlet destination = segue.destination"
@@ -443,11 +323,11 @@ extension Storyboard {
 					
 				let swiftIdentifier = "present" + dstName
 				let functionName = "prepareToPresent" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: NSStoryboardSegue)"
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
 
 				if dstCast != dstRef {
@@ -491,13 +371,63 @@ extension Storyboard {
 
 				let swiftIdentifier = "embed" + dstName
 				let functionName = "prepareToEmbed" + dstName
-				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: UIStoryboardSegue)"
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: NSStoryboardSegue)"
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<UIStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
 				}
 
+				if dstCast != dstRef {
+					numberOfCases += 1
+					delegateMethods += "\tfunc " + method
+					defaultImplementation += "\tfunc " + method + " {"
+//					defaultImplementation += "\t\tprint(\"\(customClass).\(method)\")"
+					defaultImplementation += "\t}"
+
+					matchCases += "\t\tcase \(casePattern):"
+					if dstCast == "_" {
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(segue.destinationController, sender: sender, segue: segue)"
+					} else {
+						matchCases += "\t\t\tlet dst = (segue.destinationController as? \(dstClass)).require()"
+						matchCases += "\t\t\tsceneCoordinator.\(functionName)(dst, sender: sender, segue: segue)"
+					}
+				}
+				
+				initWithRawValue += "\t\t\tcase \(casePattern): self = .\(swiftIdentifier)"
+			} else if segue.kind == "relationship" {
+				let relationshipKind = segue.relationshipKind ?? ""
+
+				var dstName = swiftRepresentation(for: relationshipKind, firstLetter: .capitalize) + "To"
+
+				var segueIdentifier: String?
+				if let segueID = segue.identifier, !segueID.isEmpty {
+					dstName = swiftRepresentation(for: segueID, firstLetter: .capitalize)
+					segueIdentifier = segueID
+				} else if let identifier = dstElement.attribute(by: "storyboardIdentifier")?.text {
+					dstName += swiftRepresentation(for: identifier, firstLetter: .capitalize)
+				} else if let customClass = dstElement.attribute(by: "customClass")?.text {
+					dstName += swiftRepresentation(for: customClass, firstLetter: .capitalize)
+				} else {
+					dstName = swiftRepresentation(for: dstElement.name, firstLetter: .capitalize) + "_" + swiftRepresentation(for: dstID, firstLetter: .capitalize)
+				}
+
+				let segueName = dstName.first!.lowercased() + dstName.dropFirst()
+				let casePattern = nil == segueIdentifier ?
+//					"(_, \(dstRef), \(dstCast))" :
+//					"(Segues.\(segueName).identifier, \(dstRef), \(dstCast))"
+					"(_, \(dstCast))" :
+					"(Segues.\(segueName).identifier, \(dstCast))"
+
+				let swiftIdentifier = "relationship" + dstName
+				let functionName = "prepareRelationship" + dstName
+				let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: NSStoryboardSegue)"
+
+				if let segueIdentifier = segueIdentifier {
+					allCases += "\t\t\t\(segueName),"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+				}
+				
 				if dstCast != dstRef {
 					numberOfCases += 1
 					delegateMethods += "\tfunc " + method
@@ -518,7 +448,7 @@ extension Storyboard {
 			}
 		}
 
-		if numberOfCases == 0 && seguePatterns.isEmpty {
+		if numberOfCases == 0 {
 			return [String]()
 		}
 
@@ -539,7 +469,7 @@ extension Storyboard {
 
 		// tweaked so that 13.* does not give me grief
 		canUnwindCases.insert("\t@available(iOS 13, *)", at: 0)
-		canUnwindCases.insert("\toverride func canPerformUnwindSegueAction(_ action: Selector, from: UIViewController, sender: Any?) -> Bool {", at: 1)
+		canUnwindCases.insert("\toverride func canPerformUnwindSegueAction(_ action: Selector, from: NSViewController, sender: Any?) -> Bool {", at: 1)
 		canUnwindCases.insert("\t\tswitch (action, from) {", at: 2)
 
 		canUnwindCases += "\t\tdefault:"
@@ -561,7 +491,7 @@ extension Storyboard {
 	}
 	
 	// MARK: - Reusables
-	func processReusables(_ sceneReusables: [Reusable]?) -> (declarations: [String], cases: [(String, String, String)]) {
+	func processReusablesMac(_ sceneReusables: [Reusable]?) -> (declarations: [String], cases: [(String, String, String)]) {
 		var declarations = [String]()
 		var allCases = [(String, String, String)]()
 		guard let reusables = sceneReusables, !reusables.isEmpty else { return (declarations: [], cases: []) }
@@ -586,18 +516,18 @@ extension Storyboard {
 		}
 		return (declarations: declarations, cases: allCases)
 	}
-	func processReusableCases(_ cases: [(String, String, String)]) -> [String] {
+	func processReusableCasesMac(_ cases: [(String, String, String)]) -> [String] {
 		var output = [String]()
 		let table = Dictionary(grouping: cases) { $0.0 }
-		output.append(contentsOf: processCollectionView(values: table))
-		output.append(contentsOf: processTableView(values: table))
+		output.append(contentsOf: processCollectionViewMac(values: table))
+		output.append(contentsOf: processTableViewMac(values: table))
 		return output
 	}
 
-	func processCollectionView(values: [String: [(String, String, String)]]) -> [String] {
+	func processCollectionViewMac(values: [String: [(String, String, String)]]) -> [String] {
 		var output = [String]()
 		output += "\t\t" + "struct Prototypes: CollectionViewPrototypes {"
-		output += "\t\t\t" + "typealias Kind = UICollectionView"
+		output += "\t\t\t" + "typealias Kind = NSCollectionView"
 		output += "\t\t\t" + "static let cells: [ReusableProtocol] = ["
 		if let reusables = values["collectionViewCell"] {
 			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
@@ -608,13 +538,13 @@ extension Storyboard {
 			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
 		}
 		output += "\t\t\t" + "]"
-		output += "\t\t\t" + "let cells: [String: UICollectionViewCell]"
-		output += "\t\t\t" + "let reusableViews: [String: UICollectionReusableView]"
+		output += "\t\t\t" + "let cells: [String: NSCollectionViewItem]"
+		output += "\t\t\t" + "let reusableViews: [String: NSView]"
 		output += ""
 		output += "\t\t\t@_transparent"
-		output += "\t\t\t" + "init(collectionView: UICollectionView) {"
-		output += "\t\t\t\t" + "var cells = [String: UICollectionViewCell]()"
-		output += "\t\t\t\t" + "var reusableViews = [String: UICollectionReusableView]()"
+		output += "\t\t\t" + "init(collectionView: NSCollectionView) {"
+		output += "\t\t\t\t" + "var cells = [String: NSCollectionViewItem]()"
+		output += "\t\t\t\t" + "var reusableViews = [String: NSView]()"
 		output += "\t\t\t\t" + "for reusable in Self.cells {"
 		output += "\t\t\t\t\t" + "cells[reusable.identifier] = collectionView.dequeueReusableCell(withReuseIdentifier: reusable.identifier, for: IndexPath())"
 		output += "\t\t\t\t" + "}"
@@ -627,24 +557,24 @@ extension Storyboard {
 		output += "\t\t\t}"
 		output += "\t\t\t@inline(__always)"
 		output += "\t\t\t" + "subscript<Content>(reusable: Reusable<Content>) -> Content"
-		output += "\t\t\t\t" + "where Content: UICollectionViewCell {"
+		output += "\t\t\t\t" + "where Content: NSCollectionViewItem {"
 		output += "\t\t\t\t" + "(cells[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
 		output += "\t\t\t" + "}"
 		output += "\t\t\t@inline(__always)"
 		output += "\t\t\t" + "subscript<Content>(reusable: Reusable<Content>) -> Content"
-		output += "\t\t\t\t" + "where Content: UICollectionReusableView {"
+		output += "\t\t\t\t" + "where Content: NSView {"
 		output += "\t\t\t\t" + "(reusableViews[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
 		output += "\t\t\t" + "}"
 		output += "\t\t}"
-		output += "\t\t" + "static func callAsFunction(_ collectionView: UICollectionView) -> Prototypes {"
+		output += "\t\t" + "static func callAsFunction(_ collectionView: NSCollectionView) -> Prototypes {"
 		output += "\t\t\t" + ".init(collectionView: collectionView)"
 		output += "\t\t" + "}"
 		return output
 	}
-	func processTableView(values: [String: [(String, String, String)]]) -> [String] {
+	func processTableViewMac(values: [String: [(String, String, String)]]) -> [String] {
 		var output = [String]()
 		output += "\t\t" + "struct TablePrototypes: TableViewPrototypes {"
-		output += "\t\t\t" + "typealias Kind = UITableView"
+		output += "\t\t\t" + "typealias Kind = NSTableView"
 		output += "\t\t\t" + "static let cells: [ReusableProtocol] = ["
 		if let reusables = values["tableViewCell"] {
 			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
@@ -655,13 +585,13 @@ extension Storyboard {
 			output += "\t\t\t\t" + reusables.map { $0.1 }.joined(separator: ", ")
 		}
 		output += "\t\t\t" + "]"
-		output += "\t\t\t" + "let cells: [String: UITableViewCell]"
-		output += "\t\t\t" + "let reusableViews: [String: UITableViewHeaderFooterView]"
+		output += "\t\t\t" + "let cells: [String: NSTableCellView]"
+		output += "\t\t\t" + "let reusableViews: [String: NSView]"
 		output += ""
 		output += "\t\t\t@_transparent"
-		output += "\t\t\t" + "init(tableView: UITableView) {"
-		output += "\t\t\t\t" + "var cells = [String: UITableViewCell]()"
-		output += "\t\t\t\t" + "var reusableViews = [String: UITableViewHeaderFooterView]()"
+		output += "\t\t\t" + "init(tableView: NSTableView) {"
+		output += "\t\t\t\t" + "var cells = [String: NSTableCellView]()"
+		output += "\t\t\t\t" + "var reusableViews = [String: NSView]()"
 		output += "\t\t\t\t" + "for reusable in Self.cells {"
 		output += "\t\t\t\t\t" + "cells[reusable.identifier] = tableView.dequeueReusableCell(withIdentifier: reusable.identifier, for: IndexPath())"
 		output += "\t\t\t\t" + "}"
@@ -673,16 +603,16 @@ extension Storyboard {
 		output += "\t\t\t}"
 		output += "\t\t\t@inline(__always)"
 		output += "\t\t\t" + "subscript<Content>(reusable: Reusable<Content>) -> Content"
-		output += "\t\t\t\t" + "where Content: UITableViewCell {"
+		output += "\t\t\t\t" + "where Content: NSTableCellView {"
 		output += "\t\t\t\t" + "(cells[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
 		output += "\t\t\t" + "}"
 		output += "\t\t\t@inline(__always)"
 		output += "\t\t\t" + "subscript<Content>(reusable: Reusable<Content>) -> Content"
-		output += "\t\t\t\t" + "where Content: UITableViewHeaderFooterView {"
+		output += "\t\t\t\t" + "where Content: NSView {"
 		output += "\t\t\t\t" + "(reusableViews[reusable.identifier] as? Content).require(\"No prorotype for \\(reusable)\")"
 		output += "\t\t\t" + "}"
 		output += "\t\t}"
-		output += "\t\t" + "static func callAsFunction(_ tableView: UITableView) -> TablePrototypes {"
+		output += "\t\t" + "static func callAsFunction(_ tableView: NSTableView) -> TablePrototypes {"
 		output += "\t\t\t" + ".init(tableView: tableView)"
 		output += "\t\t" + "}"
 		return output

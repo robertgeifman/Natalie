@@ -70,11 +70,12 @@ struct Natalie {
 	func process(os: OS) -> [String] {
 		var output = [String]()
 		var customModules = Set<String>()
-//		customModules.insert("\(os.framework)Additions")
 		for file in storyboards {
-			output += file.storyboard.processViewControllers(storyboardCustomModules: &customModules)
+			output += os == .OSX ?
+				file.storyboard.processViewControllersMac(storyboardCustomModules: &customModules) :
+				file.storyboard.processViewControllers(storyboardCustomModules: &customModules)
 		}
-		
+	
 		output += "// MARK: - Storyboard"
 		output += "enum Storyboards {"
 		for file in storyboards {

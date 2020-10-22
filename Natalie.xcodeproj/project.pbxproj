@@ -26,6 +26,7 @@
 		E106750F21B47EC900CDEF9B /* natalie in CopyFiles */ = {isa = PBXBuildFile; fileRef = 755B834F1D576CBF0020148B /* natalie */; };
 		E106751621B5AF7400CDEF9B /* Storyboard+ViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */; };
 		E106751821B5CD6300CDEF9B /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = E106751721B5CD6300CDEF9B /* Optional.swift */; };
+		E1F7547E254040A90084D99C /* Storyboard+ViewControllersMac.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F7547D254040A90084D99C /* Storyboard+ViewControllersMac.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -62,6 +63,7 @@
 		E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Storyboard+ViewControllers.swift"; sourceTree = "<group>"; };
 		E106751721B5CD6300CDEF9B /* Optional.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
 		E15AECFE23A6278400E12A90 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		E1F7547D254040A90084D99C /* Storyboard+ViewControllersMac.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Storyboard+ViewControllersMac.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 			children = (
 				48E3E55A1EE6D5DF000D4B3F /* StoryboardGenerator.swift */,
 				E106751521B5AF7400CDEF9B /* Storyboard+ViewControllers.swift */,
+				E1F7547D254040A90084D99C /* Storyboard+ViewControllersMac.swift */,
 				48E3E55C1EE6D85E000D4B3F /* Storyboard+Natalie.swift */,
 				75E28AA51D577D0500A80623 /* main.swift */,
 				750149441D5782F100B22C87 /* OS.swift */,
@@ -241,6 +244,7 @@
 				750149451D5782F100B22C87 /* OS.swift in Sources */,
 				E106751821B5CD6300CDEF9B /* Optional.swift in Sources */,
 				750149431D5782CA00B22C87 /* Scene.swift in Sources */,
+				E1F7547E254040A90084D99C /* Storyboard+ViewControllersMac.swift in Sources */,
 				48E3E55B1EE6D5DF000D4B3F /* StoryboardGenerator.swift in Sources */,
 				7501493B1D57825F00B22C87 /* ViewController.swift in Sources */,
 				7501493D1D57827800B22C87 /* Segue.swift in Sources */,
