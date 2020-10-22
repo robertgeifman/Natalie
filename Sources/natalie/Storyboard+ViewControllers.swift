@@ -47,6 +47,7 @@ extension Storyboard {
 					output += segues
 					output += "\t" + "}"
 					output += ""
+#if false
 					output += "\t" + "@inline(__always)"
 					output += "\t" + "func perform<Kind: UIStoryboardSegue, To: UIViewController>(_ segue: Segue<Kind, To>) { segue.perform(from: self) }"
 					output += "\t" + "@inline(__always)"
@@ -94,6 +95,7 @@ extension Storyboard {
 					output += "\t\t" + "segue.perform(from: self) { body($1, $2) }"
 					output += "\t" + "}"
 					output += ""
+#endif
 				} else {
 					output += "extension \(customClass) {"
 				}
