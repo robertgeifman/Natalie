@@ -20,7 +20,7 @@ public protocol CollectionViewPrototypes {
 	var cells: [String: UICollectionViewCell] { get }
 	var reusableViews: [String: UICollectionReusableView] { get }
 	
-	func makePrototypes(collectionView: UICollectionView) -> ([String: UICollectionViewCell], [String: UICollectionReusableView])
+	static func makePrototypes(_ collectionView: UICollectionView) -> ([String: UICollectionViewCell], [String: UICollectionReusableView])
 
 	subscript<T: UICollectionViewCell>(reusable: Reusable<T>) -> T { get }
 	subscript<T: UICollectionReusableView>(reusable: Reusable<T>) -> T { get }
@@ -29,7 +29,7 @@ public protocol CollectionViewPrototypes {
 public extension CollectionViewPrototypes {
 	typealias Kind = UICollectionView
 
-	func makePrototypes(collectionView: UICollectionView) -> ([String: UICollectionViewCell], [String: UICollectionReusableView]) {
+	static func makePrototypes(_ collectionView: UICollectionView) -> ([String: UICollectionViewCell], [String: UICollectionReusableView]) {
 		var cells = [String: UICollectionViewCell]()
 		var reusableViews = [String: UICollectionReusableView]()
 		for reusable in Self.cells {
@@ -61,7 +61,7 @@ public protocol TableViewPrototypes {
 	var cells: [String: UITableViewCell] { get }
 	var reusableViews: [String: UITableViewHeaderFooterView] { get }
 	
-	func makePrototypes(tableView: UITableView) -> ([String: UITableViewCell], [String: UITableViewHeaderFooterView])
+	static func makePrototypes(_ tableView: UITableView) -> ([String: UITableViewCell], [String: UITableViewHeaderFooterView])
 
 	subscript<T: UITableViewCell>(reusable: Reusable<T>) -> T { get }
 	subscript<T: UITableViewHeaderFooterView>(reusable: Reusable<T>) -> T { get }
@@ -70,7 +70,7 @@ public protocol TableViewPrototypes {
 public extension TableViewPrototypes {
 	typealias Kind = UITableView
 
-	func makePrototypes(tableView: UITableView) -> ([String: UITableViewCell], [String: UITableViewHeaderFooterView]) {
+	static func makePrototypes(_ tableView: UITableView) -> ([String: UITableViewCell], [String: UITableViewHeaderFooterView]) {
 		var cells = [String: UITableViewCell]()
 		var reusableViews = [String: UITableViewHeaderFooterView]()
 		for reusable in Self.cells {
