@@ -234,37 +234,4 @@ public extension Reusable where Content: UITableViewHeaderFooterView {
 		return view
 	}
 }
-
-// MARK: - UITableView
-@available(*, deprecated)
-public extension UITableView {
-	func dequeue<T: UITableViewCell>(reusable: Reusable<T>, for indexPath: IndexPath, _ body: (T) -> Void = { _ in }) -> T {
-		guard let cell = dequeueReusableCell(withIdentifier: reusable.identifier, for: indexPath) as? T else { runtimeError() }
-		body(cell)
-		return cell
-	}
-
-	func dequeue<T: UITableViewHeaderFooterView>(reusable: Reusable<T>, _ body: (T) -> Void = { _ in }) -> T {
-		guard let view = dequeueReusableHeaderFooterView(withIdentifier: reusable.identifier) as? T else { runtimeError() }
-		body(view)
-		return view
-	}
-	func register<T: ReusableViewProtocol>(reusable: T) {
-		if let type = reusable.viewType, let identifier = reusable.identifier {
-			register(type, forCellReuseIdentifier: identifier)
-		}
-	}
-
-	func registerReusableHeaderFooter<T: ReusableViewProtocol>(_ reusable: T) {
-		if let type = reusable.viewType, let identifier = reusable.identifier {
-			 register(type, forHeaderFooterViewReuseIdentifier: identifier)
-		}
-	}
-}
-
-@available(*, deprecated)
-extension UITableViewCell: ReusableViewProtocol {
-	public var viewType: UIView.Type? { type(of: self) }
-	public var identifier: String? { reuseIdentifier }
-}
 #endif
