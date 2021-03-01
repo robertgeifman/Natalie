@@ -19,8 +19,8 @@ let package = Package(
             targets: ["NatalieSupport"]),
     ],
     dependencies: [
-        .package(path: "../Aspects"),
-        .package(path: "../FoundationAdditions")
+        .package(name: "Aspects", url: "https://github.com/robertgeifman/Aspects", .branch("rc-1")),
+        .package(name: "FoundationAdditions", url: "https://github.com/robertgeifman/FoundationAdditions", .branch("rc-1")),
     ],
     targets: [
         .target(
