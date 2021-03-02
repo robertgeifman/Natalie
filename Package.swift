@@ -19,16 +19,20 @@ let package = Package(
             targets: ["NatalieSupport"]),
     ],
     dependencies: [
-        .package(name: "Aspects", url: "https://github.com/robertgeifman/Aspects", .branch("rc-1")),
-        .package(name: "FoundationAdditions", url: "https://github.com/robertgeifman/FoundationAdditions", .branch("rc-1")),
+        .package(name: "Aspects", url: "https://github.com/robertgeifman/Aspects", from: "1.0.0"),
+        .package(name: "FoundationAdditions", url: "https://github.com/robertgeifman/FoundationAdditions", from: "1.0.0"),
     ],
     targets: [
         .target(
             name: "natalie",
-            dependencies: []),
+            dependencies: [
+            	"FoundationAdditions",
+            ]
+		),
         .target(
             name: "NatalieSupport",
-            dependencies: ["FoundationAdditions",
+            dependencies: [
+            	"FoundationAdditions",
             	"Aspects",
 			]
 		)

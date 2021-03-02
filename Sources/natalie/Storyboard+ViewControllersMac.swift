@@ -16,7 +16,7 @@ extension Storyboard {
 			guard let viewController = scene.viewController,
 				let customClass = viewController.customClass
 			else { continue }
-			let kind = viewController.name
+//			let kind = viewController.name
 			let sceneSegues = scene.segues
 			let sceneReusables = viewController.reusables(os)
 
@@ -135,8 +135,8 @@ extension Storyboard {
 
 		var hasIdentifiableSegues = false
 		for segue in segues {
-			guard let srcElement = segue.source.viewController else { continue }
-			guard let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name) else { continue }
+//			guard let srcElement = segue.source.viewController else { continue }
+//			guard let srcClass = srcElement.customClass ?? os.controllerType(for: srcElement.name) else { continue }
 			guard let dstID = segue.destination else { continue }
 			guard let dstElement = searchById(id: dstID)?.element else { continue }
 			
@@ -198,7 +198,7 @@ extension Storyboard {
 						 
 						let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: \(customSegueClass))"
 
-						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customSegueClass), \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
+						seguePatterns += "\t\tstatic let \(segueName) = Segue<\(customSegueClass), \(dstClass)>(identifier: \"\(segueID)\")" // , segueKind: .\(segue.kind))"
 
 						delegateMethods += "\tfunc " + method
 
@@ -219,7 +219,7 @@ extension Storyboard {
 				} else {
 					let method = "\(functionName)(_ destination: \(dstClass), sender: Any?, segue: NSStoryboardSegue)"
 
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueID)\")"//, segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueID)\")" // , segueKind: .\(segue.kind))"
 
 					delegateMethods += "\tfunc " + method
 
@@ -327,7 +327,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")" // , segueKind: .\(segue.kind))"
 				}
 
 				if dstCast != dstRef {
@@ -375,7 +375,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")" // , segueKind: .\(segue.kind))"
 				}
 
 				if dstCast != dstRef {
@@ -425,7 +425,7 @@ extension Storyboard {
 
 				if let segueIdentifier = segueIdentifier {
 					allCases += "\t\t\t\(segueName),"
-					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")"//, segueKind: .\(segue.kind))"
+					seguePatterns += "\t\tstatic let \(segueName) = Segue<NSStoryboardSegue, \(dstClass)>(identifier: \"\(segueIdentifier)\")" // , segueKind: .\(segue.kind))"
 				}
 				
 				if dstCast != dstRef {
@@ -510,7 +510,7 @@ extension Storyboard {
 					declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\", elementKind: reusable.key)"
 				}
 			} else {
-				declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\")"//, kind: .\(reusable.kind))"
+				declarations += "\t\tstatic let \(reusableIdentifier) = Reusable<\(customClass)>(\"\(identifier)\")" // , kind: .\(reusable.kind))"
 			}
 			allCases.append((reusable.kind, reusableIdentifier, reusable.key))
 		}

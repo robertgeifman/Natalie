@@ -222,7 +222,7 @@ public extension Reusable where Content: UITableViewCell {
 // MARK: - Reusable- DecorationView
 public extension Reusable where Content: UITableViewHeaderFooterView {
 	func configure<Data>(elementKind: String, using body: @escaping (Data, Content) -> Void) -> (IndexPath, UITableView, Data?) -> Content {
-		return { indexPath, tableView, data in
+		return { _, tableView, data in
 			self.dequeue(in: tableView) {
 				if let data = data { body(data, $0) }
 			}

@@ -57,7 +57,7 @@ public extension NavigationSegue {
 		}
 	}
 	func perform(from source: UIViewController, prepare body: @escaping (To) -> Void)
-		where Kind == UIStoryboardSegue{
+		where Kind == UIStoryboardSegue {
 		source.performSegue(withIdentifier: identifier.required) { [segueDescription = { String(reflecting: self) }] segue, _ in
 			let destination = segue.destination(ofType: To.self)
 				.require("\(segueDescription()): expected destination view controller hierarchy to include \(To.self)")
