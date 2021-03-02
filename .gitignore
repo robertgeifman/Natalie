@@ -1,7 +1,6 @@
 .build
 
 /Packages
-/*.xcodeproj
 project.xcworkspace
 
 #OSX
@@ -66,3 +65,4 @@ DerivedData
 
 Carthage/Build
 #NatalieExample/NatalieExample/Storyboards.swift
+Package.resolved

@@ -48,13 +48,15 @@ public enum SegueKind: CustomStringConvertible {
 	}
 }
 
-public enum TypedSegueError: LocalizedError {
 #if os(iOS) || os(tvOS)
+public enum TypedSegueError: LocalizedError {
 	case castToCustomClass(UIStoryboardSegue.Type)
-#elseif os(macOS)
-	case castToCustomClass(NSStoryboardSegue.Type)
-#endif
 }
+#elseif os(macOS)
+public enum TypedSegueError: LocalizedError {
+	case castToCustomClass(NSStoryboardSegue.Type)
+}
+#endif
 
 // MARK: - SegueProtocol
 public protocol SegueProtocol {
@@ -248,7 +250,6 @@ public extension Segue {
 	func perform(from source: UIViewController) {
 		source.performSegue(withIdentifier: identifier.required, sender: source)
 	}
-
 	func perform(from source: UIViewController, prepare body: @escaping (Kind, To) -> Void) {
 		source.performSegue(withIdentifier: identifier.required) { [segueDescription = { String(reflecting: self) }] segue, _ in
 			let destination = segue.destination(ofType: To.self)
@@ -264,7 +265,6 @@ public extension UIViewController {
 	func perform() {
 		rejectUnusedImplementation("This method will never be called, and exists only to remove an apparent ambiguity resolving the generic method 'perform(_:prepare:)'", in: self)
 	}
-	
 	func performSegue(withIdentifier identifier: String, sender: Any? = nil, prepare body: @escaping (UIStoryboardSegue, Any?) -> Void) {
 		do {
 			_ = try hookOnce(after: #selector(UIViewController.prepare(for:sender:))) { 

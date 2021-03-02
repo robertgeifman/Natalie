@@ -70,11 +70,12 @@ struct Natalie {
 	func process(os: OS) -> [String] {
 		var output = [String]()
 		var customModules = Set<String>()
-//		customModules.insert("\(os.framework)Additions")
 		for file in storyboards {
-			output += file.storyboard.processViewControllers(storyboardCustomModules: &customModules)
+			output += os == .OSX ?
+				file.storyboard.processViewControllersMac(storyboardCustomModules: &customModules) :
+				file.storyboard.processViewControllers(storyboardCustomModules: &customModules)
 		}
-		
+	
 		output += "// MARK: - Storyboard"
 		output += "enum Storyboards {"
 		for file in storyboards {
@@ -93,7 +94,7 @@ struct Natalie {
 			output += "@available(\(os.colorOS), *)"
 			output += "extension \(os.colorType) {"
 			for colorName in Set(colors) {
-				output += "\tstatic let \(swiftRepresentation(for: colorName, firstLetter: .none)) = \(os.colorType)(named: \(initIdentifier(for: os.colorNameType, value: colorName)))"
+				output += "\tstatic let \(swiftRepresentation(for: colorName, firstLetter: .lowercase)) = \(os.colorType)(named: \(initIdentifier(for: os.colorNameType, value: colorName)))"
 			}
 			output += "}"
 		}
